@@ -149,31 +149,22 @@ export async function resetPassword(
 }
 
 export async function getAuthenticatedUser() {
-  const query = `
+  return keystoneClient(`
     query AuthenticatedUser {
       authenticatedItem {
         ... on User {
-          id
-          email
-          name
-          role {
-            canAccessDashboard
-          }
+          id email name onboardingStatus
+          role { canAccessDashboard canManageOnboarding }
         }
       }
+      eventsCount: eventsCount
+      storeSettingsRecords(take: 1) { name }
     }
-  `;
-
-  const response = await keystoneClient(query);
-
-  return response;
+  `);
 }
 
 export async function getAuthHeaders() {
-  'use server';
   const cookieStore = await cookies();
   const keystoneCookie = cookieStore.get('keystonejs-session')?.value;
-  return keystoneCookie ? {
-    Cookie: `keystonejs-session=${keystoneCookie}`
-  } : {};
+  return keystoneCookie ? { Cookie: `keystonejs-session=${keystoneCookie}` } : {};
 }

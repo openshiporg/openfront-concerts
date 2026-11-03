@@ -5249,6 +5249,8 @@ type Mutation {
   completeTicketCheckout(input: CompleteTicketCheckoutInput!): JSON
   transferTicket(input: TransferTicketInput!): JSON
   refundTicketOrder(input: RefundTicketOrderInput!): JSON
+  updateActiveUser(data: UserUpdateProfileInput!): User
+  seedConcerts(section: String!, data: JSON!): JSON
   placeDateHold(input: OperatorCommandInput!): JSON
   challengeHold(input: OperatorCommandInput!): JSON
   confirmHold(input: OperatorCommandInput!): JSON
@@ -5604,6 +5606,13 @@ input OperatorCommandInput {
   method: String
   reference: String
   status: String
+}
+
+input UserUpdateProfileInput {
+  email: String
+  name: String
+  password: String
+  onboardingStatus: String
 }
 
 input CreateHoldInput {

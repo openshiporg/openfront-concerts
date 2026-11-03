@@ -1,0 +1,1872 @@
+{
+  "storeInfo": {
+    "name": "Lantern Live",
+    "currencyCode": "USD",
+    "refundApprovalThresholdCents": 20000
+  },
+  "roles": [
+    {
+      "name": "Owner",
+      "all": true
+    },
+    {
+      "name": "Booker",
+      "permissions": [
+        "canAccessDashboard",
+        "canManageEvents",
+        "canManageDeals",
+        "canManageVenues",
+        "canManageArtists",
+        "canManageInventory"
+      ]
+    },
+    {
+      "name": "Box Office",
+      "permissions": [
+        "canAccessDashboard",
+        "canManageOrders",
+        "canIssueRefunds",
+        "canScanTickets"
+      ]
+    },
+    {
+      "name": "Door Staff",
+      "permissions": [
+        "canAccessDashboard",
+        "canScanTickets"
+      ]
+    },
+    {
+      "name": "Settlement Manager",
+      "permissions": [
+        "canAccessDashboard",
+        "canManageSettlements",
+        "canApproveAdjustments",
+        "canReadAudit",
+        "canReadPayments"
+      ]
+    },
+    {
+      "name": "Customer",
+      "permissions": []
+    }
+  ],
+  "venues": [
+    {
+      "name": "The Foundry",
+      "city": "Portland",
+      "timezone": "America/Los_Angeles",
+      "address": "410 Foundry Row",
+      "capacity": 400,
+      "ownedByPromoter": true,
+      "taxBps": 0,
+      "defaultFacilityFeeCents": 200,
+      "contact": "foundry@lanternlive.example",
+      "chart": {
+        "name": "GA standing",
+        "sections": [
+          {
+            "name": "Floor GA",
+            "kind": "ga",
+            "capacity": 400
+          }
+        ]
+      }
+    },
+    {
+      "name": "Halvorsen Theatre",
+      "city": "Portland",
+      "timezone": "America/Los_Angeles",
+      "address": "88 Halvorsen Avenue",
+      "capacity": 1200,
+      "ownedByPromoter": false,
+      "taxBps": 0,
+      "defaultFacilityFeeCents": 350,
+      "contact": "rentals@halvorsen.example",
+      "chart": {
+        "name": "Full reserved",
+        "sections": [
+          {
+            "name": "Orchestra",
+            "kind": "reserved",
+            "rows": 20,
+            "seatsPerRow": 30
+          },
+          {
+            "name": "Mezzanine",
+            "kind": "reserved",
+            "rows": 12,
+            "seatsPerRow": 30
+          },
+          {
+            "name": "Balcony",
+            "kind": "reserved",
+            "rows": 10,
+            "seatsPerRow": 24
+          }
+        ]
+      }
+    },
+    {
+      "name": "Riverbend Amphitheatre",
+      "city": "Salem",
+      "timezone": "America/Los_Angeles",
+      "address": "1 Riverbend Road",
+      "capacity": 5000,
+      "ownedByPromoter": false,
+      "taxBps": 0,
+      "defaultFacilityFeeCents": 300,
+      "contact": "events@riverbend.example",
+      "chart": {
+        "name": "GA lawn + reserved pavilion",
+        "sections": [
+          {
+            "name": "Lawn GA",
+            "kind": "ga",
+            "capacity": 3500
+          },
+          {
+            "name": "Pavilion",
+            "kind": "reserved",
+            "rows": 30,
+            "seatsPerRow": 50
+          }
+        ]
+      }
+    }
+  ],
+  "agencies": [
+    {
+      "name": "Northstar Agency",
+      "contacts": [
+        {
+          "name": "Dana Pike",
+          "email": "dana@northstar.example"
+        }
+      ]
+    },
+    {
+      "name": "Brightside Talent",
+      "contacts": [
+        {
+          "name": "Omar Reyes",
+          "email": "omar@brightside.example"
+        }
+      ]
+    }
+  ],
+  "artists": [
+    {
+      "name": "Neon Rivers",
+      "genreTags": "Indie rock",
+      "agency": "Northstar Agency",
+      "agentName": "Booking desk",
+      "agentEmail": "neonrivers@agency.example"
+    },
+    {
+      "name": "Marlowe Vane",
+      "genreTags": "Singer-songwriter",
+      "agency": "Northstar Agency",
+      "agentName": "Booking desk",
+      "agentEmail": "marlowevane@agency.example"
+    },
+    {
+      "name": "The Hollow Pines",
+      "genreTags": "Folk",
+      "agency": "Brightside Talent",
+      "agentName": "Booking desk",
+      "agentEmail": "thehollowpines@agency.example"
+    },
+    {
+      "name": "Cobalt Static",
+      "genreTags": "Electronic",
+      "agency": "Brightside Talent",
+      "agentName": "Booking desk",
+      "agentEmail": "cobaltstatic@agency.example"
+    },
+    {
+      "name": "Ines Calder",
+      "genreTags": "Jazz",
+      "agency": "Northstar Agency",
+      "agentName": "Booking desk",
+      "agentEmail": "inescalder@agency.example"
+    },
+    {
+      "name": "Rook & Rye",
+      "genreTags": "Country",
+      "agency": "Brightside Talent",
+      "agentName": "Booking desk",
+      "agentEmail": "rookandrye@agency.example"
+    },
+    {
+      "name": "Velvet Harbor",
+      "genreTags": "Soul",
+      "agency": "Northstar Agency",
+      "agentName": "Booking desk",
+      "agentEmail": "velvetharbor@agency.example"
+    },
+    {
+      "name": "Pale Orchard",
+      "genreTags": "Dream pop",
+      "agency": "Brightside Talent",
+      "agentName": "Booking desk",
+      "agentEmail": "paleorchard@agency.example"
+    },
+    {
+      "name": "Saint Juno",
+      "genreTags": "Pop",
+      "agency": "Northstar Agency",
+      "agentName": "Booking desk",
+      "agentEmail": "saintjuno@agency.example"
+    },
+    {
+      "name": "Tin Lantern",
+      "genreTags": "Punk",
+      "agency": "Brightside Talent",
+      "agentName": "Booking desk",
+      "agentEmail": "tinlantern@agency.example"
+    }
+  ],
+  "tours": [
+    {
+      "name": "Neon Rivers Spring 2027",
+      "artist": "Neon Rivers",
+      "startDays": -30,
+      "endDays": 60
+    },
+    {
+      "name": "Hollow Pines Harvest Run",
+      "artist": "The Hollow Pines",
+      "startDays": 5,
+      "endDays": 70
+    }
+  ],
+  "events": [
+    {
+      "key": "p1",
+      "title": "Cobalt Static: Signal Fires",
+      "venue": "The Foundry",
+      "chart": "GA standing",
+      "status": "settled",
+      "showDays": -42,
+      "artist": "Cobalt Static",
+      "deal": {
+        "dealType": "flat_guarantee",
+        "guaranteeCents": 600000,
+        "percentageBps": 0,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 0,
+        "depositCents": 0,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "GA Floor",
+          "priceCents": 3000,
+          "feeCents": 400,
+          "facilityFeeCents": 300,
+          "capacity": 400,
+          "sections": [
+            "Floor GA"
+          ],
+          "phases": []
+        }
+      ],
+      "past": {
+        "orders": 60,
+        "qty": 3,
+        "merchSoft": 420000,
+        "merchHard": 0,
+        "settlement": "final",
+        "scanned": true
+      },
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 160000,
+          "actualCents": 160000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 120000,
+          "actualCents": 128000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 32000,
+          "actualCents": 33600,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 24000,
+          "actualCents": 24000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 60000,
+          "actualCents": 56800,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 8000,
+          "actualCents": 8000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ],
+      "ageRestriction": "18"
+    },
+    {
+      "key": "p2",
+      "title": "Ines Calder Quartet",
+      "venue": "Halvorsen Theatre",
+      "chart": "Full reserved",
+      "status": "settled",
+      "showDays": -28,
+      "artist": "Ines Calder",
+      "deal": {
+        "dealType": "versus",
+        "guaranteeCents": 800000,
+        "percentageBps": 8500,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 600000,
+        "depositCents": 200000,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "Orchestra",
+          "priceCents": 6500,
+          "feeCents": 600,
+          "facilityFeeCents": 300,
+          "capacity": 600,
+          "sections": [
+            "Orchestra"
+          ],
+          "phases": []
+        },
+        {
+          "name": "Mezzanine",
+          "priceCents": 4500,
+          "feeCents": 500,
+          "facilityFeeCents": 300,
+          "capacity": 360,
+          "sections": [
+            "Mezzanine"
+          ],
+          "phases": []
+        },
+        {
+          "name": "Balcony",
+          "priceCents": 3000,
+          "feeCents": 400,
+          "facilityFeeCents": 300,
+          "capacity": 240,
+          "sections": [
+            "Balcony"
+          ],
+          "phases": []
+        }
+      ],
+      "past": {
+        "orders": 90,
+        "qty": 2,
+        "merchSoft": 300000,
+        "merchHard": 180000,
+        "settlement": "final",
+        "scanned": true
+      },
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 400000,
+          "actualCents": 400000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 300000,
+          "actualCents": 320000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 80000,
+          "actualCents": 84000,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 60000,
+          "actualCents": 60000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 150000,
+          "actualCents": 142000,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 20000,
+          "actualCents": 20000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ]
+    },
+    {
+      "key": "p3",
+      "title": "Marlowe Vane Live",
+      "venue": "The Foundry",
+      "chart": "GA standing",
+      "status": "settled",
+      "showDays": -14,
+      "artist": "Marlowe Vane",
+      "deal": {
+        "dealType": "door_deal",
+        "guaranteeCents": 0,
+        "percentageBps": 7000,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 0,
+        "depositCents": 0,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "GA Floor",
+          "priceCents": 2800,
+          "feeCents": 350,
+          "facilityFeeCents": 300,
+          "capacity": 400,
+          "sections": [
+            "Floor GA"
+          ],
+          "phases": []
+        }
+      ],
+      "past": {
+        "orders": 70,
+        "qty": 3,
+        "merchSoft": 210000,
+        "merchHard": 0,
+        "settlement": "final",
+        "scanned": true
+      },
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 140000,
+          "actualCents": 140000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 105000,
+          "actualCents": 112000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 28000,
+          "actualCents": 29399,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 21000,
+          "actualCents": 21000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 52500,
+          "actualCents": 49700,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 7000,
+          "actualCents": 7000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ]
+    },
+    {
+      "key": "p4",
+      "title": "Rook & Rye Summer Closer",
+      "venue": "Riverbend Amphitheatre",
+      "chart": "GA lawn + reserved pavilion",
+      "status": "settling",
+      "showDays": -6,
+      "artist": "Rook & Rye",
+      "deal": {
+        "dealType": "plus",
+        "guaranteeCents": 1500000,
+        "percentageBps": 6000,
+        "promoterProfitBps": 1000,
+        "expenseCapCents": 900000,
+        "depositCents": 500000,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "Lawn GA",
+          "priceCents": 4000,
+          "feeCents": 500,
+          "facilityFeeCents": 300,
+          "capacity": 3500,
+          "sections": [
+            "Lawn GA"
+          ],
+          "phases": []
+        },
+        {
+          "name": "Pavilion",
+          "priceCents": 7500,
+          "feeCents": 700,
+          "facilityFeeCents": 300,
+          "capacity": 1500,
+          "sections": [
+            "Pavilion"
+          ],
+          "phases": []
+        }
+      ],
+      "past": {
+        "orders": 150,
+        "qty": 4,
+        "merchSoft": 640000,
+        "merchHard": 260000,
+        "settlement": "draft",
+        "scanned": true
+      },
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 880000,
+          "actualCents": 880000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 660000,
+          "actualCents": 704000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 176000,
+          "actualCents": 184800,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 132000,
+          "actualCents": 132000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 330000,
+          "actualCents": 312400,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 44000,
+          "actualCents": 44000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ]
+    },
+    {
+      "key": "p5",
+      "title": "Velvet Harbor: Winter Hall",
+      "venue": "Halvorsen Theatre",
+      "chart": "Full reserved",
+      "status": "postponed",
+      "showDays": 21,
+      "artist": "Velvet Harbor",
+      "deal": {
+        "dealType": "flat_guarantee",
+        "guaranteeCents": 900000,
+        "percentageBps": 0,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 0,
+        "depositCents": 0,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "Orchestra",
+          "priceCents": 7000,
+          "feeCents": 600,
+          "facilityFeeCents": 300,
+          "capacity": 600,
+          "sections": [
+            "Orchestra"
+          ],
+          "phases": []
+        },
+        {
+          "name": "Mezzanine",
+          "priceCents": 5000,
+          "feeCents": 500,
+          "facilityFeeCents": 300,
+          "capacity": 360,
+          "sections": [
+            "Mezzanine"
+          ],
+          "phases": []
+        },
+        {
+          "name": "Balcony",
+          "priceCents": 3500,
+          "feeCents": 400,
+          "facilityFeeCents": 300,
+          "capacity": 240,
+          "sections": [
+            "Balcony"
+          ],
+          "phases": []
+        }
+      ],
+      "origin": "Rescheduled from last month; tickets remain valid."
+    },
+    {
+      "key": "u1",
+      "title": "Neon Rivers: Spring Tour",
+      "venue": "Halvorsen Theatre",
+      "chart": "Full reserved",
+      "status": "on_sale",
+      "showDays": 12,
+      "artist": "Neon Rivers",
+      "deal": {
+        "dealType": "versus",
+        "guaranteeCents": 1200000,
+        "percentageBps": 8000,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 700000,
+        "depositCents": 300000,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "Orchestra",
+          "priceCents": 7500,
+          "feeCents": 650,
+          "facilityFeeCents": 300,
+          "capacity": 600,
+          "sections": [
+            "Orchestra"
+          ],
+          "phases": [
+            {
+              "name": "Early bird",
+              "priceCents": 6500,
+              "quantity": 100
+            },
+            {
+              "name": "Tier 1",
+              "priceCents": 7500,
+              "quantity": 300
+            },
+            {
+              "name": "Tier 2",
+              "priceCents": 8500,
+              "quantity": 200
+            }
+          ]
+        },
+        {
+          "name": "Mezzanine",
+          "priceCents": 5500,
+          "feeCents": 550,
+          "facilityFeeCents": 300,
+          "capacity": 360,
+          "sections": [
+            "Mezzanine"
+          ],
+          "phases": []
+        },
+        {
+          "name": "Balcony",
+          "priceCents": 3500,
+          "feeCents": 400,
+          "facilityFeeCents": 300,
+          "capacity": 240,
+          "sections": [
+            "Balcony"
+          ],
+          "phases": []
+        }
+      ],
+      "tour": "Neon Rivers Spring 2027",
+      "productionHolds": [
+        {
+          "level": "Orchestra",
+          "holdType": "artist",
+          "quantity": 12
+        },
+        {
+          "level": "Mezzanine",
+          "holdType": "ada",
+          "quantity": 8
+        }
+      ],
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 440000,
+          "actualCents": 440000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 330000,
+          "actualCents": 352000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 88000,
+          "actualCents": 92400,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 66000,
+          "actualCents": 66000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 165000,
+          "actualCents": 156200,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 22000,
+          "actualCents": 22000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ],
+      "ageRestriction": "all_ages"
+    },
+    {
+      "key": "u2",
+      "title": "Hollow Pines: Harvest Run",
+      "venue": "The Foundry",
+      "chart": "GA standing",
+      "status": "on_sale",
+      "showDays": 9,
+      "artist": "The Hollow Pines",
+      "deal": {
+        "dealType": "plus",
+        "guaranteeCents": 350000,
+        "percentageBps": 6500,
+        "promoterProfitBps": 1000,
+        "expenseCapCents": 200000,
+        "depositCents": 100000,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "GA Floor",
+          "priceCents": 2500,
+          "feeCents": 300,
+          "facilityFeeCents": 300,
+          "capacity": 400,
+          "sections": [
+            "Floor GA"
+          ],
+          "phases": [
+            {
+              "name": "Early bird",
+              "priceCents": 2000,
+              "quantity": 80
+            },
+            {
+              "name": "General",
+              "priceCents": 2500,
+              "quantity": 320
+            }
+          ]
+        }
+      ],
+      "tour": "Hollow Pines Harvest Run",
+      "productionHolds": [
+        {
+          "level": "GA Floor",
+          "holdType": "production",
+          "quantity": 10
+        }
+      ],
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 120000,
+          "actualCents": 120000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 90000,
+          "actualCents": 96000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 24000,
+          "actualCents": 25200,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 18000,
+          "actualCents": 18000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 45000,
+          "actualCents": 42600,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 6000,
+          "actualCents": 6000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ],
+      "ageRestriction": "21"
+    },
+    {
+      "key": "u3",
+      "title": "Saint Juno: Open Air",
+      "venue": "Riverbend Amphitheatre",
+      "chart": "GA lawn + reserved pavilion",
+      "status": "presale",
+      "showDays": 30,
+      "artist": "Saint Juno",
+      "deal": {
+        "dealType": "versus",
+        "guaranteeCents": 2000000,
+        "percentageBps": 8500,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 1100000,
+        "depositCents": 700000,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "Lawn GA",
+          "priceCents": 5000,
+          "feeCents": 600,
+          "facilityFeeCents": 300,
+          "capacity": 3500,
+          "sections": [
+            "Lawn GA"
+          ],
+          "phases": [
+            {
+              "name": "Early bird",
+              "priceCents": 4200,
+              "quantity": 500
+            },
+            {
+              "name": "Tier 1",
+              "priceCents": 5000,
+              "quantity": 1500
+            },
+            {
+              "name": "Tier 2",
+              "priceCents": 6000,
+              "quantity": 1500
+            }
+          ]
+        },
+        {
+          "name": "Pavilion",
+          "priceCents": 9500,
+          "feeCents": 800,
+          "facilityFeeCents": 300,
+          "capacity": 1500,
+          "sections": [
+            "Pavilion"
+          ],
+          "phases": []
+        }
+      ],
+      "presaleCode": "JUNOFAN",
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 1000000,
+          "actualCents": 1000000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 750000,
+          "actualCents": 800000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 200000,
+          "actualCents": 210000,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 150000,
+          "actualCents": 150000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 375000,
+          "actualCents": 355000,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 50000,
+          "actualCents": 50000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ]
+    },
+    {
+      "key": "u4",
+      "title": "Pale Orchard",
+      "venue": "The Foundry",
+      "chart": "GA standing",
+      "status": "announced",
+      "showDays": 34,
+      "artist": "Pale Orchard",
+      "deal": {
+        "dealType": "flat_guarantee",
+        "guaranteeCents": 250000,
+        "percentageBps": 0,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 0,
+        "depositCents": 0,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "GA Floor",
+          "priceCents": 2200,
+          "feeCents": 300,
+          "facilityFeeCents": 300,
+          "capacity": 400,
+          "sections": [
+            "Floor GA"
+          ],
+          "phases": []
+        }
+      ],
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 100000,
+          "actualCents": 100000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 75000,
+          "actualCents": 80000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 20000,
+          "actualCents": 21000,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 15000,
+          "actualCents": 15000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 37500,
+          "actualCents": 35500,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 5000,
+          "actualCents": 5000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ],
+      "ageRestriction": "all_ages"
+    },
+    {
+      "key": "u5",
+      "title": "Tin Lantern + Cobalt Static",
+      "venue": "The Foundry",
+      "chart": "GA standing",
+      "status": "on_sale",
+      "showDays": 16,
+      "artist": "Tin Lantern",
+      "deal": {
+        "dealType": "door_deal",
+        "guaranteeCents": 0,
+        "percentageBps": 7500,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 0,
+        "depositCents": 0,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "GA Floor",
+          "priceCents": 2000,
+          "feeCents": 300,
+          "facilityFeeCents": 300,
+          "capacity": 400,
+          "sections": [
+            "Floor GA"
+          ],
+          "phases": []
+        }
+      ],
+      "support": [
+        "Cobalt Static"
+      ],
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 120000,
+          "actualCents": 120000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 90000,
+          "actualCents": 96000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 24000,
+          "actualCents": 25200,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 18000,
+          "actualCents": 18000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 45000,
+          "actualCents": 42600,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 6000,
+          "actualCents": 6000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ],
+      "ageRestriction": "18"
+    },
+    {
+      "key": "u6",
+      "title": "Velvet Harbor in Concert",
+      "venue": "Halvorsen Theatre",
+      "chart": "Full reserved",
+      "status": "hold",
+      "showDays": 47,
+      "artist": "Velvet Harbor",
+      "deal": {
+        "dealType": "versus",
+        "guaranteeCents": 700000,
+        "percentageBps": 8000,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 500000,
+        "depositCents": 0,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "Orchestra",
+          "priceCents": 6000,
+          "feeCents": 600,
+          "facilityFeeCents": 300,
+          "capacity": 600,
+          "sections": [
+            "Orchestra"
+          ],
+          "phases": []
+        },
+        {
+          "name": "Mezzanine",
+          "priceCents": 4200,
+          "feeCents": 500,
+          "facilityFeeCents": 300,
+          "capacity": 360,
+          "sections": [
+            "Mezzanine"
+          ],
+          "phases": []
+        },
+        {
+          "name": "Balcony",
+          "priceCents": 2800,
+          "feeCents": 400,
+          "facilityFeeCents": 300,
+          "capacity": 240,
+          "sections": [
+            "Balcony"
+          ],
+          "phases": []
+        }
+      ],
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 360000,
+          "actualCents": 360000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 270000,
+          "actualCents": 288000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 72000,
+          "actualCents": 75600,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 54000,
+          "actualCents": 54000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 135000,
+          "actualCents": 127800,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 18000,
+          "actualCents": 18000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ]
+    },
+    {
+      "key": "u7",
+      "title": "Ines Calder: Late Set",
+      "venue": "The Foundry",
+      "chart": "GA standing",
+      "status": "on_sale",
+      "showDays": 20,
+      "artist": "Ines Calder",
+      "deal": {
+        "dealType": "flat_guarantee",
+        "guaranteeCents": 300000,
+        "percentageBps": 0,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 0,
+        "depositCents": 0,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "GA Floor",
+          "priceCents": 3500,
+          "feeCents": 350,
+          "facilityFeeCents": 300,
+          "capacity": 400,
+          "sections": [
+            "Floor GA"
+          ],
+          "phases": []
+        }
+      ],
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 120000,
+          "actualCents": 120000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 90000,
+          "actualCents": 96000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 24000,
+          "actualCents": 25200,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 18000,
+          "actualCents": 18000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 45000,
+          "actualCents": 42600,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 6000,
+          "actualCents": 6000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ]
+    },
+    {
+      "key": "u8",
+      "title": "Marlowe Vane: Riverbend",
+      "venue": "Riverbend Amphitheatre",
+      "chart": "GA lawn + reserved pavilion",
+      "status": "on_sale",
+      "showDays": 39,
+      "artist": "Marlowe Vane",
+      "deal": {
+        "dealType": "plus",
+        "guaranteeCents": 1100000,
+        "percentageBps": 7000,
+        "promoterProfitBps": 1000,
+        "expenseCapCents": 800000,
+        "depositCents": 400000,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "Lawn GA",
+          "priceCents": 4500,
+          "feeCents": 500,
+          "facilityFeeCents": 300,
+          "capacity": 3500,
+          "sections": [
+            "Lawn GA"
+          ],
+          "phases": []
+        },
+        {
+          "name": "Pavilion",
+          "priceCents": 8500,
+          "feeCents": 700,
+          "facilityFeeCents": 300,
+          "capacity": 1500,
+          "sections": [
+            "Pavilion"
+          ],
+          "phases": []
+        }
+      ],
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 800000,
+          "actualCents": 800000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 600000,
+          "actualCents": 640000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 160000,
+          "actualCents": 168000,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 120000,
+          "actualCents": 120000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 300000,
+          "actualCents": 284000,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 40000,
+          "actualCents": 40000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ]
+    },
+    {
+      "key": "u9",
+      "title": "Pale Orchard + Saint Juno",
+      "venue": "Halvorsen Theatre",
+      "chart": "Full reserved",
+      "status": "on_sale",
+      "showDays": 55,
+      "artist": "Saint Juno",
+      "deal": {
+        "dealType": "versus",
+        "guaranteeCents": 900000,
+        "percentageBps": 8000,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 500000,
+        "depositCents": 200000,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "Orchestra",
+          "priceCents": 6800,
+          "feeCents": 600,
+          "facilityFeeCents": 300,
+          "capacity": 600,
+          "sections": [
+            "Orchestra"
+          ],
+          "phases": []
+        },
+        {
+          "name": "Mezzanine",
+          "priceCents": 4800,
+          "feeCents": 500,
+          "facilityFeeCents": 300,
+          "capacity": 360,
+          "sections": [
+            "Mezzanine"
+          ],
+          "phases": []
+        },
+        {
+          "name": "Balcony",
+          "priceCents": 3200,
+          "feeCents": 400,
+          "facilityFeeCents": 300,
+          "capacity": 240,
+          "sections": [
+            "Balcony"
+          ],
+          "phases": []
+        }
+      ],
+      "support": [
+        "Pale Orchard"
+      ],
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 400000,
+          "actualCents": 400000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 300000,
+          "actualCents": 320000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 80000,
+          "actualCents": 84000,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 60000,
+          "actualCents": 60000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 150000,
+          "actualCents": 142000,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 20000,
+          "actualCents": 20000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ]
+    },
+    {
+      "key": "u10",
+      "title": "Rook & Rye Fall Date",
+      "venue": "The Foundry",
+      "chart": "GA standing",
+      "status": "on_sale",
+      "showDays": 63,
+      "artist": "Rook & Rye",
+      "deal": {
+        "dealType": "flat_guarantee",
+        "guaranteeCents": 350000,
+        "percentageBps": 0,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 0,
+        "depositCents": 0,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "GA Floor",
+          "priceCents": 3200,
+          "feeCents": 350,
+          "facilityFeeCents": 300,
+          "capacity": 400,
+          "sections": [
+            "Floor GA"
+          ],
+          "phases": []
+        }
+      ],
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 120000,
+          "actualCents": 120000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 90000,
+          "actualCents": 96000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 24000,
+          "actualCents": 25200,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 18000,
+          "actualCents": 18000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 45000,
+          "actualCents": 42600,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 6000,
+          "actualCents": 6000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ]
+    },
+    {
+      "key": "u11",
+      "title": "Cobalt Static: Night Shift",
+      "venue": "The Foundry",
+      "chart": "GA standing",
+      "status": "announced",
+      "showDays": 27,
+      "artist": "Cobalt Static",
+      "deal": {
+        "dealType": "door_deal",
+        "guaranteeCents": 0,
+        "percentageBps": 7000,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 0,
+        "depositCents": 0,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "GA Floor",
+          "priceCents": 2600,
+          "feeCents": 300,
+          "facilityFeeCents": 300,
+          "capacity": 400,
+          "sections": [
+            "Floor GA"
+          ],
+          "phases": []
+        }
+      ],
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 120000,
+          "actualCents": 120000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 90000,
+          "actualCents": 96000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 24000,
+          "actualCents": 25200,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 18000,
+          "actualCents": 18000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 45000,
+          "actualCents": 42600,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 6000,
+          "actualCents": 6000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ],
+      "ageRestriction": "18"
+    },
+    {
+      "key": "u12",
+      "title": "Neon Rivers: Riverbend Finale",
+      "venue": "Riverbend Amphitheatre",
+      "chart": "GA lawn + reserved pavilion",
+      "status": "hold",
+      "showDays": 68,
+      "artist": "Neon Rivers",
+      "deal": {
+        "dealType": "versus",
+        "guaranteeCents": 2500000,
+        "percentageBps": 8500,
+        "promoterProfitBps": 0,
+        "expenseCapCents": 1200000,
+        "depositCents": 800000,
+        "merchSplitBps": 1500,
+        "hardMerchSplitBps": 1000,
+        "breakevenBasis": "Counted expenses + guarantee + promoter profit",
+        "radiusClause": "No shows within 60 miles for 30 days before or after.",
+        "hospitalityRiderCents": 25000
+      },
+      "levels": [
+        {
+          "name": "Lawn GA",
+          "priceCents": 5500,
+          "feeCents": 600,
+          "facilityFeeCents": 300,
+          "capacity": 3500,
+          "sections": [
+            "Lawn GA"
+          ],
+          "phases": []
+        },
+        {
+          "name": "Pavilion",
+          "priceCents": 10000,
+          "feeCents": 900,
+          "facilityFeeCents": 300,
+          "capacity": 1500,
+          "sections": [
+            "Pavilion"
+          ],
+          "phases": []
+        }
+      ],
+      "tour": "Neon Rivers Spring 2027",
+      "expenses": [
+        {
+          "category": "venue_rent",
+          "budgetCents": 1040000,
+          "actualCents": 1040000,
+          "isCapped": true,
+          "vendor": "Venue"
+        },
+        {
+          "category": "production",
+          "budgetCents": 780000,
+          "actualCents": 832000,
+          "isCapped": true,
+          "vendor": "Northwest Sound"
+        },
+        {
+          "category": "security",
+          "budgetCents": 208000,
+          "actualCents": 218400,
+          "isCapped": false,
+          "vendor": "Guardline"
+        },
+        {
+          "category": "stagehands",
+          "budgetCents": 156000,
+          "actualCents": 156000,
+          "isCapped": false,
+          "vendor": "IATSE Local 28"
+        },
+        {
+          "category": "marketing",
+          "budgetCents": 390000,
+          "actualCents": 369200,
+          "isCapped": false,
+          "vendor": "Lantern Live"
+        },
+        {
+          "category": "insurance",
+          "budgetCents": 52000,
+          "actualCents": 52000,
+          "isCapped": false,
+          "vendor": "Coastal Event Cover"
+        }
+      ]
+    }
+  ],
+  "dateHolds": [
+    {
+      "venue": "Halvorsen Theatre",
+      "days": 47,
+      "rank": 1,
+      "artist": "Velvet Harbor",
+      "confirmedTitle": "Velvet Harbor in Concert"
+    },
+    {
+      "venue": "Halvorsen Theatre",
+      "days": 47,
+      "rank": 2,
+      "artist": "Saint Juno"
+    },
+    {
+      "venue": "Riverbend Amphitheatre",
+      "days": 68,
+      "rank": 1,
+      "artist": "Neon Rivers",
+      "confirmedTitle": "Neon Rivers: Riverbend Finale"
+    },
+    {
+      "venue": "Riverbend Amphitheatre",
+      "days": 68,
+      "rank": 2,
+      "artist": "Rook & Rye"
+    },
+    {
+      "venue": "The Foundry",
+      "days": 70,
+      "rank": 1,
+      "artist": "Tin Lantern"
+    }
+  ],
+  "promoCodes": [
+    {
+      "code": "JUNOFAN",
+      "discountType": "percent_bps",
+      "value": 0,
+      "maxUses": 500,
+      "eventTitle": "Saint Juno: Open Air"
+    },
+    {
+      "code": "LANTERN10",
+      "discountType": "percent_bps",
+      "value": 1000,
+      "maxUses": 200,
+      "eventTitle": "Hollow Pines: Harvest Run"
+    },
+    {
+      "code": "STAFF5",
+      "discountType": "amount_cents",
+      "value": 500,
+      "maxUses": 50
+    }
+  ],
+  "paymentProviders": [
+    {
+      "name": "Stripe",
+      "code": "pp_stripe_stripe"
+    }
+  ]
+}
