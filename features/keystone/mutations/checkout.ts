@@ -115,7 +115,7 @@ export async function completeTicketCheckout(_: any, { input }: any, context: an
 }
 
 export async function lookupTicketOrder(_: any, { email, orderNumber }: any, context: any) {
-  const o = await context.prisma.ticketOrder.findUnique({ where: { orderNumber: String(orderNumber || '').trim().toUpperCase() }, include: { event: { select: { title: true, showAt: true, doorsAt: true } }, ticket_order: { select: { ticketCode: true, status: true, holderName: true } }, ticketOrderLine_order: true } });
+  const o = await context.prisma.ticketOrder.findUnique({ where: { orderNumber: String(orderNumber || '').trim().toUpperCase() }, include: { event: { select: { title: true, showAt: true, doorsAt: true, venue: { select: { timezone: true } } } }, ticket_order: { select: { ticketCode: true, status: true, holderName: true } }, ticketOrderLine_order: true } });
   // Same response shape for unknown order and wrong email.
   if (!o || o.guestEmail !== String(email || '').trim().toLowerCase()) throw new Error('Order not found');
   return { orderId: o.id, orderNumber: o.orderNumber, status: o.status, totalCents: o.totalCents, refundedCents: o.refundedCents, currencyCode: o.currencyCode, event: o.event, tickets: o.ticket_order, lines: o.ticketOrderLine_order, proof: createProof(o.id, Math.floor(Date.now() / 1000) + 900) };

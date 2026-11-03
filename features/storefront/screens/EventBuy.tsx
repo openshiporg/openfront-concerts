@@ -62,19 +62,20 @@ export function EventBuy({ eventId }: { eventId: string }) {
   const levelFor = (id: string) => levels.find((l: any) => l.id === id);
   const reservedLevels = levels.filter((l: any) => l.sections.some((s: any) => s.kind === 'reserved'));
   const gaLevels = levels.filter((l: any) => l.sections.every((s: any) => s.kind === 'ga'));
+  const tz = event.venue?.timezone || undefined;
   const m = Math.floor(left / 60), sec = String(left % 60).padStart(2, '0');
 
   return (
     <main className="mx-auto w-full max-w-3xl space-y-5 p-4">
       <header className="space-y-1"><h1 className="text-2xl font-semibold">{event.title}</h1>
-        <p className="text-sm opacity-70">{event.venue?.name}, {event.venue?.city} · {showTime(event.showAt)} · doors {showTime(event.doorsAt)} · {String(event.ageRestriction).replace(/_/g, ' ')}</p>
+        <p className="text-sm opacity-70">{event.venue?.name}, {event.venue?.city} · {showTime(event.showAt, tz)} · doors {showTime(event.doorsAt, tz)} · {String(event.ageRestriction).replace(/_/g, ' ')}</p>
         {event.description ? <p className="text-sm">{event.description}</p> : null}</header>
       {error ? <p role="alert" className="text-sm text-red-600">{error}</p> : null}
 
       {!hold ? <>
         <label className="flex flex-col gap-1 text-sm">Presale or promo code
           <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} className="max-w-xs rounded border px-3 py-2" /></label>
-        <section className="space-y-2"><h2 className="font-medium">Tickets</h2>
+        {gaLevels.length ? <section className="space-y-2"><h2 className="font-medium">Tickets</h2>
           {gaLevels.map((l: any) => { const phase = l.priceLevelPhase_priceLevel?.filter((p: any) => new Date(p.startsAt) <= new Date()).sort((a: any, b: any) => a.sort - b.sort).find((p: any) => p.sold < p.quantity); const left = l.capacity - l.sold - l.held - l.productionHeld; return (
             <div key={l.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3">
               <div><div className="font-medium">{l.name}</div><div className="text-sm opacity-70">{usd(phase?.priceCents ?? l.priceCents)} + {usd(l.feeCents)} fee{phase ? ` · ${phase.name}` : ''} · {left > 0 ? `${left} left` : 'Sold out'}</div></div>
@@ -82,14 +83,14 @@ export function EventBuy({ eventId }: { eventId: string }) {
                 <input id={`q-${l.id}`} type="number" min={1} max={l.perOrderLimit} value={qty[l.id] || 1} onChange={(e) => setQty({ ...qty, [l.id]: Number(e.target.value) })} className="w-16 rounded border px-2 py-1" />
                 <button disabled={busy || left < 1} onClick={() => holdGa(l.id)} className="rounded bg-black px-3 py-2 text-sm text-white disabled:opacity-40">Hold</button></div>
             </div>); })}
-        </section>
+        </section> : null}
         {reservedLevels.length ? <section className="space-y-3"><h2 className="font-medium">Choose seats</h2>
-          {reservedLevels.map((l: any) => { const rows = new Map<string, any[]>(); for (const s of seats.filter((x: any) => x.priceLevelId === l.id).sort((a: any, b: any) => a.seat.row.localeCompare(b.seat.row) || Number(a.seat.number) - Number(b.seat.number))) { const k = s.seat.row; rows.set(k, [...(rows.get(k) || []), s]); } return (
+          {reservedLevels.map((l: any) => { const rows = new Map<string, any[]>(); for (const s of seats.filter((x: any) => x.priceLevelId === l.id).sort((a: any, b: any) => a.seat.y - b.seat.y || a.seat.x - b.seat.x)) { const k = s.seat.row; rows.set(k, [...(rows.get(k) || []), s]); } return (
             <div key={l.id} className="space-y-1"><div className="text-sm font-medium">{l.name} · {usd(l.priceCents)} + {usd(l.feeCents)} fee</div>
-              <div className="max-w-full space-y-0.5 overflow-x-auto pb-2">{[...rows.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([row, list]) => <div key={row} className="flex items-center gap-0.5"><span className="w-6 shrink-0 text-xs">{row}</span>
+              <div className="max-w-full overflow-x-auto rounded-lg border p-2"><div className="w-max space-y-0.5"><div className="mb-2 rounded bg-black/80 px-3 py-1 text-center font-mono text-xs uppercase tracking-wide text-white">Stage</div>{[...rows.entries()].map(([row, list]) => <div key={row} className="flex items-center gap-0.5"><span className="w-6 shrink-0 text-xs">{row}</span>
                 {list.map((s) => { const on = picked.includes(s.id); const free = s.status === 'open'; return <button key={s.id} type="button" disabled={!free && !on} aria-label={`${s.seat.label} ${s.status}`} title={s.seat.label}
                   onClick={() => setPicked(on ? picked.filter((x) => x !== s.id) : picked.length < 8 ? [...picked, s.id] : picked)}
-                  className={`size-4 shrink-0 rounded-sm border ${on ? 'bg-black' : free ? 'bg-emerald-200' : 'bg-zinc-300 opacity-50'}`} />; })}</div>)}</div></div>); })}
+                  className={`size-3.5 shrink-0 rounded-sm border ${on ? 'bg-black' : free ? 'bg-emerald-200' : 'bg-zinc-300 opacity-50'}`} />; })}</div>)}</div></div></div>); })}
           <div className="flex flex-wrap items-center gap-3"><span className="text-sm">{pickedSeats.length ? pickedSeats.map((s) => s.seat.label).join(', ') : 'No seats selected'}</span>
             <button disabled={busy || !picked.length} onClick={holdSeats} className="rounded bg-black px-3 py-2 text-sm text-white disabled:opacity-40">Hold seats</button></div>
         </section> : null}

@@ -16,7 +16,7 @@ export function EventsHome() {
         {(events || []).map((e) => (
           <li key={e.id}><Link href={`/events/${e.id}`} className="block p-4 hover:bg-black/5">
             <div className="font-medium">{e.title}</div>
-            <div className="text-sm opacity-70">{e.venue?.name}, {e.venue?.city} · {showTime(e.showAt)} · doors {showTime(e.doorsAt)}</div>
+            <div className="text-sm opacity-70">{e.venue?.name}, {e.venue?.city} · {showTime(e.showAt, e.venue?.timezone)} · doors {showTime(e.doorsAt, e.venue?.timezone)}</div>
             <div className="font-mono text-xs uppercase tracking-wide opacity-70">{String(e.status).replace(/_/g, ' ')}</div>
           </Link></li>
         ))}

@@ -23,10 +23,10 @@ export async function releaseBlock(tx: any, block: any) {
 export async function availability(_: any, { eventId }: any, context: any) {
   return context.prisma.$transaction(async (raw: any) => {
     const tx = checkedClient(raw); await lockTransactionKey(tx, `event:${eventId}`); await expireHolds(tx, eventId);
-    const event = await tx.event.findUnique({ where: { id: eventId }, select: { id: true, title: true, status: true, showAt: true, doorsAt: true, ageRestriction: true, description: true, venue: { select: { name: true, city: true } } } });
+    const event = await tx.event.findUnique({ where: { id: eventId }, select: { id: true, title: true, status: true, showAt: true, doorsAt: true, ageRestriction: true, description: true, venue: { select: { name: true, city: true, timezone: true } } } });
     if (!event || !['announced', 'presale', 'on_sale', 'sold_out', 'postponed'].includes(event.status)) throw new Error('Event unavailable');
     const levels = await tx.priceLevel.findMany({ where: { eventId, status: 'active' }, select: { id: true, name: true, priceCents: true, feeCents: true, facilityFeeCents: true, capacity: true, sold: true, held: true, productionHeld: true, perOrderLimit: true, currencyCode: true, sections: { select: { id: true, name: true, kind: true, capacity: true } }, priceLevelPhase_priceLevel: { select: { id: true, name: true, priceCents: true, quantity: true, sold: true, startsAt: true, sort: true } } } });
-    const seats = await tx.seatInventory.findMany({ where: { eventId }, select: { id: true, status: true, priceLevelId: true, seat: { select: { label: true, row: true, number: true, accessible: true, obstructed: true, chartSectionId: true } } }, take: 10000 });
+    const seats = await tx.seatInventory.findMany({ where: { eventId }, select: { id: true, status: true, priceLevelId: true, seat: { select: { label: true, row: true, number: true, x: true, y: true, accessible: true, obstructed: true, chartSectionId: true } } }, take: 10000 });
     return { event, levels, seats };
   });
 }

@@ -12,7 +12,7 @@ const SEAT_COLOR: Record<string, string> = { open: 'bg-emerald-500', held: 'bg-a
 export async function EventDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
   const { id } = await params; const { tab = 'overview' } = await searchParams;
   const data = await gql(`query($id: ID!) { event(where: { id: $id }) {
-    id title status showAt doorsAt curfewAt ageRestriction onSaleAt description sold held kills open gross venue { name city } seatingChart { name version } tour { name }
+    id title status showAt doorsAt curfewAt ageRestriction onSaleAt description sold held kills open gross venue { name city timezone } seatingChart { name version } tour { name }
     eventArtist_event(orderBy: [{ position: asc }]) { id billing position setMinutes artist { name } }
     offer_event { id status dealType guaranteeCents percentageBps expenseCapCents depositCents artist { name } }
     priceLevel_event { id name priceCents feeCents capacity sold held productionHeld priceLevelPhase_priceLevel(orderBy: [{ sort: asc }]) { id name priceCents quantity sold } }
@@ -27,12 +27,12 @@ export async function EventDetailPage({ params, searchParams }: { params: Promis
   const base = `/dashboard/platform/events/${id}`;
   return (
     <Page title={e.title} action={<EventActions eventId={e.id} status={e.status} />}>
-      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"><StatusLabel status={e.status} /><span>{e.venue?.name}, {e.venue?.city}</span><span>{when(e.showAt)}</span></div>
+      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"><StatusLabel status={e.status} /><span>{e.venue?.name}, {e.venue?.city}</span><span>{when(e.showAt, e.venue?.timezone)}</span></div>
       <div className="max-w-full overflow-x-auto"><div className="inline-flex gap-1 rounded-lg bg-muted p-1">
         {TABS.map((t) => <Link key={t} href={`${base}?tab=${t}`} className={cn('whitespace-nowrap rounded-md px-3 py-1.5 text-sm capitalize', tab === t ? 'bg-background font-medium shadow-sm' : 'text-muted-foreground')}>{t}</Link>)}
       </div></div>
       {tab === 'overview' && <div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><Stat name="Sold" value={e.sold} /><Stat name="Held" value={e.held} /><Stat name="Open" value={e.open} /><Stat name="Gross" value={money(e.gross)} />
-        <Stat name="Doors" value={when(e.doorsAt)} /><Stat name="Curfew" value={when(e.curfewAt)} /><Stat name="Age" value={label(e.ageRestriction)} /><Stat name="Chart" value={e.seatingChart ? `${e.seatingChart.name} v${e.seatingChart.version}` : ''} /></div>}
+        <Stat name="Doors" value={when(e.doorsAt, e.venue?.timezone)} /><Stat name="Curfew" value={when(e.curfewAt, e.venue?.timezone)} /><Stat name="Age" value={label(e.ageRestriction)} /><Stat name="Chart" value={e.seatingChart ? `${e.seatingChart.name} v${e.seatingChart.version}` : ''} /></div>}
       {tab === 'billing' && <Rows empty="No billing.">{e.eventArtist_event.map((a: any) => <Row key={a.id} title={a.artist.name} meta={`${label(a.billing)} · ${a.setMinutes || 0} min`} right={`#${a.position}`} />)}</Rows>}
       {tab === 'pricing' && <Rows empty="No price levels.">{e.priceLevel_event.map((l: any) => <Row key={l.id} title={l.name} meta={l.priceLevelPhase_priceLevel.map((p: any) => `${p.name} ${money(p.priceCents)} (${p.sold}/${p.quantity})`).join(' · ') || 'Single price'} right={<>{money(l.priceCents)} + {money(l.feeCents)} fee · {l.sold} sold · {l.held} held · {l.productionHeld} blocked · cap {l.capacity}</>} />)}</Rows>}
       {tab === 'seating' && (seats.length ? <div className="space-y-4">{Object.entries(bySection).map(([name, list]) => <div key={name} className="space-y-2"><h2 className="text-sm font-medium">{name}</h2><div className="flex flex-wrap gap-1">{list.map((s) => <span key={s.id} title={`${s.seat?.label} · ${s.status}`} className={cn('size-3 rounded-sm', SEAT_COLOR[s.status])} />)}</div></div>)}

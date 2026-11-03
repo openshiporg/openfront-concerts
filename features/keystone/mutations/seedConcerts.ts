@@ -7,6 +7,16 @@ import { ticketQuote, percentage } from '../lib/settlement';
 import { buildSettlement, termsOf, applyArtistPayment } from './operators';
 
 const DAY = 86400000;
+/** Wall-clock `hour` on the calendar day `days` from now in `timeZone`, returned as the UTC instant. */
+function zoned(days: number, hour: number, timeZone: string) {
+  const parts = (d: Date) => Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }).formatToParts(d).map((p) => [p.type, Number(p.value)]));
+  const offset = (instant: number) => { const p: any = parts(new Date(instant)); return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - instant; };
+  const day: any = parts(new Date(Date.now() + days * DAY));
+  const wall = Date.UTC(day.year, day.month - 1, day.day, hour);
+  let instant = wall - offset(wall);
+  instant = wall - offset(instant);
+  return new Date(instant);
+}
 const at = (days: number, hour = 20) => { const d = new Date(Date.now() + days * DAY); d.setUTCHours(hour, 0, 0, 0); return d; };
 
 /** Onboarding setup. Each call is one ordered, rerunnable phase; records are matched by name. */
@@ -88,8 +98,10 @@ async function seedEvent(tx: any, e: any, actor: string) {
   const venue = await tx.venue.findFirst({ where: { name: e.venue } });
   const chart = await tx.seatingChart.findFirst({ where: { venueId: venue.id, name: e.chart }, include: { chartSection_chart: true } });
   const tour = e.tour ? await tx.tour.findFirst({ where: { name: e.tour } }) : null;
-  const showAt = at(e.showDays), past = e.showDays < 0;
-  const event = await tx.event.create({ data: { title: e.title, venueId: venue.id, seatingChartId: chart.id, tourId: tour?.id, promoterId: actor, doorsAt: new Date(+showAt - 3600000), showAt, curfewAt: new Date(+showAt + 3 * 3600000), ageRestriction: e.ageRestriction || 'all_ages', status: 'hold', announceAt: at(e.showDays - 60), onSaleAt: e.status === 'presale' ? at(7) : at(e.showDays - 55), presaleAt: e.presaleCode ? at(-3) : null, presaleCode: e.presaleCode || '', allowReentry: false, description: e.origin || '' } });
+  const past = e.showDays < 0;
+  const tz = venue.timezone || 'America/Los_Angeles';
+  const showAt = zoned(e.showDays, 20, tz);
+  const event = await tx.event.create({ data: { title: e.title, venueId: venue.id, seatingChartId: chart.id, tourId: tour?.id, promoterId: actor, doorsAt: zoned(e.showDays, 19, tz), showAt, curfewAt: zoned(e.showDays, 23, tz), ageRestriction: e.ageRestriction || 'all_ages', status: 'hold', announceAt: at(e.showDays - 60), onSaleAt: e.status === 'presale' ? at(7) : at(e.showDays - 55), presaleAt: e.presaleCode ? at(-3) : null, presaleCode: e.presaleCode || '', allowReentry: false, description: e.origin || '' } });
   const sectionByName = new Map<string, any>(chart.chartSection_chart.map((s: any) => [s.name, s]));
   const levels: any[] = [];
   for (const l of e.levels) {
