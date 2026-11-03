@@ -1500,6 +1500,8 @@ type Tour {
   artist: Artist
   event_tour(where: EventWhereInput! = {}, orderBy: [EventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: EventWhereUniqueInput): [Event!]
   event_tourCount(where: EventWhereInput! = {}): Int
+  promoCodes(where: PromoCodeWhereInput! = {}, orderBy: [PromoCodeOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PromoCodeWhereUniqueInput): [PromoCode!]
+  promoCodesCount(where: PromoCodeWhereInput! = {}): Int
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -1519,8 +1521,15 @@ input TourWhereInput {
   endAt: DateTimeNullableFilter
   artist: ArtistWhereInput
   event_tour: EventManyRelationFilter
+  promoCodes: PromoCodeManyRelationFilter
   createdAt: DateTimeFilter
   updatedAt: DateTimeFilter
+}
+
+input PromoCodeManyRelationFilter {
+  every: PromoCodeWhereInput
+  some: PromoCodeWhereInput
+  none: PromoCodeWhereInput
 }
 
 input TourOrderByInput {
@@ -1540,6 +1549,7 @@ input TourUpdateInput {
   endAt: DateTime
   artist: ArtistRelateToOneForUpdateInput
   event_tour: EventRelateToManyForUpdateInput
+  promoCodes: PromoCodeRelateToManyForUpdateInput
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -1548,6 +1558,13 @@ input ArtistRelateToOneForUpdateInput {
   create: ArtistCreateInput
   connect: ArtistWhereUniqueInput
   disconnect: Boolean
+}
+
+input PromoCodeRelateToManyForUpdateInput {
+  disconnect: [PromoCodeWhereUniqueInput!]
+  set: [PromoCodeWhereUniqueInput!]
+  create: [PromoCodeCreateInput!]
+  connect: [PromoCodeWhereUniqueInput!]
 }
 
 input TourUpdateArgs {
@@ -1562,6 +1579,7 @@ input TourCreateInput {
   endAt: DateTime
   artist: ArtistRelateToOneForCreateInput
   event_tour: EventRelateToManyForCreateInput
+  promoCodes: PromoCodeRelateToManyForCreateInput
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -1569,6 +1587,11 @@ input TourCreateInput {
 input ArtistRelateToOneForCreateInput {
   create: ArtistCreateInput
   connect: ArtistWhereUniqueInput
+}
+
+input PromoCodeRelateToManyForCreateInput {
+  create: [PromoCodeCreateInput!]
+  connect: [PromoCodeWhereUniqueInput!]
 }
 
 type Event {
@@ -1690,12 +1713,6 @@ input ProductionHoldManyRelationFilter {
   none: ProductionHoldWhereInput
 }
 
-input PromoCodeManyRelationFilter {
-  every: PromoCodeWhereInput
-  some: PromoCodeWhereInput
-  none: PromoCodeWhereInput
-}
-
 input TicketManyRelationFilter {
   every: TicketWhereInput
   some: TicketWhereInput
@@ -1800,13 +1817,6 @@ input ProductionHoldRelateToManyForUpdateInput {
   connect: [ProductionHoldWhereUniqueInput!]
 }
 
-input PromoCodeRelateToManyForUpdateInput {
-  disconnect: [PromoCodeWhereUniqueInput!]
-  set: [PromoCodeWhereUniqueInput!]
-  create: [PromoCodeCreateInput!]
-  connect: [PromoCodeWhereUniqueInput!]
-}
-
 input TicketRelateToManyForUpdateInput {
   disconnect: [TicketWhereUniqueInput!]
   set: [TicketWhereUniqueInput!]
@@ -1892,11 +1902,6 @@ input EventExpenseRelateToManyForCreateInput {
 input ProductionHoldRelateToManyForCreateInput {
   create: [ProductionHoldCreateInput!]
   connect: [ProductionHoldWhereUniqueInput!]
-}
-
-input PromoCodeRelateToManyForCreateInput {
-  create: [PromoCodeCreateInput!]
-  connect: [PromoCodeWhereUniqueInput!]
 }
 
 input TicketRelateToManyForCreateInput {
@@ -2791,6 +2796,8 @@ type InventoryHold {
   seatsCount(where: SeatInventoryWhereInput! = {}): Int
   order: TicketOrder
   promoCode: PromoCode
+  promoRedemptions(where: PromoRedemptionWhereInput! = {}, orderBy: [PromoRedemptionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PromoRedemptionWhereUniqueInput): [PromoRedemption!]
+  promoRedemptionsCount(where: PromoRedemptionWhereInput! = {}): Int
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -2818,8 +2825,15 @@ input InventoryHoldWhereInput {
   seats: SeatInventoryManyRelationFilter
   order: TicketOrderWhereInput
   promoCode: PromoCodeWhereInput
+  promoRedemptions: PromoRedemptionManyRelationFilter
   createdAt: DateTimeFilter
   updatedAt: DateTimeFilter
+}
+
+input PromoRedemptionManyRelationFilter {
+  every: PromoRedemptionWhereInput
+  some: PromoRedemptionWhereInput
+  none: PromoRedemptionWhereInput
 }
 
 input InventoryHoldOrderByInput {
@@ -2849,6 +2863,7 @@ input InventoryHoldUpdateInput {
   seats: SeatInventoryRelateToManyForUpdateInput
   order: TicketOrderRelateToOneForUpdateInput
   promoCode: PromoCodeRelateToOneForUpdateInput
+  promoRedemptions: PromoRedemptionRelateToManyForUpdateInput
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -2871,6 +2886,13 @@ input PromoCodeRelateToOneForUpdateInput {
   disconnect: Boolean
 }
 
+input PromoRedemptionRelateToManyForUpdateInput {
+  disconnect: [PromoRedemptionWhereUniqueInput!]
+  set: [PromoRedemptionWhereUniqueInput!]
+  create: [PromoRedemptionCreateInput!]
+  connect: [PromoRedemptionWhereUniqueInput!]
+}
+
 input InventoryHoldUpdateArgs {
   where: InventoryHoldWhereUniqueInput!
   data: InventoryHoldUpdateInput!
@@ -2891,6 +2913,7 @@ input InventoryHoldCreateInput {
   seats: SeatInventoryRelateToManyForCreateInput
   order: TicketOrderRelateToOneForCreateInput
   promoCode: PromoCodeRelateToOneForCreateInput
+  promoRedemptions: PromoRedemptionRelateToManyForCreateInput
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -2910,22 +2933,30 @@ input PromoCodeRelateToOneForCreateInput {
   connect: PromoCodeWhereUniqueInput
 }
 
+input PromoRedemptionRelateToManyForCreateInput {
+  create: [PromoRedemptionCreateInput!]
+  connect: [PromoRedemptionWhereUniqueInput!]
+}
+
 type PromoCode {
   id: ID!
   code: String
-  scope: String
+  discountType: String
+  value: Int
   maxUses: Int
-  uses: Int
-  reservedUses: Int
-  discountBps: Int
+  usedCount: Int
+  perOrderLimit: Int
   startsAt: DateTime
   endsAt: DateTime
   status: String
   event: Event
   priceLevels(where: PriceLevelWhereInput! = {}, orderBy: [PriceLevelOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PriceLevelWhereUniqueInput): [PriceLevel!]
   priceLevelsCount(where: PriceLevelWhereInput! = {}): Int
+  tour: Tour
   inventoryHold_promoCode(where: InventoryHoldWhereInput! = {}, orderBy: [InventoryHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: InventoryHoldWhereUniqueInput): [InventoryHold!]
   inventoryHold_promoCodeCount(where: InventoryHoldWhereInput! = {}): Int
+  redemptions(where: PromoRedemptionWhereInput! = {}, orderBy: [PromoRedemptionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PromoRedemptionWhereUniqueInput): [PromoRedemption!]
+  redemptionsCount(where: PromoRedemptionWhereInput! = {}): Int
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -2940,18 +2971,20 @@ input PromoCodeWhereInput {
   OR: [PromoCodeWhereInput!]
   NOT: [PromoCodeWhereInput!]
   id: IDFilter
-  code: StringNullableFilter
-  scope: StringFilter
+  code: StringFilter
+  discountType: StringNullableFilter
+  value: IntNullableFilter
   maxUses: IntNullableFilter
-  uses: IntNullableFilter
-  reservedUses: IntNullableFilter
-  discountBps: IntNullableFilter
+  usedCount: IntNullableFilter
+  perOrderLimit: IntNullableFilter
   startsAt: DateTimeNullableFilter
   endsAt: DateTimeNullableFilter
   status: StringNullableFilter
   event: EventWhereInput
   priceLevels: PriceLevelManyRelationFilter
+  tour: TourWhereInput
   inventoryHold_promoCode: InventoryHoldManyRelationFilter
+  redemptions: PromoRedemptionManyRelationFilter
   createdAt: DateTimeFilter
   updatedAt: DateTimeFilter
 }
@@ -2959,11 +2992,11 @@ input PromoCodeWhereInput {
 input PromoCodeOrderByInput {
   id: OrderDirection
   code: OrderDirection
-  scope: OrderDirection
+  discountType: OrderDirection
+  value: OrderDirection
   maxUses: OrderDirection
-  uses: OrderDirection
-  reservedUses: OrderDirection
-  discountBps: OrderDirection
+  usedCount: OrderDirection
+  perOrderLimit: OrderDirection
   startsAt: OrderDirection
   endsAt: OrderDirection
   status: OrderDirection
@@ -2973,17 +3006,19 @@ input PromoCodeOrderByInput {
 
 input PromoCodeUpdateInput {
   code: String
-  scope: String
+  discountType: String
+  value: Int
   maxUses: Int
-  uses: Int
-  reservedUses: Int
-  discountBps: Int
+  usedCount: Int
+  perOrderLimit: Int
   startsAt: DateTime
   endsAt: DateTime
   status: String
   event: EventRelateToOneForUpdateInput
   priceLevels: PriceLevelRelateToManyForUpdateInput
+  tour: TourRelateToOneForUpdateInput
   inventoryHold_promoCode: InventoryHoldRelateToManyForUpdateInput
+  redemptions: PromoRedemptionRelateToManyForUpdateInput
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -2995,19 +3030,94 @@ input PromoCodeUpdateArgs {
 
 input PromoCodeCreateInput {
   code: String
-  scope: String
+  discountType: String
+  value: Int
   maxUses: Int
-  uses: Int
-  reservedUses: Int
-  discountBps: Int
+  usedCount: Int
+  perOrderLimit: Int
   startsAt: DateTime
   endsAt: DateTime
   status: String
   event: EventRelateToOneForCreateInput
   priceLevels: PriceLevelRelateToManyForCreateInput
+  tour: TourRelateToOneForCreateInput
   inventoryHold_promoCode: InventoryHoldRelateToManyForCreateInput
+  redemptions: PromoRedemptionRelateToManyForCreateInput
   createdAt: DateTime
   updatedAt: DateTime
+}
+
+type PromoRedemption {
+  id: ID!
+  promoCode: PromoCode
+  hold: InventoryHold
+  order: TicketOrder
+  amountCents: Int
+  status: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PromoRedemptionWhereUniqueInput {
+  id: ID
+}
+
+input PromoRedemptionWhereInput {
+  AND: [PromoRedemptionWhereInput!]
+  OR: [PromoRedemptionWhereInput!]
+  NOT: [PromoRedemptionWhereInput!]
+  id: IDFilter
+  promoCode: PromoCodeWhereInput
+  hold: InventoryHoldWhereInput
+  order: TicketOrderWhereInput
+  amountCents: IntNullableFilter
+  status: StringNullableFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input PromoRedemptionOrderByInput {
+  id: OrderDirection
+  amountCents: OrderDirection
+  status: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input PromoRedemptionUpdateInput {
+  promoCode: PromoCodeRelateToOneForUpdateInput
+  hold: InventoryHoldRelateToOneForUpdateInput
+  order: TicketOrderRelateToOneForUpdateInput
+  amountCents: Int
+  status: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input InventoryHoldRelateToOneForUpdateInput {
+  create: InventoryHoldCreateInput
+  connect: InventoryHoldWhereUniqueInput
+  disconnect: Boolean
+}
+
+input PromoRedemptionUpdateArgs {
+  where: PromoRedemptionWhereUniqueInput!
+  data: PromoRedemptionUpdateInput!
+}
+
+input PromoRedemptionCreateInput {
+  promoCode: PromoCodeRelateToOneForCreateInput
+  hold: InventoryHoldRelateToOneForCreateInput
+  order: TicketOrderRelateToOneForCreateInput
+  amountCents: Int
+  status: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input InventoryHoldRelateToOneForCreateInput {
+  create: InventoryHoldCreateInput
+  connect: InventoryHoldWhereUniqueInput
 }
 
 type TicketOrder {
@@ -3038,6 +3148,9 @@ type TicketOrder {
   currencyCode: String
   payments(where: PaymentWhereInput! = {}, orderBy: [PaymentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentWhereUniqueInput): [Payment!]
   paymentsCount(where: PaymentWhereInput! = {}): Int
+  promoRedemptions(where: PromoRedemptionWhereInput! = {}, orderBy: [PromoRedemptionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PromoRedemptionWhereUniqueInput): [PromoRedemption!]
+  promoRedemptionsCount(where: PromoRedemptionWhereInput! = {}): Int
+  discountSnapshot: JSON
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -3074,6 +3187,7 @@ input TicketOrderWhereInput {
   ticket_order: TicketManyRelationFilter
   currencyCode: StringFilter
   payments: PaymentManyRelationFilter
+  promoRedemptions: PromoRedemptionManyRelationFilter
   createdAt: DateTimeFilter
   updatedAt: DateTimeFilter
 }
@@ -3128,6 +3242,8 @@ input TicketOrderUpdateInput {
   ticket_order: TicketRelateToManyForUpdateInput
   currencyCode: String
   payments: PaymentRelateToManyForUpdateInput
+  promoRedemptions: PromoRedemptionRelateToManyForUpdateInput
+  discountSnapshot: JSON
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -3173,6 +3289,8 @@ input TicketOrderCreateInput {
   ticket_order: TicketRelateToManyForCreateInput
   currencyCode: String
   payments: PaymentRelateToManyForCreateInput
+  promoRedemptions: PromoRedemptionRelateToManyForCreateInput
+  discountSnapshot: JSON
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -5006,6 +5124,12 @@ type Mutation {
   updatePromoCodes(data: [PromoCodeUpdateArgs!]!): [PromoCode]
   deletePromoCode(where: PromoCodeWhereUniqueInput!): PromoCode
   deletePromoCodes(where: [PromoCodeWhereUniqueInput!]!): [PromoCode]
+  createPromoRedemption(data: PromoRedemptionCreateInput!): PromoRedemption
+  createPromoRedemptionRecords(data: [PromoRedemptionCreateInput!]!): [PromoRedemption]
+  updatePromoRedemption(where: PromoRedemptionWhereUniqueInput!, data: PromoRedemptionUpdateInput!): PromoRedemption
+  updatePromoRedemptionRecords(data: [PromoRedemptionUpdateArgs!]!): [PromoRedemption]
+  deletePromoRedemption(where: PromoRedemptionWhereUniqueInput!): PromoRedemption
+  deletePromoRedemptionRecords(where: [PromoRedemptionWhereUniqueInput!]!): [PromoRedemption]
   createTicketOrder(data: TicketOrderCreateInput!): TicketOrder
   createTicketOrders(data: [TicketOrderCreateInput!]!): [TicketOrder]
   updateTicketOrder(where: TicketOrderWhereUniqueInput!, data: TicketOrderUpdateInput!): TicketOrder
@@ -5119,6 +5243,28 @@ type Mutation {
   createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
   sendUserPasswordResetLink(email: String!): Boolean!
   redeemUserPasswordResetToken(email: String!, token: String!, password: String!): RedeemUserPasswordResetTokenResult
+  createGaHold(eventId: ID!, levelId: ID!, qty: Int!, presaleCode: String, idempotencyKey: String!): JSON
+  createSeatHold(eventId: ID!, seatInventoryIds: [ID!]!, presaleCode: String, idempotencyKey: String!): JSON
+  startTicketCheckout(input: StartTicketCheckoutInput!): JSON
+  completeTicketCheckout(input: CompleteTicketCheckoutInput!): JSON
+  transferTicket(input: TransferTicketInput!): JSON
+  refundTicketOrder(input: RefundTicketOrderInput!): JSON
+  placeDateHold(input: OperatorCommandInput!): JSON
+  challengeHold(input: OperatorCommandInput!): JSON
+  confirmHold(input: OperatorCommandInput!): JSON
+  sendOffer(input: OperatorCommandInput!): JSON
+  acceptOffer(input: OperatorCommandInput!): JSON
+  publishEvent(input: OperatorCommandInput!): JSON
+  setProductionHold(input: OperatorCommandInput!): JSON
+  releaseProductionHold(input: OperatorCommandInput!): JSON
+  scanTicket(input: OperatorCommandInput!): JSON
+  recordMerchSales(input: OperatorCommandInput!): JSON
+  computeSettlement(input: OperatorCommandInput!): JSON
+  adjustSettlement(input: OperatorCommandInput!): JSON
+  signSettlement(input: OperatorCommandInput!): JSON
+  recordArtistPayment(input: OperatorCommandInput!): JSON
+  postponeEvent(input: OperatorCommandInput!): JSON
+  cancelEvent(input: OperatorCommandInput!): JSON
 }
 
 union UserAuthenticationWithPasswordResult = UserAuthenticationWithPasswordSuccess | UserAuthenticationWithPasswordFailure
@@ -5216,6 +5362,9 @@ type Query {
   promoCode(where: PromoCodeWhereUniqueInput!): PromoCode
   promoCodes(where: PromoCodeWhereInput! = {}, orderBy: [PromoCodeOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PromoCodeWhereUniqueInput): [PromoCode!]
   promoCodesCount(where: PromoCodeWhereInput! = {}): Int
+  promoRedemption(where: PromoRedemptionWhereUniqueInput!): PromoRedemption
+  promoRedemptionRecords(where: PromoRedemptionWhereInput! = {}, orderBy: [PromoRedemptionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PromoRedemptionWhereUniqueInput): [PromoRedemption!]
+  promoRedemptionRecordsCount(where: PromoRedemptionWhereInput! = {}): Int
   ticketOrder(where: TicketOrderWhereUniqueInput!): TicketOrder
   ticketOrders(where: TicketOrderWhereInput! = {}, orderBy: [TicketOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketOrderWhereUniqueInput): [TicketOrder!]
   ticketOrdersCount(where: TicketOrderWhereInput! = {}): Int
@@ -5274,6 +5423,9 @@ type Query {
   authenticatedItem: AuthenticatedItem
   validateUserPasswordResetToken(email: String!, token: String!): ValidateUserPasswordResetTokenResult
   redirectToInit: Boolean
+  eventsOnSale: JSON
+  eventAvailability(eventId: ID!): JSON
+  lookupTicketOrder(email: String!, orderNumber: String!): JSON
 }
 
 union AuthenticatedItem = User
@@ -5412,4 +5564,79 @@ type KeystoneAdminUISort {
 enum KeystoneAdminUISortDirection {
   ASC
   DESC
+}
+
+input OperatorCommandInput {
+  idempotencyKey: String!
+  eventId: ID
+  venueId: ID
+  date: String
+  rank: Int
+  artistId: ID
+  agencyId: ID
+  expiresAt: String
+  holdId: ID
+  offerId: ID
+  settlementId: ID
+  productionHoldId: ID
+  seatingChartId: ID
+  title: String
+  showAt: String
+  doorsAt: String
+  ageRestriction: String
+  levelId: ID
+  quantity: Int
+  seatInventoryIds: [ID!]
+  holdType: String
+  releaseAt: String
+  token: String
+  ticketCode: String
+  gate: String
+  softGrossCents: Int
+  hardGrossCents: Int
+  sellerFeeCents: Int
+  countIn: JSON
+  countOut: JSON
+  amountCents: Int
+  reason: String
+  approvedById: ID
+  kind: String
+  method: String
+  reference: String
+  status: String
+}
+
+input CreateHoldInput {
+  idempotencyKey: String!
+}
+
+input StartTicketCheckoutInput {
+  holdId: ID!
+  proof: String!
+  email: String!
+  name: String!
+  ageAttested: Boolean
+  idempotencyKey: String!
+}
+
+input CompleteTicketCheckoutInput {
+  orderId: ID!
+  proof: String!
+}
+
+input TransferTicketInput {
+  ticketCode: String!
+  orderId: ID!
+  proof: String!
+  toEmail: String!
+  toName: String
+  idempotencyKey: String!
+}
+
+input RefundTicketOrderInput {
+  orderId: ID!
+  amountCents: Int
+  reason: String!
+  idempotencyKey: String!
+  approvedById: ID
 }

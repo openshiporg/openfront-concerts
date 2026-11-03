@@ -217,16 +217,17 @@ model Artist {
 }
 
 model Tour {
-  id         String    @id @default(cuid())
-  name       String    @default("")
-  notes      String    @default("")
+  id         String      @id @default(cuid())
+  name       String      @default("")
+  notes      String      @default("")
   startAt    DateTime?
   endAt      DateTime?
-  artist     Artist?   @relation("Tour_artist", fields: [artistId], references: [id])
-  artistId   String?   @map("artist")
-  event_tour Event[]   @relation("Event_tour")
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @default(now()) @updatedAt
+  artist     Artist?     @relation("Tour_artist", fields: [artistId], references: [id])
+  artistId   String?     @map("artist")
+  event_tour Event[]     @relation("Event_tour")
+  promoCodes PromoCode[] @relation("PromoCode_tour")
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @default(now()) @updatedAt
 
   @@index([artistId])
 }
@@ -465,29 +466,30 @@ model ProductionHold {
 }
 
 model InventoryHold {
-  id            String           @id @default(cuid())
-  holdKey       String?          @unique
-  secretHash    String           @default("")
-  presaleCode   String           @default("")
-  quantity      Int?             @default(0)
-  quoteSnapshot Json?
-  expiresAt     DateTime?
-  status        String?          @default("active")
-  event         Event?           @relation("InventoryHold_event", fields: [eventId], references: [id])
-  eventId       String?          @map("event")
-  priceLevel    PriceLevel?      @relation("InventoryHold_priceLevel", fields: [priceLevelId], references: [id])
-  priceLevelId  String?          @map("priceLevel")
-  phase         PriceLevelPhase? @relation("InventoryHold_phase", fields: [phaseId], references: [id])
-  phaseId       String?          @map("phase")
-  customer      User?            @relation("InventoryHold_customer", fields: [customerId], references: [id])
-  customerId    String?          @map("customer")
-  seats         SeatInventory[]  @relation("InventoryHold_seats")
-  order         TicketOrder?     @relation("InventoryHold_order", fields: [orderId], references: [id])
-  orderId       String?          @map("order")
-  promoCode     PromoCode?       @relation("InventoryHold_promoCode", fields: [promoCodeId], references: [id])
-  promoCodeId   String?          @map("promoCode")
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @default(now()) @updatedAt
+  id               String            @id @default(cuid())
+  holdKey          String?           @unique
+  secretHash       String            @default("")
+  presaleCode      String            @default("")
+  quantity         Int?              @default(0)
+  quoteSnapshot    Json?
+  expiresAt        DateTime?
+  status           String?           @default("active")
+  event            Event?            @relation("InventoryHold_event", fields: [eventId], references: [id])
+  eventId          String?           @map("event")
+  priceLevel       PriceLevel?       @relation("InventoryHold_priceLevel", fields: [priceLevelId], references: [id])
+  priceLevelId     String?           @map("priceLevel")
+  phase            PriceLevelPhase?  @relation("InventoryHold_phase", fields: [phaseId], references: [id])
+  phaseId          String?           @map("phase")
+  customer         User?             @relation("InventoryHold_customer", fields: [customerId], references: [id])
+  customerId       String?           @map("customer")
+  seats            SeatInventory[]   @relation("InventoryHold_seats")
+  order            TicketOrder?      @relation("InventoryHold_order", fields: [orderId], references: [id])
+  orderId          String?           @map("order")
+  promoCode        PromoCode?        @relation("InventoryHold_promoCode", fields: [promoCodeId], references: [id])
+  promoCodeId      String?           @map("promoCode")
+  promoRedemptions PromoRedemption[] @relation("PromoRedemption_hold")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @default(now()) @updatedAt
 
   @@index([eventId])
   @@index([priceLevelId])
@@ -498,24 +500,46 @@ model InventoryHold {
 }
 
 model PromoCode {
-  id                      String          @id @default(cuid())
-  code                    String?         @unique
-  scope                   String          @default("")
-  maxUses                 Int?            @default(0)
-  uses                    Int?            @default(0)
-  reservedUses            Int?            @default(0)
-  discountBps             Int?            @default(0)
+  id                      String            @id @default(cuid())
+  code                    String            @unique @default("")
+  discountType            String?           @default("percent_bps")
+  value                   Int?              @default(0)
+  maxUses                 Int?
+  usedCount               Int?              @default(0)
+  perOrderLimit           Int?
   startsAt                DateTime?
   endsAt                  DateTime?
-  status                  String?         @default("active")
-  event                   Event?          @relation("PromoCode_event", fields: [eventId], references: [id])
-  eventId                 String?         @map("event")
-  priceLevels             PriceLevel[]    @relation("PriceLevel_promoCode_priceLevels")
-  inventoryHold_promoCode InventoryHold[] @relation("InventoryHold_promoCode")
-  createdAt               DateTime        @default(now())
-  updatedAt               DateTime        @default(now()) @updatedAt
+  status                  String?           @default("active")
+  event                   Event?            @relation("PromoCode_event", fields: [eventId], references: [id])
+  eventId                 String?           @map("event")
+  priceLevels             PriceLevel[]      @relation("PriceLevel_promoCode_priceLevels")
+  tour                    Tour?             @relation("PromoCode_tour", fields: [tourId], references: [id])
+  tourId                  String?           @map("tour")
+  inventoryHold_promoCode InventoryHold[]   @relation("InventoryHold_promoCode")
+  redemptions             PromoRedemption[] @relation("PromoRedemption_promoCode")
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @default(now()) @updatedAt
 
   @@index([eventId])
+  @@index([tourId])
+}
+
+model PromoRedemption {
+  id          String         @id @default(cuid())
+  promoCode   PromoCode?     @relation("PromoRedemption_promoCode", fields: [promoCodeId], references: [id])
+  promoCodeId String?        @map("promoCode")
+  hold        InventoryHold? @relation("PromoRedemption_hold", fields: [holdId], references: [id])
+  holdId      String?        @map("hold")
+  order       TicketOrder?   @relation("PromoRedemption_order", fields: [orderId], references: [id])
+  orderId     String?        @map("order")
+  amountCents Int?           @default(0)
+  status      String?        @default("reserved")
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @default(now()) @updatedAt
+
+  @@index([promoCodeId])
+  @@index([holdId])
+  @@index([orderId])
 }
 
 model TicketOrder {
@@ -545,6 +569,8 @@ model TicketOrder {
   ticket_order          Ticket[]           @relation("Ticket_order")
   currencyCode          String             @default("USD")
   payments              Payment[]          @relation("Payment_order")
+  promoRedemptions      PromoRedemption[]  @relation("PromoRedemption_order")
+  discountSnapshot      Json?
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @default(now()) @updatedAt
   from_Refund_order     Refund[]           @relation("Refund_order")

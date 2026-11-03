@@ -21,6 +21,7 @@ export const InventoryHold = list({
   seats: relationship({ ref: 'SeatInventory.inventoryHold_seats', many: true }),
   order: relationship({ ref: 'TicketOrder.inventoryHold_order', many: false }),
   promoCode: relationship({ ref: 'PromoCode.inventoryHold_promoCode', many: false }),
+ promoRedemptions: relationship({ ref: 'PromoRedemption.hold', many: true }),
   ...trackingFields,
  }
 });

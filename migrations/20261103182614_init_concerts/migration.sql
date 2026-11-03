@@ -1,58 +1,100 @@
-/*
-  Warnings:
-
-  - You are about to drop the column `canCreateTodos` on the `Role` table. All the data in the column will be lost.
-  - You are about to drop the column `canManageAllTodos` on the `Role` table. All the data in the column will be lost.
-  - You are about to drop the `Todo` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `TodoImage` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `_Todo_todoImages` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "PaymentCollectionDescriptionType" AS ENUM ('default', 'refund');
 
--- DropForeignKey
-ALTER TABLE "Todo" DROP CONSTRAINT "Todo_assignedTo_fkey";
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL DEFAULT '',
+    "email" TEXT NOT NULL DEFAULT '',
+    "password" TEXT NOT NULL,
+    "role" TEXT,
+    "onboardingStatus" TEXT DEFAULT 'not_started',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "passwordResetToken" TEXT,
+    "passwordResetIssuedAt" TIMESTAMP(3),
+    "passwordResetRedeemedAt" TIMESTAMP(3),
 
--- DropForeignKey
-ALTER TABLE "_Todo_todoImages" DROP CONSTRAINT "_Todo_todoImages_A_fkey";
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
--- DropForeignKey
-ALTER TABLE "_Todo_todoImages" DROP CONSTRAINT "_Todo_todoImages_B_fkey";
+-- CreateTable
+CREATE TABLE "Role" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL DEFAULT '',
+    "canSeeOtherPeople" BOOLEAN NOT NULL DEFAULT false,
+    "canEditOtherPeople" BOOLEAN NOT NULL DEFAULT false,
+    "canManagePeople" BOOLEAN NOT NULL DEFAULT false,
+    "canManageRoles" BOOLEAN NOT NULL DEFAULT false,
+    "canAccessDashboard" BOOLEAN NOT NULL DEFAULT false,
+    "canManageOnboarding" BOOLEAN NOT NULL DEFAULT false,
+    "canManagePayments" BOOLEAN NOT NULL DEFAULT false,
+    "canReadPayments" BOOLEAN NOT NULL DEFAULT false,
+    "canIssueRefunds" BOOLEAN NOT NULL DEFAULT false,
+    "canReadAudit" BOOLEAN NOT NULL DEFAULT false,
+    "canManageEvents" BOOLEAN NOT NULL DEFAULT false,
+    "canManageDeals" BOOLEAN NOT NULL DEFAULT false,
+    "canManageInventory" BOOLEAN NOT NULL DEFAULT false,
+    "canManageOrders" BOOLEAN NOT NULL DEFAULT false,
+    "canScanTickets" BOOLEAN NOT NULL DEFAULT false,
+    "canManageSettlements" BOOLEAN NOT NULL DEFAULT false,
+    "canApproveAdjustments" BOOLEAN NOT NULL DEFAULT false,
+    "canManageVenues" BOOLEAN NOT NULL DEFAULT false,
+    "canManageArtists" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
--- AlterTable
-ALTER TABLE "Role" DROP COLUMN "canCreateTodos",
-DROP COLUMN "canManageAllTodos",
-ADD COLUMN     "canApproveAdjustments" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "canIssueRefunds" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "canManageArtists" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "canManageDeals" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "canManageEvents" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "canManageInventory" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "canManageOnboarding" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "canManageOrders" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "canManagePayments" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "canManageSettlements" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "canManageVenues" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "canReadAudit" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "canReadPayments" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "canScanTickets" BOOLEAN NOT NULL DEFAULT false,
-ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+    CONSTRAINT "Role_pkey" PRIMARY KEY ("id")
+);
 
--- AlterTable
-ALTER TABLE "User" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "onboardingStatus" TEXT DEFAULT 'not_started',
-ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+-- CreateTable
+CREATE TABLE "OAuthApp" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL DEFAULT '',
+    "clientId" TEXT NOT NULL DEFAULT '',
+    "clientSecret" TEXT NOT NULL DEFAULT '',
+    "tokenEndpointAuthMethod" TEXT DEFAULT 'client_secret_post',
+    "redirectUris" JSONB DEFAULT '[]',
+    "scopes" JSONB DEFAULT '["mcp:read","mcp:write"]',
+    "webhookUrl" TEXT NOT NULL DEFAULT '',
+    "status" TEXT DEFAULT 'active',
+    "installUrl" TEXT NOT NULL DEFAULT '',
+    "uninstallUrl" TEXT NOT NULL DEFAULT '',
+    "description" TEXT NOT NULL DEFAULT '',
+    "metadata" JSONB DEFAULT '{}',
+    "developerEmail" TEXT NOT NULL DEFAULT '',
+    "privacyPolicyUrl" TEXT NOT NULL DEFAULT '',
+    "termsOfServiceUrl" TEXT NOT NULL DEFAULT '',
+    "supportUrl" TEXT NOT NULL DEFAULT '',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
--- DropTable
-DROP TABLE "Todo";
+    CONSTRAINT "OAuthApp_pkey" PRIMARY KEY ("id")
+);
 
--- DropTable
-DROP TABLE "TodoImage";
+-- CreateTable
+CREATE TABLE "OAuthToken" (
+    "id" TEXT NOT NULL,
+    "tokenType" TEXT NOT NULL,
+    "token" TEXT NOT NULL DEFAULT '',
+    "clientId" TEXT NOT NULL DEFAULT '',
+    "user" TEXT,
+    "scopes" JSONB DEFAULT '[]',
+    "redirectUri" TEXT NOT NULL DEFAULT '',
+    "resource" TEXT NOT NULL DEFAULT '',
+    "expiresAt" TIMESTAMP(3),
+    "isRevoked" TEXT DEFAULT 'false',
+    "authorizationCode" TEXT NOT NULL DEFAULT '',
+    "refreshToken" TEXT NOT NULL DEFAULT '',
+    "accessToken" TEXT NOT NULL DEFAULT '',
+    "state" TEXT NOT NULL DEFAULT '',
+    "codeChallenge" TEXT NOT NULL DEFAULT '',
+    "codeChallengeMethod" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
--- DropTable
-DROP TABLE "_Todo_todoImages";
+    CONSTRAINT "OAuthToken_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Venue" (
@@ -368,20 +410,35 @@ CREATE TABLE "InventoryHold" (
 -- CreateTable
 CREATE TABLE "PromoCode" (
     "id" TEXT NOT NULL,
-    "code" TEXT,
-    "scope" TEXT NOT NULL DEFAULT '',
-    "maxUses" INTEGER DEFAULT 0,
-    "uses" INTEGER DEFAULT 0,
-    "reservedUses" INTEGER DEFAULT 0,
-    "discountBps" INTEGER DEFAULT 0,
+    "code" TEXT NOT NULL DEFAULT '',
+    "discountType" TEXT DEFAULT 'percent_bps',
+    "value" INTEGER DEFAULT 0,
+    "maxUses" INTEGER,
+    "usedCount" INTEGER DEFAULT 0,
+    "perOrderLimit" INTEGER,
     "startsAt" TIMESTAMP(3),
     "endsAt" TIMESTAMP(3),
     "status" TEXT DEFAULT 'active',
     "event" TEXT,
+    "tour" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "PromoCode_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PromoRedemption" (
+    "id" TEXT NOT NULL,
+    "promoCode" TEXT,
+    "hold" TEXT,
+    "order" TEXT,
+    "amountCents" INTEGER DEFAULT 0,
+    "status" TEXT DEFAULT 'reserved',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PromoRedemption_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -405,6 +462,7 @@ CREATE TABLE "TicketOrder" (
     "event" TEXT,
     "paymentCollection" TEXT,
     "currencyCode" TEXT NOT NULL DEFAULT 'USD',
+    "discountSnapshot" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -765,6 +823,24 @@ CREATE TABLE "_InventoryHold_seats" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE INDEX "User_role_idx" ON "User"("role");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "OAuthApp_clientId_key" ON "OAuthApp"("clientId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "OAuthToken_token_key" ON "OAuthToken"("token");
+
+-- CreateIndex
+CREATE INDEX "OAuthToken_clientId_idx" ON "OAuthToken"("clientId");
+
+-- CreateIndex
+CREATE INDEX "OAuthToken_user_idx" ON "OAuthToken"("user");
+
+-- CreateIndex
 CREATE INDEX "SeatingChart_venue_idx" ON "SeatingChart"("venue");
 
 -- CreateIndex
@@ -880,6 +956,18 @@ CREATE UNIQUE INDEX "PromoCode_code_key" ON "PromoCode"("code");
 
 -- CreateIndex
 CREATE INDEX "PromoCode_event_idx" ON "PromoCode"("event");
+
+-- CreateIndex
+CREATE INDEX "PromoCode_tour_idx" ON "PromoCode"("tour");
+
+-- CreateIndex
+CREATE INDEX "PromoRedemption_promoCode_idx" ON "PromoRedemption"("promoCode");
+
+-- CreateIndex
+CREATE INDEX "PromoRedemption_hold_idx" ON "PromoRedemption"("hold");
+
+-- CreateIndex
+CREATE INDEX "PromoRedemption_order_idx" ON "PromoRedemption"("order");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "TicketOrder_orderNumber_key" ON "TicketOrder"("orderNumber");
@@ -1044,6 +1132,12 @@ CREATE UNIQUE INDEX "_InventoryHold_seats_AB_unique" ON "_InventoryHold_seats"("
 CREATE INDEX "_InventoryHold_seats_B_index" ON "_InventoryHold_seats"("B");
 
 -- AddForeignKey
+ALTER TABLE "User" ADD CONSTRAINT "User_role_fkey" FOREIGN KEY ("role") REFERENCES "Role"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "OAuthToken" ADD CONSTRAINT "OAuthToken_user_fkey" FOREIGN KEY ("user") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "SeatingChart" ADD CONSTRAINT "SeatingChart_venue_fkey" FOREIGN KEY ("venue") REFERENCES "Venue"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -1141,6 +1235,18 @@ ALTER TABLE "InventoryHold" ADD CONSTRAINT "InventoryHold_promoCode_fkey" FOREIG
 
 -- AddForeignKey
 ALTER TABLE "PromoCode" ADD CONSTRAINT "PromoCode_event_fkey" FOREIGN KEY ("event") REFERENCES "Event"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PromoCode" ADD CONSTRAINT "PromoCode_tour_fkey" FOREIGN KEY ("tour") REFERENCES "Tour"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PromoRedemption" ADD CONSTRAINT "PromoRedemption_promoCode_fkey" FOREIGN KEY ("promoCode") REFERENCES "PromoCode"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PromoRedemption" ADD CONSTRAINT "PromoRedemption_hold_fkey" FOREIGN KEY ("hold") REFERENCES "InventoryHold"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PromoRedemption" ADD CONSTRAINT "PromoRedemption_order_fkey" FOREIGN KEY ("order") REFERENCES "TicketOrder"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "TicketOrder" ADD CONSTRAINT "TicketOrder_customer_fkey" FOREIGN KEY ("customer") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

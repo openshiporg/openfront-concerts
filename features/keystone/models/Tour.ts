@@ -13,6 +13,7 @@ export const Tour = list({
   endAt: timestamp(),
   artist: relationship({ ref: 'Artist.tour_artist', many: false }),
   event_tour: relationship({ ref: 'Event.tour', many: true }),
+ promoCodes: relationship({ ref: 'PromoCode.tour', many: true }),
   ...trackingFields,
  }
 });

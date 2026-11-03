@@ -29,6 +29,8 @@ export const TicketOrder = list({
   ticket_order: relationship({ ref: 'Ticket.order', many: true }),
   currencyCode: text({ defaultValue: 'USD', validation: { match: { regex: /^[A-Z]{3}$/, explanation: 'ISO 4217 currency code' } } }),
   payments: relationship({ ref: 'Payment.order', many: true }),
+  promoRedemptions: relationship({ ref: 'PromoRedemption.order', many: true }),
+  discountSnapshot: json(),
   ...trackingFields,
  }
 });
