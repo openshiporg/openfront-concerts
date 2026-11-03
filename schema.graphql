@@ -7,8 +7,23 @@ type User {
   email: String
   password: PasswordState
   role: Role
-  tasks(where: TodoWhereInput! = {}, orderBy: [TodoOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TodoWhereUniqueInput): [Todo!]
-  tasksCount(where: TodoWhereInput! = {}): Int
+  onboardingStatus: String
+  event_promoter(where: EventWhereInput! = {}, orderBy: [EventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: EventWhereUniqueInput): [Event!]
+  event_promoterCount(where: EventWhereInput! = {}): Int
+  inventoryHold_customer(where: InventoryHoldWhereInput! = {}, orderBy: [InventoryHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: InventoryHoldWhereUniqueInput): [InventoryHold!]
+  inventoryHold_customerCount(where: InventoryHoldWhereInput! = {}): Int
+  ticketOrder_customer(where: TicketOrderWhereInput! = {}, orderBy: [TicketOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketOrderWhereUniqueInput): [TicketOrder!]
+  ticketOrder_customerCount(where: TicketOrderWhereInput! = {}): Int
+  scanEvent_scannedBy(where: ScanEventWhereInput! = {}, orderBy: [ScanEventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ScanEventWhereUniqueInput): [ScanEvent!]
+  scanEvent_scannedByCount(where: ScanEventWhereInput! = {}): Int
+  settlementLine_approvedBy(where: SettlementLineWhereInput! = {}, orderBy: [SettlementLineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SettlementLineWhereUniqueInput): [SettlementLine!]
+  settlementLine_approvedByCount(where: SettlementLineWhereInput! = {}): Int
+  auditEvent_actor(where: AuditEventWhereInput! = {}, orderBy: [AuditEventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: AuditEventWhereUniqueInput): [AuditEvent!]
+  auditEvent_actorCount(where: AuditEventWhereInput! = {}): Int
+  storeSettings_manager(where: StoreSettingsWhereInput! = {}, orderBy: [StoreSettingsOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StoreSettingsWhereUniqueInput): [StoreSettings!]
+  storeSettings_managerCount(where: StoreSettingsWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
   passwordResetToken: PasswordState
   passwordResetIssuedAt: DateTime
   passwordResetRedeemedAt: DateTime
@@ -31,7 +46,16 @@ input UserWhereInput {
   id: IDFilter
   name: StringFilter
   role: RoleWhereInput
-  tasks: TodoManyRelationFilter
+  onboardingStatus: StringNullableFilter
+  event_promoter: EventManyRelationFilter
+  inventoryHold_customer: InventoryHoldManyRelationFilter
+  ticketOrder_customer: TicketOrderManyRelationFilter
+  scanEvent_scannedBy: ScanEventManyRelationFilter
+  settlementLine_approvedBy: SettlementLineManyRelationFilter
+  auditEvent_actor: AuditEventManyRelationFilter
+  storeSettings_manager: StoreSettingsManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
   passwordResetToken: PasswordFilter
   passwordResetIssuedAt: DateTimeNullableFilter
   passwordResetRedeemedAt: DateTimeNullableFilter
@@ -82,10 +106,72 @@ input NestedStringFilter {
   not: NestedStringFilter
 }
 
-input TodoManyRelationFilter {
-  every: TodoWhereInput
-  some: TodoWhereInput
-  none: TodoWhereInput
+input StringNullableFilter {
+  equals: String
+  in: [String!]
+  notIn: [String!]
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  mode: QueryMode
+  not: StringNullableFilter
+}
+
+input EventManyRelationFilter {
+  every: EventWhereInput
+  some: EventWhereInput
+  none: EventWhereInput
+}
+
+input InventoryHoldManyRelationFilter {
+  every: InventoryHoldWhereInput
+  some: InventoryHoldWhereInput
+  none: InventoryHoldWhereInput
+}
+
+input TicketOrderManyRelationFilter {
+  every: TicketOrderWhereInput
+  some: TicketOrderWhereInput
+  none: TicketOrderWhereInput
+}
+
+input ScanEventManyRelationFilter {
+  every: ScanEventWhereInput
+  some: ScanEventWhereInput
+  none: ScanEventWhereInput
+}
+
+input SettlementLineManyRelationFilter {
+  every: SettlementLineWhereInput
+  some: SettlementLineWhereInput
+  none: SettlementLineWhereInput
+}
+
+input AuditEventManyRelationFilter {
+  every: AuditEventWhereInput
+  some: AuditEventWhereInput
+  none: AuditEventWhereInput
+}
+
+input StoreSettingsManyRelationFilter {
+  every: StoreSettingsWhereInput
+  some: StoreSettingsWhereInput
+  none: StoreSettingsWhereInput
+}
+
+input DateTimeFilter {
+  equals: DateTime
+  in: [DateTime!]
+  notIn: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+  not: DateTimeFilter
 }
 
 input PasswordFilter {
@@ -106,6 +192,9 @@ input DateTimeNullableFilter {
 input UserOrderByInput {
   id: OrderDirection
   name: OrderDirection
+  onboardingStatus: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
   passwordResetIssuedAt: OrderDirection
   passwordResetRedeemedAt: OrderDirection
 }
@@ -120,7 +209,16 @@ input UserUpdateInput {
   email: String
   password: String
   role: RoleRelateToOneForUpdateInput
-  tasks: TodoRelateToManyForUpdateInput
+  onboardingStatus: String
+  event_promoter: EventRelateToManyForUpdateInput
+  inventoryHold_customer: InventoryHoldRelateToManyForUpdateInput
+  ticketOrder_customer: TicketOrderRelateToManyForUpdateInput
+  scanEvent_scannedBy: ScanEventRelateToManyForUpdateInput
+  settlementLine_approvedBy: SettlementLineRelateToManyForUpdateInput
+  auditEvent_actor: AuditEventRelateToManyForUpdateInput
+  storeSettings_manager: StoreSettingsRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
   passwordResetToken: String
   passwordResetIssuedAt: DateTime
   passwordResetRedeemedAt: DateTime
@@ -132,11 +230,53 @@ input RoleRelateToOneForUpdateInput {
   disconnect: Boolean
 }
 
-input TodoRelateToManyForUpdateInput {
-  disconnect: [TodoWhereUniqueInput!]
-  set: [TodoWhereUniqueInput!]
-  create: [TodoCreateInput!]
-  connect: [TodoWhereUniqueInput!]
+input EventRelateToManyForUpdateInput {
+  disconnect: [EventWhereUniqueInput!]
+  set: [EventWhereUniqueInput!]
+  create: [EventCreateInput!]
+  connect: [EventWhereUniqueInput!]
+}
+
+input InventoryHoldRelateToManyForUpdateInput {
+  disconnect: [InventoryHoldWhereUniqueInput!]
+  set: [InventoryHoldWhereUniqueInput!]
+  create: [InventoryHoldCreateInput!]
+  connect: [InventoryHoldWhereUniqueInput!]
+}
+
+input TicketOrderRelateToManyForUpdateInput {
+  disconnect: [TicketOrderWhereUniqueInput!]
+  set: [TicketOrderWhereUniqueInput!]
+  create: [TicketOrderCreateInput!]
+  connect: [TicketOrderWhereUniqueInput!]
+}
+
+input ScanEventRelateToManyForUpdateInput {
+  disconnect: [ScanEventWhereUniqueInput!]
+  set: [ScanEventWhereUniqueInput!]
+  create: [ScanEventCreateInput!]
+  connect: [ScanEventWhereUniqueInput!]
+}
+
+input SettlementLineRelateToManyForUpdateInput {
+  disconnect: [SettlementLineWhereUniqueInput!]
+  set: [SettlementLineWhereUniqueInput!]
+  create: [SettlementLineCreateInput!]
+  connect: [SettlementLineWhereUniqueInput!]
+}
+
+input AuditEventRelateToManyForUpdateInput {
+  disconnect: [AuditEventWhereUniqueInput!]
+  set: [AuditEventWhereUniqueInput!]
+  create: [AuditEventCreateInput!]
+  connect: [AuditEventWhereUniqueInput!]
+}
+
+input StoreSettingsRelateToManyForUpdateInput {
+  disconnect: [StoreSettingsWhereUniqueInput!]
+  set: [StoreSettingsWhereUniqueInput!]
+  create: [StoreSettingsCreateInput!]
+  connect: [StoreSettingsWhereUniqueInput!]
 }
 
 input UserUpdateArgs {
@@ -149,7 +289,16 @@ input UserCreateInput {
   email: String
   password: String
   role: RoleRelateToOneForCreateInput
-  tasks: TodoRelateToManyForCreateInput
+  onboardingStatus: String
+  event_promoter: EventRelateToManyForCreateInput
+  inventoryHold_customer: InventoryHoldRelateToManyForCreateInput
+  ticketOrder_customer: TicketOrderRelateToManyForCreateInput
+  scanEvent_scannedBy: ScanEventRelateToManyForCreateInput
+  settlementLine_approvedBy: SettlementLineRelateToManyForCreateInput
+  auditEvent_actor: AuditEventRelateToManyForCreateInput
+  storeSettings_manager: StoreSettingsRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
   passwordResetToken: String
   passwordResetIssuedAt: DateTime
   passwordResetRedeemedAt: DateTime
@@ -160,21 +309,65 @@ input RoleRelateToOneForCreateInput {
   connect: RoleWhereUniqueInput
 }
 
-input TodoRelateToManyForCreateInput {
-  create: [TodoCreateInput!]
-  connect: [TodoWhereUniqueInput!]
+input EventRelateToManyForCreateInput {
+  create: [EventCreateInput!]
+  connect: [EventWhereUniqueInput!]
+}
+
+input InventoryHoldRelateToManyForCreateInput {
+  create: [InventoryHoldCreateInput!]
+  connect: [InventoryHoldWhereUniqueInput!]
+}
+
+input TicketOrderRelateToManyForCreateInput {
+  create: [TicketOrderCreateInput!]
+  connect: [TicketOrderWhereUniqueInput!]
+}
+
+input ScanEventRelateToManyForCreateInput {
+  create: [ScanEventCreateInput!]
+  connect: [ScanEventWhereUniqueInput!]
+}
+
+input SettlementLineRelateToManyForCreateInput {
+  create: [SettlementLineCreateInput!]
+  connect: [SettlementLineWhereUniqueInput!]
+}
+
+input AuditEventRelateToManyForCreateInput {
+  create: [AuditEventCreateInput!]
+  connect: [AuditEventWhereUniqueInput!]
+}
+
+input StoreSettingsRelateToManyForCreateInput {
+  create: [StoreSettingsCreateInput!]
+  connect: [StoreSettingsWhereUniqueInput!]
 }
 
 type Role {
   id: ID!
   name: String
-  canCreateTodos: Boolean
-  canManageAllTodos: Boolean
   canSeeOtherPeople: Boolean
   canEditOtherPeople: Boolean
   canManagePeople: Boolean
   canManageRoles: Boolean
   canAccessDashboard: Boolean
+  canManageOnboarding: Boolean
+  canManagePayments: Boolean
+  canReadPayments: Boolean
+  canIssueRefunds: Boolean
+  canReadAudit: Boolean
+  canManageEvents: Boolean
+  canManageDeals: Boolean
+  canManageInventory: Boolean
+  canManageOrders: Boolean
+  canScanTickets: Boolean
+  canManageSettlements: Boolean
+  canApproveAdjustments: Boolean
+  canManageVenues: Boolean
+  canManageArtists: Boolean
+  createdAt: DateTime
+  updatedAt: DateTime
   assignedTo(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   assignedToCount(where: UserWhereInput! = {}): Int
 }
@@ -189,13 +382,27 @@ input RoleWhereInput {
   NOT: [RoleWhereInput!]
   id: IDFilter
   name: StringFilter
-  canCreateTodos: BooleanFilter
-  canManageAllTodos: BooleanFilter
   canSeeOtherPeople: BooleanFilter
   canEditOtherPeople: BooleanFilter
   canManagePeople: BooleanFilter
   canManageRoles: BooleanFilter
   canAccessDashboard: BooleanFilter
+  canManageOnboarding: BooleanFilter
+  canManagePayments: BooleanFilter
+  canReadPayments: BooleanFilter
+  canIssueRefunds: BooleanFilter
+  canReadAudit: BooleanFilter
+  canManageEvents: BooleanFilter
+  canManageDeals: BooleanFilter
+  canManageInventory: BooleanFilter
+  canManageOrders: BooleanFilter
+  canScanTickets: BooleanFilter
+  canManageSettlements: BooleanFilter
+  canApproveAdjustments: BooleanFilter
+  canManageVenues: BooleanFilter
+  canManageArtists: BooleanFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
   assignedTo: UserManyRelationFilter
 }
 
@@ -213,24 +420,52 @@ input UserManyRelationFilter {
 input RoleOrderByInput {
   id: OrderDirection
   name: OrderDirection
-  canCreateTodos: OrderDirection
-  canManageAllTodos: OrderDirection
   canSeeOtherPeople: OrderDirection
   canEditOtherPeople: OrderDirection
   canManagePeople: OrderDirection
   canManageRoles: OrderDirection
   canAccessDashboard: OrderDirection
+  canManageOnboarding: OrderDirection
+  canManagePayments: OrderDirection
+  canReadPayments: OrderDirection
+  canIssueRefunds: OrderDirection
+  canReadAudit: OrderDirection
+  canManageEvents: OrderDirection
+  canManageDeals: OrderDirection
+  canManageInventory: OrderDirection
+  canManageOrders: OrderDirection
+  canScanTickets: OrderDirection
+  canManageSettlements: OrderDirection
+  canApproveAdjustments: OrderDirection
+  canManageVenues: OrderDirection
+  canManageArtists: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
 }
 
 input RoleUpdateInput {
   name: String
-  canCreateTodos: Boolean
-  canManageAllTodos: Boolean
   canSeeOtherPeople: Boolean
   canEditOtherPeople: Boolean
   canManagePeople: Boolean
   canManageRoles: Boolean
   canAccessDashboard: Boolean
+  canManageOnboarding: Boolean
+  canManagePayments: Boolean
+  canReadPayments: Boolean
+  canIssueRefunds: Boolean
+  canReadAudit: Boolean
+  canManageEvents: Boolean
+  canManageDeals: Boolean
+  canManageInventory: Boolean
+  canManageOrders: Boolean
+  canScanTickets: Boolean
+  canManageSettlements: Boolean
+  canApproveAdjustments: Boolean
+  canManageVenues: Boolean
+  canManageArtists: Boolean
+  createdAt: DateTime
+  updatedAt: DateTime
   assignedTo: UserRelateToManyForUpdateInput
 }
 
@@ -248,289 +483,33 @@ input RoleUpdateArgs {
 
 input RoleCreateInput {
   name: String
-  canCreateTodos: Boolean
-  canManageAllTodos: Boolean
   canSeeOtherPeople: Boolean
   canEditOtherPeople: Boolean
   canManagePeople: Boolean
   canManageRoles: Boolean
   canAccessDashboard: Boolean
+  canManageOnboarding: Boolean
+  canManagePayments: Boolean
+  canReadPayments: Boolean
+  canIssueRefunds: Boolean
+  canReadAudit: Boolean
+  canManageEvents: Boolean
+  canManageDeals: Boolean
+  canManageInventory: Boolean
+  canManageOrders: Boolean
+  canScanTickets: Boolean
+  canManageSettlements: Boolean
+  canApproveAdjustments: Boolean
+  canManageVenues: Boolean
+  canManageArtists: Boolean
+  createdAt: DateTime
+  updatedAt: DateTime
   assignedTo: UserRelateToManyForCreateInput
 }
 
 input UserRelateToManyForCreateInput {
   create: [UserCreateInput!]
   connect: [UserWhereUniqueInput!]
-}
-
-type Todo {
-  id: ID!
-  label: String
-  description: Todo_description_Document
-  isComplete: Boolean
-  status: String
-  priority: Int
-  tags: [String!]
-  dueDate: DateTime
-  weight: Float
-  budget: Decimal
-  isPrivate: Boolean
-  largeNumber: BigInt
-  metadata: JSON
-  secretNote: PasswordState
-  coverImage: ImageFieldOutput
-  todoImages(where: TodoImageWhereInput! = {}, orderBy: [TodoImageOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TodoImageWhereUniqueInput): [TodoImage!]
-  todoImagesCount(where: TodoImageWhereInput! = {}): Int
-  assignedTo: User
-}
-
-type Todo_description_Document {
-  document(hydrateRelationships: Boolean! = false): JSON!
-}
-
-scalar Decimal
-
-scalar BigInt
-
-type ImageFieldOutput {
-  id: ID!
-  filesize: Int!
-  width: Int!
-  height: Int!
-  extension: ImageExtension!
-  url: String!
-}
-
-enum ImageExtension {
-  jpg
-  png
-  webp
-  gif
-}
-
-input TodoWhereUniqueInput {
-  id: ID
-}
-
-input TodoWhereInput {
-  AND: [TodoWhereInput!]
-  OR: [TodoWhereInput!]
-  NOT: [TodoWhereInput!]
-  id: IDFilter
-  label: StringFilter
-  isComplete: BooleanFilter
-  status: StringNullableFilter
-  priority: IntNullableFilter
-  dueDate: DateTimeNullableFilter
-  weight: FloatNullableFilter
-  budget: DecimalNullableFilter
-  isPrivate: BooleanFilter
-  largeNumber: BigIntNullableFilter
-  secretNote: PasswordFilter
-  todoImages: TodoImageManyRelationFilter
-  assignedTo: UserWhereInput
-}
-
-input StringNullableFilter {
-  equals: String
-  in: [String!]
-  notIn: [String!]
-  lt: String
-  lte: String
-  gt: String
-  gte: String
-  contains: String
-  startsWith: String
-  endsWith: String
-  mode: QueryMode
-  not: StringNullableFilter
-}
-
-input IntNullableFilter {
-  equals: Int
-  in: [Int!]
-  notIn: [Int!]
-  lt: Int
-  lte: Int
-  gt: Int
-  gte: Int
-  not: IntNullableFilter
-}
-
-input FloatNullableFilter {
-  equals: Float
-  in: [Float!]
-  notIn: [Float!]
-  lt: Float
-  lte: Float
-  gt: Float
-  gte: Float
-  not: FloatNullableFilter
-}
-
-input DecimalNullableFilter {
-  equals: Decimal
-  in: [Decimal!]
-  notIn: [Decimal!]
-  lt: Decimal
-  lte: Decimal
-  gt: Decimal
-  gte: Decimal
-  not: DecimalNullableFilter
-}
-
-input BigIntNullableFilter {
-  equals: BigInt
-  in: [BigInt!]
-  notIn: [BigInt!]
-  lt: BigInt
-  lte: BigInt
-  gt: BigInt
-  gte: BigInt
-  not: BigIntNullableFilter
-}
-
-input TodoImageManyRelationFilter {
-  every: TodoImageWhereInput
-  some: TodoImageWhereInput
-  none: TodoImageWhereInput
-}
-
-input TodoOrderByInput {
-  id: OrderDirection
-  label: OrderDirection
-  isComplete: OrderDirection
-  status: OrderDirection
-  priority: OrderDirection
-  dueDate: OrderDirection
-  weight: OrderDirection
-  budget: OrderDirection
-  isPrivate: OrderDirection
-  largeNumber: OrderDirection
-}
-
-input TodoUpdateInput {
-  label: String
-  description: JSON
-  isComplete: Boolean
-  status: String
-  priority: Int
-  tags: [String!]
-  dueDate: DateTime
-  weight: Float
-  budget: Decimal
-  isPrivate: Boolean
-  largeNumber: BigInt
-  metadata: JSON
-  secretNote: String
-  coverImage: ImageFieldInput
-  todoImages: TodoImageRelateToManyForUpdateInput
-  assignedTo: UserRelateToOneForUpdateInput
-}
-
-input ImageFieldInput {
-  upload: Upload!
-}
-
-"""The `Upload` scalar type represents a file upload."""
-scalar Upload
-
-input TodoImageRelateToManyForUpdateInput {
-  disconnect: [TodoImageWhereUniqueInput!]
-  set: [TodoImageWhereUniqueInput!]
-  create: [TodoImageCreateInput!]
-  connect: [TodoImageWhereUniqueInput!]
-}
-
-input UserRelateToOneForUpdateInput {
-  create: UserCreateInput
-  connect: UserWhereUniqueInput
-  disconnect: Boolean
-}
-
-input TodoUpdateArgs {
-  where: TodoWhereUniqueInput!
-  data: TodoUpdateInput!
-}
-
-input TodoCreateInput {
-  label: String
-  description: JSON
-  isComplete: Boolean
-  status: String
-  priority: Int
-  tags: [String!]
-  dueDate: DateTime
-  weight: Float
-  budget: Decimal
-  isPrivate: Boolean
-  largeNumber: BigInt
-  metadata: JSON
-  secretNote: String
-  coverImage: ImageFieldInput
-  todoImages: TodoImageRelateToManyForCreateInput
-  assignedTo: UserRelateToOneForCreateInput
-}
-
-input TodoImageRelateToManyForCreateInput {
-  create: [TodoImageCreateInput!]
-  connect: [TodoImageWhereUniqueInput!]
-}
-
-input UserRelateToOneForCreateInput {
-  create: UserCreateInput
-  connect: UserWhereUniqueInput
-}
-
-type TodoImage {
-  id: ID!
-  image: ImageFieldOutput
-  imagePath: String
-  altText: String
-  todos(where: TodoWhereInput! = {}, orderBy: [TodoOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TodoWhereUniqueInput): [Todo!]
-  todosCount(where: TodoWhereInput! = {}): Int
-  metadata: JSON
-}
-
-input TodoImageWhereUniqueInput {
-  id: ID
-}
-
-input TodoImageWhereInput {
-  AND: [TodoImageWhereInput!]
-  OR: [TodoImageWhereInput!]
-  NOT: [TodoImageWhereInput!]
-  id: IDFilter
-  imagePath: StringFilter
-  altText: StringFilter
-  todos: TodoManyRelationFilter
-}
-
-input TodoImageOrderByInput {
-  id: OrderDirection
-  imagePath: OrderDirection
-  altText: OrderDirection
-}
-
-input TodoImageUpdateInput {
-  image: ImageFieldInput
-  imagePath: String
-  altText: String
-  todos: TodoRelateToManyForUpdateInput
-  metadata: JSON
-}
-
-input TodoImageUpdateArgs {
-  where: TodoImageWhereUniqueInput!
-  data: TodoImageUpdateInput!
-}
-
-input TodoImageCreateInput {
-  image: ImageFieldInput
-  imagePath: String
-  altText: String
-  todos: TodoRelateToManyForCreateInput
-  metadata: JSON
 }
 
 type OAuthApp {
@@ -580,17 +559,6 @@ input OAuthAppWhereInput {
   supportUrl: StringFilter
   createdAt: DateTimeFilter
   updatedAt: DateTimeFilter
-}
-
-input DateTimeFilter {
-  equals: DateTime
-  in: [DateTime!]
-  notIn: [DateTime!]
-  lt: DateTime
-  lte: DateTime
-  gt: DateTime
-  gte: DateTime
-  not: DateTimeFilter
 }
 
 input OAuthAppOrderByInput {
@@ -747,6 +715,12 @@ input OAuthTokenUpdateInput {
   updatedAt: DateTime
 }
 
+input UserRelateToOneForUpdateInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
+  disconnect: Boolean
+}
+
 input OAuthTokenUpdateArgs {
   where: OAuthTokenWhereUniqueInput!
   data: OAuthTokenUpdateInput!
@@ -772,6 +746,4128 @@ input OAuthTokenCreateInput {
   updatedAt: DateTime
 }
 
+input UserRelateToOneForCreateInput {
+  create: UserCreateInput
+  connect: UserWhereUniqueInput
+}
+
+type Venue {
+  id: ID!
+  name: String
+  city: String
+  timezone: String
+  address: String
+  contact: String
+  capacity: Int
+  defaultFacilityFeeCents: Int
+  taxBps: Int
+  ownedByPromoter: Boolean
+  rentTermsDefault: JSON
+  seatingChart_venue(where: SeatingChartWhereInput! = {}, orderBy: [SeatingChartOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SeatingChartWhereUniqueInput): [SeatingChart!]
+  seatingChart_venueCount(where: SeatingChartWhereInput! = {}): Int
+  event_venue(where: EventWhereInput! = {}, orderBy: [EventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: EventWhereUniqueInput): [Event!]
+  event_venueCount(where: EventWhereInput! = {}): Int
+  dateHold_venue(where: DateHoldWhereInput! = {}, orderBy: [DateHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DateHoldWhereUniqueInput): [DateHold!]
+  dateHold_venueCount(where: DateHoldWhereInput! = {}): Int
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input VenueWhereUniqueInput {
+  id: ID
+}
+
+input VenueWhereInput {
+  AND: [VenueWhereInput!]
+  OR: [VenueWhereInput!]
+  NOT: [VenueWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  city: StringFilter
+  timezone: StringFilter
+  address: StringFilter
+  contact: StringFilter
+  capacity: IntNullableFilter
+  defaultFacilityFeeCents: IntNullableFilter
+  taxBps: IntNullableFilter
+  ownedByPromoter: BooleanFilter
+  seatingChart_venue: SeatingChartManyRelationFilter
+  event_venue: EventManyRelationFilter
+  dateHold_venue: DateHoldManyRelationFilter
+  currencyCode: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input IntNullableFilter {
+  equals: Int
+  in: [Int!]
+  notIn: [Int!]
+  lt: Int
+  lte: Int
+  gt: Int
+  gte: Int
+  not: IntNullableFilter
+}
+
+input SeatingChartManyRelationFilter {
+  every: SeatingChartWhereInput
+  some: SeatingChartWhereInput
+  none: SeatingChartWhereInput
+}
+
+input DateHoldManyRelationFilter {
+  every: DateHoldWhereInput
+  some: DateHoldWhereInput
+  none: DateHoldWhereInput
+}
+
+input VenueOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  city: OrderDirection
+  timezone: OrderDirection
+  address: OrderDirection
+  contact: OrderDirection
+  capacity: OrderDirection
+  defaultFacilityFeeCents: OrderDirection
+  taxBps: OrderDirection
+  ownedByPromoter: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input VenueUpdateInput {
+  name: String
+  city: String
+  timezone: String
+  address: String
+  contact: String
+  capacity: Int
+  defaultFacilityFeeCents: Int
+  taxBps: Int
+  ownedByPromoter: Boolean
+  rentTermsDefault: JSON
+  seatingChart_venue: SeatingChartRelateToManyForUpdateInput
+  event_venue: EventRelateToManyForUpdateInput
+  dateHold_venue: DateHoldRelateToManyForUpdateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SeatingChartRelateToManyForUpdateInput {
+  disconnect: [SeatingChartWhereUniqueInput!]
+  set: [SeatingChartWhereUniqueInput!]
+  create: [SeatingChartCreateInput!]
+  connect: [SeatingChartWhereUniqueInput!]
+}
+
+input DateHoldRelateToManyForUpdateInput {
+  disconnect: [DateHoldWhereUniqueInput!]
+  set: [DateHoldWhereUniqueInput!]
+  create: [DateHoldCreateInput!]
+  connect: [DateHoldWhereUniqueInput!]
+}
+
+input VenueUpdateArgs {
+  where: VenueWhereUniqueInput!
+  data: VenueUpdateInput!
+}
+
+input VenueCreateInput {
+  name: String
+  city: String
+  timezone: String
+  address: String
+  contact: String
+  capacity: Int
+  defaultFacilityFeeCents: Int
+  taxBps: Int
+  ownedByPromoter: Boolean
+  rentTermsDefault: JSON
+  seatingChart_venue: SeatingChartRelateToManyForCreateInput
+  event_venue: EventRelateToManyForCreateInput
+  dateHold_venue: DateHoldRelateToManyForCreateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SeatingChartRelateToManyForCreateInput {
+  create: [SeatingChartCreateInput!]
+  connect: [SeatingChartWhereUniqueInput!]
+}
+
+input DateHoldRelateToManyForCreateInput {
+  create: [DateHoldCreateInput!]
+  connect: [DateHoldWhereUniqueInput!]
+}
+
+type SeatingChart {
+  id: ID!
+  name: String
+  version: Int
+  status: String
+  venue: Venue
+  chartSection_chart(where: ChartSectionWhereInput! = {}, orderBy: [ChartSectionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChartSectionWhereUniqueInput): [ChartSection!]
+  chartSection_chartCount(where: ChartSectionWhereInput! = {}): Int
+  event_seatingChart(where: EventWhereInput! = {}, orderBy: [EventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: EventWhereUniqueInput): [Event!]
+  event_seatingChartCount(where: EventWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SeatingChartWhereUniqueInput {
+  id: ID
+}
+
+input SeatingChartWhereInput {
+  AND: [SeatingChartWhereInput!]
+  OR: [SeatingChartWhereInput!]
+  NOT: [SeatingChartWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  version: IntNullableFilter
+  status: StringNullableFilter
+  venue: VenueWhereInput
+  chartSection_chart: ChartSectionManyRelationFilter
+  event_seatingChart: EventManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input ChartSectionManyRelationFilter {
+  every: ChartSectionWhereInput
+  some: ChartSectionWhereInput
+  none: ChartSectionWhereInput
+}
+
+input SeatingChartOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  version: OrderDirection
+  status: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input SeatingChartUpdateInput {
+  name: String
+  version: Int
+  status: String
+  venue: VenueRelateToOneForUpdateInput
+  chartSection_chart: ChartSectionRelateToManyForUpdateInput
+  event_seatingChart: EventRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input VenueRelateToOneForUpdateInput {
+  create: VenueCreateInput
+  connect: VenueWhereUniqueInput
+  disconnect: Boolean
+}
+
+input ChartSectionRelateToManyForUpdateInput {
+  disconnect: [ChartSectionWhereUniqueInput!]
+  set: [ChartSectionWhereUniqueInput!]
+  create: [ChartSectionCreateInput!]
+  connect: [ChartSectionWhereUniqueInput!]
+}
+
+input SeatingChartUpdateArgs {
+  where: SeatingChartWhereUniqueInput!
+  data: SeatingChartUpdateInput!
+}
+
+input SeatingChartCreateInput {
+  name: String
+  version: Int
+  status: String
+  venue: VenueRelateToOneForCreateInput
+  chartSection_chart: ChartSectionRelateToManyForCreateInput
+  event_seatingChart: EventRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input VenueRelateToOneForCreateInput {
+  create: VenueCreateInput
+  connect: VenueWhereUniqueInput
+}
+
+input ChartSectionRelateToManyForCreateInput {
+  create: [ChartSectionCreateInput!]
+  connect: [ChartSectionWhereUniqueInput!]
+}
+
+type ChartSection {
+  id: ID!
+  name: String
+  capacity: Int
+  sort: Int
+  kind: String
+  chart: SeatingChart
+  seat_chartSection(where: SeatWhereInput! = {}, orderBy: [SeatOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SeatWhereUniqueInput): [Seat!]
+  seat_chartSectionCount(where: SeatWhereInput! = {}): Int
+  priceLevel_sections(where: PriceLevelWhereInput! = {}, orderBy: [PriceLevelOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PriceLevelWhereUniqueInput): [PriceLevel!]
+  priceLevel_sectionsCount(where: PriceLevelWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ChartSectionWhereUniqueInput {
+  id: ID
+}
+
+input ChartSectionWhereInput {
+  AND: [ChartSectionWhereInput!]
+  OR: [ChartSectionWhereInput!]
+  NOT: [ChartSectionWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  capacity: IntNullableFilter
+  sort: IntNullableFilter
+  kind: StringNullableFilter
+  chart: SeatingChartWhereInput
+  seat_chartSection: SeatManyRelationFilter
+  priceLevel_sections: PriceLevelManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input SeatManyRelationFilter {
+  every: SeatWhereInput
+  some: SeatWhereInput
+  none: SeatWhereInput
+}
+
+input PriceLevelManyRelationFilter {
+  every: PriceLevelWhereInput
+  some: PriceLevelWhereInput
+  none: PriceLevelWhereInput
+}
+
+input ChartSectionOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  capacity: OrderDirection
+  sort: OrderDirection
+  kind: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input ChartSectionUpdateInput {
+  name: String
+  capacity: Int
+  sort: Int
+  kind: String
+  chart: SeatingChartRelateToOneForUpdateInput
+  seat_chartSection: SeatRelateToManyForUpdateInput
+  priceLevel_sections: PriceLevelRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SeatingChartRelateToOneForUpdateInput {
+  create: SeatingChartCreateInput
+  connect: SeatingChartWhereUniqueInput
+  disconnect: Boolean
+}
+
+input SeatRelateToManyForUpdateInput {
+  disconnect: [SeatWhereUniqueInput!]
+  set: [SeatWhereUniqueInput!]
+  create: [SeatCreateInput!]
+  connect: [SeatWhereUniqueInput!]
+}
+
+input PriceLevelRelateToManyForUpdateInput {
+  disconnect: [PriceLevelWhereUniqueInput!]
+  set: [PriceLevelWhereUniqueInput!]
+  create: [PriceLevelCreateInput!]
+  connect: [PriceLevelWhereUniqueInput!]
+}
+
+input ChartSectionUpdateArgs {
+  where: ChartSectionWhereUniqueInput!
+  data: ChartSectionUpdateInput!
+}
+
+input ChartSectionCreateInput {
+  name: String
+  capacity: Int
+  sort: Int
+  kind: String
+  chart: SeatingChartRelateToOneForCreateInput
+  seat_chartSection: SeatRelateToManyForCreateInput
+  priceLevel_sections: PriceLevelRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SeatingChartRelateToOneForCreateInput {
+  create: SeatingChartCreateInput
+  connect: SeatingChartWhereUniqueInput
+}
+
+input SeatRelateToManyForCreateInput {
+  create: [SeatCreateInput!]
+  connect: [SeatWhereUniqueInput!]
+}
+
+input PriceLevelRelateToManyForCreateInput {
+  create: [PriceLevelCreateInput!]
+  connect: [PriceLevelWhereUniqueInput!]
+}
+
+type Seat {
+  id: ID!
+  row: String
+  number: String
+  label: String
+  x: Int
+  y: Int
+  accessible: Boolean
+  companion: Boolean
+  obstructed: Boolean
+  status: String
+  chartSection: ChartSection
+  seatInventory_seat(where: SeatInventoryWhereInput! = {}, orderBy: [SeatInventoryOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SeatInventoryWhereUniqueInput): [SeatInventory!]
+  seatInventory_seatCount(where: SeatInventoryWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SeatWhereUniqueInput {
+  id: ID
+}
+
+input SeatWhereInput {
+  AND: [SeatWhereInput!]
+  OR: [SeatWhereInput!]
+  NOT: [SeatWhereInput!]
+  id: IDFilter
+  row: StringFilter
+  number: StringFilter
+  label: StringFilter
+  x: IntNullableFilter
+  y: IntNullableFilter
+  accessible: BooleanFilter
+  companion: BooleanFilter
+  obstructed: BooleanFilter
+  status: StringNullableFilter
+  chartSection: ChartSectionWhereInput
+  seatInventory_seat: SeatInventoryManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input SeatInventoryManyRelationFilter {
+  every: SeatInventoryWhereInput
+  some: SeatInventoryWhereInput
+  none: SeatInventoryWhereInput
+}
+
+input SeatOrderByInput {
+  id: OrderDirection
+  row: OrderDirection
+  number: OrderDirection
+  label: OrderDirection
+  x: OrderDirection
+  y: OrderDirection
+  accessible: OrderDirection
+  companion: OrderDirection
+  obstructed: OrderDirection
+  status: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input SeatUpdateInput {
+  row: String
+  number: String
+  label: String
+  x: Int
+  y: Int
+  accessible: Boolean
+  companion: Boolean
+  obstructed: Boolean
+  status: String
+  chartSection: ChartSectionRelateToOneForUpdateInput
+  seatInventory_seat: SeatInventoryRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ChartSectionRelateToOneForUpdateInput {
+  create: ChartSectionCreateInput
+  connect: ChartSectionWhereUniqueInput
+  disconnect: Boolean
+}
+
+input SeatInventoryRelateToManyForUpdateInput {
+  disconnect: [SeatInventoryWhereUniqueInput!]
+  set: [SeatInventoryWhereUniqueInput!]
+  create: [SeatInventoryCreateInput!]
+  connect: [SeatInventoryWhereUniqueInput!]
+}
+
+input SeatUpdateArgs {
+  where: SeatWhereUniqueInput!
+  data: SeatUpdateInput!
+}
+
+input SeatCreateInput {
+  row: String
+  number: String
+  label: String
+  x: Int
+  y: Int
+  accessible: Boolean
+  companion: Boolean
+  obstructed: Boolean
+  status: String
+  chartSection: ChartSectionRelateToOneForCreateInput
+  seatInventory_seat: SeatInventoryRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ChartSectionRelateToOneForCreateInput {
+  create: ChartSectionCreateInput
+  connect: ChartSectionWhereUniqueInput
+}
+
+input SeatInventoryRelateToManyForCreateInput {
+  create: [SeatInventoryCreateInput!]
+  connect: [SeatInventoryWhereUniqueInput!]
+}
+
+type Agency {
+  id: ID!
+  name: String
+  contacts: JSON
+  artist_agency(where: ArtistWhereInput! = {}, orderBy: [ArtistOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ArtistWhereUniqueInput): [Artist!]
+  artist_agencyCount(where: ArtistWhereInput! = {}): Int
+  dateHold_agency(where: DateHoldWhereInput! = {}, orderBy: [DateHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DateHoldWhereUniqueInput): [DateHold!]
+  dateHold_agencyCount(where: DateHoldWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input AgencyWhereUniqueInput {
+  id: ID
+}
+
+input AgencyWhereInput {
+  AND: [AgencyWhereInput!]
+  OR: [AgencyWhereInput!]
+  NOT: [AgencyWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  artist_agency: ArtistManyRelationFilter
+  dateHold_agency: DateHoldManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input ArtistManyRelationFilter {
+  every: ArtistWhereInput
+  some: ArtistWhereInput
+  none: ArtistWhereInput
+}
+
+input AgencyOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input AgencyUpdateInput {
+  name: String
+  contacts: JSON
+  artist_agency: ArtistRelateToManyForUpdateInput
+  dateHold_agency: DateHoldRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ArtistRelateToManyForUpdateInput {
+  disconnect: [ArtistWhereUniqueInput!]
+  set: [ArtistWhereUniqueInput!]
+  create: [ArtistCreateInput!]
+  connect: [ArtistWhereUniqueInput!]
+}
+
+input AgencyUpdateArgs {
+  where: AgencyWhereUniqueInput!
+  data: AgencyUpdateInput!
+}
+
+input AgencyCreateInput {
+  name: String
+  contacts: JSON
+  artist_agency: ArtistRelateToManyForCreateInput
+  dateHold_agency: DateHoldRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ArtistRelateToManyForCreateInput {
+  create: [ArtistCreateInput!]
+  connect: [ArtistWhereUniqueInput!]
+}
+
+type Artist {
+  id: ID!
+  name: String
+  genreTags: String
+  agentName: String
+  agentEmail: String
+  manager: String
+  bio: String
+  image: String
+  socials: JSON
+  agency: Agency
+  tour_artist(where: TourWhereInput! = {}, orderBy: [TourOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TourWhereUniqueInput): [Tour!]
+  tour_artistCount(where: TourWhereInput! = {}): Int
+  eventArtist_artist(where: EventArtistWhereInput! = {}, orderBy: [EventArtistOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: EventArtistWhereUniqueInput): [EventArtist!]
+  eventArtist_artistCount(where: EventArtistWhereInput! = {}): Int
+  dateHold_artist(where: DateHoldWhereInput! = {}, orderBy: [DateHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DateHoldWhereUniqueInput): [DateHold!]
+  dateHold_artistCount(where: DateHoldWhereInput! = {}): Int
+  offer_artist(where: OfferWhereInput! = {}, orderBy: [OfferOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: OfferWhereUniqueInput): [Offer!]
+  offer_artistCount(where: OfferWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ArtistWhereUniqueInput {
+  id: ID
+}
+
+input ArtistWhereInput {
+  AND: [ArtistWhereInput!]
+  OR: [ArtistWhereInput!]
+  NOT: [ArtistWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  genreTags: StringFilter
+  agentName: StringFilter
+  agentEmail: StringFilter
+  manager: StringFilter
+  bio: StringFilter
+  image: StringFilter
+  agency: AgencyWhereInput
+  tour_artist: TourManyRelationFilter
+  eventArtist_artist: EventArtistManyRelationFilter
+  dateHold_artist: DateHoldManyRelationFilter
+  offer_artist: OfferManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input TourManyRelationFilter {
+  every: TourWhereInput
+  some: TourWhereInput
+  none: TourWhereInput
+}
+
+input EventArtistManyRelationFilter {
+  every: EventArtistWhereInput
+  some: EventArtistWhereInput
+  none: EventArtistWhereInput
+}
+
+input OfferManyRelationFilter {
+  every: OfferWhereInput
+  some: OfferWhereInput
+  none: OfferWhereInput
+}
+
+input ArtistOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  genreTags: OrderDirection
+  agentName: OrderDirection
+  agentEmail: OrderDirection
+  manager: OrderDirection
+  bio: OrderDirection
+  image: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input ArtistUpdateInput {
+  name: String
+  genreTags: String
+  agentName: String
+  agentEmail: String
+  manager: String
+  bio: String
+  image: String
+  socials: JSON
+  agency: AgencyRelateToOneForUpdateInput
+  tour_artist: TourRelateToManyForUpdateInput
+  eventArtist_artist: EventArtistRelateToManyForUpdateInput
+  dateHold_artist: DateHoldRelateToManyForUpdateInput
+  offer_artist: OfferRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input AgencyRelateToOneForUpdateInput {
+  create: AgencyCreateInput
+  connect: AgencyWhereUniqueInput
+  disconnect: Boolean
+}
+
+input TourRelateToManyForUpdateInput {
+  disconnect: [TourWhereUniqueInput!]
+  set: [TourWhereUniqueInput!]
+  create: [TourCreateInput!]
+  connect: [TourWhereUniqueInput!]
+}
+
+input EventArtistRelateToManyForUpdateInput {
+  disconnect: [EventArtistWhereUniqueInput!]
+  set: [EventArtistWhereUniqueInput!]
+  create: [EventArtistCreateInput!]
+  connect: [EventArtistWhereUniqueInput!]
+}
+
+input OfferRelateToManyForUpdateInput {
+  disconnect: [OfferWhereUniqueInput!]
+  set: [OfferWhereUniqueInput!]
+  create: [OfferCreateInput!]
+  connect: [OfferWhereUniqueInput!]
+}
+
+input ArtistUpdateArgs {
+  where: ArtistWhereUniqueInput!
+  data: ArtistUpdateInput!
+}
+
+input ArtistCreateInput {
+  name: String
+  genreTags: String
+  agentName: String
+  agentEmail: String
+  manager: String
+  bio: String
+  image: String
+  socials: JSON
+  agency: AgencyRelateToOneForCreateInput
+  tour_artist: TourRelateToManyForCreateInput
+  eventArtist_artist: EventArtistRelateToManyForCreateInput
+  dateHold_artist: DateHoldRelateToManyForCreateInput
+  offer_artist: OfferRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input AgencyRelateToOneForCreateInput {
+  create: AgencyCreateInput
+  connect: AgencyWhereUniqueInput
+}
+
+input TourRelateToManyForCreateInput {
+  create: [TourCreateInput!]
+  connect: [TourWhereUniqueInput!]
+}
+
+input EventArtistRelateToManyForCreateInput {
+  create: [EventArtistCreateInput!]
+  connect: [EventArtistWhereUniqueInput!]
+}
+
+input OfferRelateToManyForCreateInput {
+  create: [OfferCreateInput!]
+  connect: [OfferWhereUniqueInput!]
+}
+
+type Tour {
+  id: ID!
+  name: String
+  notes: String
+  startAt: DateTime
+  endAt: DateTime
+  artist: Artist
+  event_tour(where: EventWhereInput! = {}, orderBy: [EventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: EventWhereUniqueInput): [Event!]
+  event_tourCount(where: EventWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input TourWhereUniqueInput {
+  id: ID
+}
+
+input TourWhereInput {
+  AND: [TourWhereInput!]
+  OR: [TourWhereInput!]
+  NOT: [TourWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  notes: StringFilter
+  startAt: DateTimeNullableFilter
+  endAt: DateTimeNullableFilter
+  artist: ArtistWhereInput
+  event_tour: EventManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input TourOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  notes: OrderDirection
+  startAt: OrderDirection
+  endAt: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input TourUpdateInput {
+  name: String
+  notes: String
+  startAt: DateTime
+  endAt: DateTime
+  artist: ArtistRelateToOneForUpdateInput
+  event_tour: EventRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ArtistRelateToOneForUpdateInput {
+  create: ArtistCreateInput
+  connect: ArtistWhereUniqueInput
+  disconnect: Boolean
+}
+
+input TourUpdateArgs {
+  where: TourWhereUniqueInput!
+  data: TourUpdateInput!
+}
+
+input TourCreateInput {
+  name: String
+  notes: String
+  startAt: DateTime
+  endAt: DateTime
+  artist: ArtistRelateToOneForCreateInput
+  event_tour: EventRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ArtistRelateToOneForCreateInput {
+  create: ArtistCreateInput
+  connect: ArtistWhereUniqueInput
+}
+
+type Event {
+  id: ID!
+  title: String
+  presaleCode: String
+  image: String
+  description: String
+  isCoPro: Boolean
+  allowReentry: Boolean
+  doorsAt: DateTime
+  showAt: DateTime
+  curfewAt: DateTime
+  announceAt: DateTime
+  onSaleAt: DateTime
+  presaleAt: DateTime
+  refundWindowEndsAt: DateTime
+  status: String
+  ageRestriction: String
+  venue: Venue
+  seatingChart: SeatingChart
+  tour: Tour
+  promoter: User
+  eventArtist_event(where: EventArtistWhereInput! = {}, orderBy: [EventArtistOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: EventArtistWhereUniqueInput): [EventArtist!]
+  eventArtist_eventCount(where: EventArtistWhereInput! = {}): Int
+  dateHold_event(where: DateHoldWhereInput! = {}, orderBy: [DateHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DateHoldWhereUniqueInput): [DateHold!]
+  dateHold_eventCount(where: DateHoldWhereInput! = {}): Int
+  offer_event(where: OfferWhereInput! = {}, orderBy: [OfferOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: OfferWhereUniqueInput): [Offer!]
+  offer_eventCount(where: OfferWhereInput! = {}): Int
+  eventExpense_event(where: EventExpenseWhereInput! = {}, orderBy: [EventExpenseOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: EventExpenseWhereUniqueInput): [EventExpense!]
+  eventExpense_eventCount(where: EventExpenseWhereInput! = {}): Int
+  priceLevel_event(where: PriceLevelWhereInput! = {}, orderBy: [PriceLevelOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PriceLevelWhereUniqueInput): [PriceLevel!]
+  priceLevel_eventCount(where: PriceLevelWhereInput! = {}): Int
+  seatInventory_event(where: SeatInventoryWhereInput! = {}, orderBy: [SeatInventoryOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SeatInventoryWhereUniqueInput): [SeatInventory!]
+  seatInventory_eventCount(where: SeatInventoryWhereInput! = {}): Int
+  productionHold_event(where: ProductionHoldWhereInput! = {}, orderBy: [ProductionHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ProductionHoldWhereUniqueInput): [ProductionHold!]
+  productionHold_eventCount(where: ProductionHoldWhereInput! = {}): Int
+  inventoryHold_event(where: InventoryHoldWhereInput! = {}, orderBy: [InventoryHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: InventoryHoldWhereUniqueInput): [InventoryHold!]
+  inventoryHold_eventCount(where: InventoryHoldWhereInput! = {}): Int
+  promoCode_event(where: PromoCodeWhereInput! = {}, orderBy: [PromoCodeOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PromoCodeWhereUniqueInput): [PromoCode!]
+  promoCode_eventCount(where: PromoCodeWhereInput! = {}): Int
+  ticketOrder_event(where: TicketOrderWhereInput! = {}, orderBy: [TicketOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketOrderWhereUniqueInput): [TicketOrder!]
+  ticketOrder_eventCount(where: TicketOrderWhereInput! = {}): Int
+  ticket_event(where: TicketWhereInput! = {}, orderBy: [TicketOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketWhereUniqueInput): [Ticket!]
+  ticket_eventCount(where: TicketWhereInput! = {}): Int
+  scanEvent_event(where: ScanEventWhereInput! = {}, orderBy: [ScanEventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ScanEventWhereUniqueInput): [ScanEvent!]
+  scanEvent_eventCount(where: ScanEventWhereInput! = {}): Int
+  merchSales_event(where: MerchSalesWhereInput! = {}, orderBy: [MerchSalesOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: MerchSalesWhereUniqueInput): [MerchSales!]
+  merchSales_eventCount(where: MerchSalesWhereInput! = {}): Int
+  barSales_event(where: BarSalesWhereInput! = {}, orderBy: [BarSalesOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: BarSalesWhereUniqueInput): [BarSales!]
+  barSales_eventCount(where: BarSalesWhereInput! = {}): Int
+  settlement_event(where: SettlementWhereInput! = {}, orderBy: [SettlementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SettlementWhereUniqueInput): [Settlement!]
+  settlement_eventCount(where: SettlementWhereInput! = {}): Int
+  sold: Int
+  held: Int
+  kills: Int
+  gross: Int
+  open: Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input EventWhereUniqueInput {
+  id: ID
+}
+
+input EventWhereInput {
+  AND: [EventWhereInput!]
+  OR: [EventWhereInput!]
+  NOT: [EventWhereInput!]
+  id: IDFilter
+  title: StringFilter
+  presaleCode: StringFilter
+  image: StringFilter
+  description: StringFilter
+  isCoPro: BooleanFilter
+  allowReentry: BooleanFilter
+  doorsAt: DateTimeNullableFilter
+  showAt: DateTimeNullableFilter
+  curfewAt: DateTimeNullableFilter
+  announceAt: DateTimeNullableFilter
+  onSaleAt: DateTimeNullableFilter
+  presaleAt: DateTimeNullableFilter
+  refundWindowEndsAt: DateTimeNullableFilter
+  status: StringNullableFilter
+  ageRestriction: StringNullableFilter
+  venue: VenueWhereInput
+  seatingChart: SeatingChartWhereInput
+  tour: TourWhereInput
+  promoter: UserWhereInput
+  eventArtist_event: EventArtistManyRelationFilter
+  dateHold_event: DateHoldManyRelationFilter
+  offer_event: OfferManyRelationFilter
+  eventExpense_event: EventExpenseManyRelationFilter
+  priceLevel_event: PriceLevelManyRelationFilter
+  seatInventory_event: SeatInventoryManyRelationFilter
+  productionHold_event: ProductionHoldManyRelationFilter
+  inventoryHold_event: InventoryHoldManyRelationFilter
+  promoCode_event: PromoCodeManyRelationFilter
+  ticketOrder_event: TicketOrderManyRelationFilter
+  ticket_event: TicketManyRelationFilter
+  scanEvent_event: ScanEventManyRelationFilter
+  merchSales_event: MerchSalesManyRelationFilter
+  barSales_event: BarSalesManyRelationFilter
+  settlement_event: SettlementManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input EventExpenseManyRelationFilter {
+  every: EventExpenseWhereInput
+  some: EventExpenseWhereInput
+  none: EventExpenseWhereInput
+}
+
+input ProductionHoldManyRelationFilter {
+  every: ProductionHoldWhereInput
+  some: ProductionHoldWhereInput
+  none: ProductionHoldWhereInput
+}
+
+input PromoCodeManyRelationFilter {
+  every: PromoCodeWhereInput
+  some: PromoCodeWhereInput
+  none: PromoCodeWhereInput
+}
+
+input TicketManyRelationFilter {
+  every: TicketWhereInput
+  some: TicketWhereInput
+  none: TicketWhereInput
+}
+
+input MerchSalesManyRelationFilter {
+  every: MerchSalesWhereInput
+  some: MerchSalesWhereInput
+  none: MerchSalesWhereInput
+}
+
+input BarSalesManyRelationFilter {
+  every: BarSalesWhereInput
+  some: BarSalesWhereInput
+  none: BarSalesWhereInput
+}
+
+input SettlementManyRelationFilter {
+  every: SettlementWhereInput
+  some: SettlementWhereInput
+  none: SettlementWhereInput
+}
+
+input EventOrderByInput {
+  id: OrderDirection
+  title: OrderDirection
+  presaleCode: OrderDirection
+  image: OrderDirection
+  description: OrderDirection
+  isCoPro: OrderDirection
+  allowReentry: OrderDirection
+  doorsAt: OrderDirection
+  showAt: OrderDirection
+  curfewAt: OrderDirection
+  announceAt: OrderDirection
+  onSaleAt: OrderDirection
+  presaleAt: OrderDirection
+  refundWindowEndsAt: OrderDirection
+  status: OrderDirection
+  ageRestriction: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input EventUpdateInput {
+  title: String
+  presaleCode: String
+  image: String
+  description: String
+  isCoPro: Boolean
+  allowReentry: Boolean
+  doorsAt: DateTime
+  showAt: DateTime
+  curfewAt: DateTime
+  announceAt: DateTime
+  onSaleAt: DateTime
+  presaleAt: DateTime
+  refundWindowEndsAt: DateTime
+  status: String
+  ageRestriction: String
+  venue: VenueRelateToOneForUpdateInput
+  seatingChart: SeatingChartRelateToOneForUpdateInput
+  tour: TourRelateToOneForUpdateInput
+  promoter: UserRelateToOneForUpdateInput
+  eventArtist_event: EventArtistRelateToManyForUpdateInput
+  dateHold_event: DateHoldRelateToManyForUpdateInput
+  offer_event: OfferRelateToManyForUpdateInput
+  eventExpense_event: EventExpenseRelateToManyForUpdateInput
+  priceLevel_event: PriceLevelRelateToManyForUpdateInput
+  seatInventory_event: SeatInventoryRelateToManyForUpdateInput
+  productionHold_event: ProductionHoldRelateToManyForUpdateInput
+  inventoryHold_event: InventoryHoldRelateToManyForUpdateInput
+  promoCode_event: PromoCodeRelateToManyForUpdateInput
+  ticketOrder_event: TicketOrderRelateToManyForUpdateInput
+  ticket_event: TicketRelateToManyForUpdateInput
+  scanEvent_event: ScanEventRelateToManyForUpdateInput
+  merchSales_event: MerchSalesRelateToManyForUpdateInput
+  barSales_event: BarSalesRelateToManyForUpdateInput
+  settlement_event: SettlementRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input TourRelateToOneForUpdateInput {
+  create: TourCreateInput
+  connect: TourWhereUniqueInput
+  disconnect: Boolean
+}
+
+input EventExpenseRelateToManyForUpdateInput {
+  disconnect: [EventExpenseWhereUniqueInput!]
+  set: [EventExpenseWhereUniqueInput!]
+  create: [EventExpenseCreateInput!]
+  connect: [EventExpenseWhereUniqueInput!]
+}
+
+input ProductionHoldRelateToManyForUpdateInput {
+  disconnect: [ProductionHoldWhereUniqueInput!]
+  set: [ProductionHoldWhereUniqueInput!]
+  create: [ProductionHoldCreateInput!]
+  connect: [ProductionHoldWhereUniqueInput!]
+}
+
+input PromoCodeRelateToManyForUpdateInput {
+  disconnect: [PromoCodeWhereUniqueInput!]
+  set: [PromoCodeWhereUniqueInput!]
+  create: [PromoCodeCreateInput!]
+  connect: [PromoCodeWhereUniqueInput!]
+}
+
+input TicketRelateToManyForUpdateInput {
+  disconnect: [TicketWhereUniqueInput!]
+  set: [TicketWhereUniqueInput!]
+  create: [TicketCreateInput!]
+  connect: [TicketWhereUniqueInput!]
+}
+
+input MerchSalesRelateToManyForUpdateInput {
+  disconnect: [MerchSalesWhereUniqueInput!]
+  set: [MerchSalesWhereUniqueInput!]
+  create: [MerchSalesCreateInput!]
+  connect: [MerchSalesWhereUniqueInput!]
+}
+
+input BarSalesRelateToManyForUpdateInput {
+  disconnect: [BarSalesWhereUniqueInput!]
+  set: [BarSalesWhereUniqueInput!]
+  create: [BarSalesCreateInput!]
+  connect: [BarSalesWhereUniqueInput!]
+}
+
+input SettlementRelateToManyForUpdateInput {
+  disconnect: [SettlementWhereUniqueInput!]
+  set: [SettlementWhereUniqueInput!]
+  create: [SettlementCreateInput!]
+  connect: [SettlementWhereUniqueInput!]
+}
+
+input EventUpdateArgs {
+  where: EventWhereUniqueInput!
+  data: EventUpdateInput!
+}
+
+input EventCreateInput {
+  title: String
+  presaleCode: String
+  image: String
+  description: String
+  isCoPro: Boolean
+  allowReentry: Boolean
+  doorsAt: DateTime
+  showAt: DateTime
+  curfewAt: DateTime
+  announceAt: DateTime
+  onSaleAt: DateTime
+  presaleAt: DateTime
+  refundWindowEndsAt: DateTime
+  status: String
+  ageRestriction: String
+  venue: VenueRelateToOneForCreateInput
+  seatingChart: SeatingChartRelateToOneForCreateInput
+  tour: TourRelateToOneForCreateInput
+  promoter: UserRelateToOneForCreateInput
+  eventArtist_event: EventArtistRelateToManyForCreateInput
+  dateHold_event: DateHoldRelateToManyForCreateInput
+  offer_event: OfferRelateToManyForCreateInput
+  eventExpense_event: EventExpenseRelateToManyForCreateInput
+  priceLevel_event: PriceLevelRelateToManyForCreateInput
+  seatInventory_event: SeatInventoryRelateToManyForCreateInput
+  productionHold_event: ProductionHoldRelateToManyForCreateInput
+  inventoryHold_event: InventoryHoldRelateToManyForCreateInput
+  promoCode_event: PromoCodeRelateToManyForCreateInput
+  ticketOrder_event: TicketOrderRelateToManyForCreateInput
+  ticket_event: TicketRelateToManyForCreateInput
+  scanEvent_event: ScanEventRelateToManyForCreateInput
+  merchSales_event: MerchSalesRelateToManyForCreateInput
+  barSales_event: BarSalesRelateToManyForCreateInput
+  settlement_event: SettlementRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input TourRelateToOneForCreateInput {
+  create: TourCreateInput
+  connect: TourWhereUniqueInput
+}
+
+input EventExpenseRelateToManyForCreateInput {
+  create: [EventExpenseCreateInput!]
+  connect: [EventExpenseWhereUniqueInput!]
+}
+
+input ProductionHoldRelateToManyForCreateInput {
+  create: [ProductionHoldCreateInput!]
+  connect: [ProductionHoldWhereUniqueInput!]
+}
+
+input PromoCodeRelateToManyForCreateInput {
+  create: [PromoCodeCreateInput!]
+  connect: [PromoCodeWhereUniqueInput!]
+}
+
+input TicketRelateToManyForCreateInput {
+  create: [TicketCreateInput!]
+  connect: [TicketWhereUniqueInput!]
+}
+
+input MerchSalesRelateToManyForCreateInput {
+  create: [MerchSalesCreateInput!]
+  connect: [MerchSalesWhereUniqueInput!]
+}
+
+input BarSalesRelateToManyForCreateInput {
+  create: [BarSalesCreateInput!]
+  connect: [BarSalesWhereUniqueInput!]
+}
+
+input SettlementRelateToManyForCreateInput {
+  create: [SettlementCreateInput!]
+  connect: [SettlementWhereUniqueInput!]
+}
+
+type EventArtist {
+  id: ID!
+  position: Int
+  setMinutes: Int
+  setTime: DateTime
+  billing: String
+  event: Event
+  artist: Artist
+  offer_eventArtist(where: OfferWhereInput! = {}, orderBy: [OfferOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: OfferWhereUniqueInput): [Offer!]
+  offer_eventArtistCount(where: OfferWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input EventArtistWhereUniqueInput {
+  id: ID
+}
+
+input EventArtistWhereInput {
+  AND: [EventArtistWhereInput!]
+  OR: [EventArtistWhereInput!]
+  NOT: [EventArtistWhereInput!]
+  id: IDFilter
+  position: IntNullableFilter
+  setMinutes: IntNullableFilter
+  setTime: DateTimeNullableFilter
+  billing: StringNullableFilter
+  event: EventWhereInput
+  artist: ArtistWhereInput
+  offer_eventArtist: OfferManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input EventArtistOrderByInput {
+  id: OrderDirection
+  position: OrderDirection
+  setMinutes: OrderDirection
+  setTime: OrderDirection
+  billing: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input EventArtistUpdateInput {
+  position: Int
+  setMinutes: Int
+  setTime: DateTime
+  billing: String
+  event: EventRelateToOneForUpdateInput
+  artist: ArtistRelateToOneForUpdateInput
+  offer_eventArtist: OfferRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input EventRelateToOneForUpdateInput {
+  create: EventCreateInput
+  connect: EventWhereUniqueInput
+  disconnect: Boolean
+}
+
+input EventArtistUpdateArgs {
+  where: EventArtistWhereUniqueInput!
+  data: EventArtistUpdateInput!
+}
+
+input EventArtistCreateInput {
+  position: Int
+  setMinutes: Int
+  setTime: DateTime
+  billing: String
+  event: EventRelateToOneForCreateInput
+  artist: ArtistRelateToOneForCreateInput
+  offer_eventArtist: OfferRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input EventRelateToOneForCreateInput {
+  create: EventCreateInput
+  connect: EventWhereUniqueInput
+}
+
+type DateHold {
+  id: ID!
+  rankKey: String
+  rank: Int
+  date: DateTime
+  expiresAt: DateTime
+  status: String
+  venue: Venue
+  artist: Artist
+  agency: Agency
+  event: Event
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input DateHoldWhereUniqueInput {
+  id: ID
+  rankKey: String
+}
+
+input DateHoldWhereInput {
+  AND: [DateHoldWhereInput!]
+  OR: [DateHoldWhereInput!]
+  NOT: [DateHoldWhereInput!]
+  id: IDFilter
+  rankKey: StringNullableFilter
+  rank: IntNullableFilter
+  date: DateTimeNullableFilter
+  expiresAt: DateTimeNullableFilter
+  status: StringNullableFilter
+  venue: VenueWhereInput
+  artist: ArtistWhereInput
+  agency: AgencyWhereInput
+  event: EventWhereInput
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input DateHoldOrderByInput {
+  id: OrderDirection
+  rankKey: OrderDirection
+  rank: OrderDirection
+  date: OrderDirection
+  expiresAt: OrderDirection
+  status: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input DateHoldUpdateInput {
+  rankKey: String
+  rank: Int
+  date: DateTime
+  expiresAt: DateTime
+  status: String
+  venue: VenueRelateToOneForUpdateInput
+  artist: ArtistRelateToOneForUpdateInput
+  agency: AgencyRelateToOneForUpdateInput
+  event: EventRelateToOneForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input DateHoldUpdateArgs {
+  where: DateHoldWhereUniqueInput!
+  data: DateHoldUpdateInput!
+}
+
+input DateHoldCreateInput {
+  rankKey: String
+  rank: Int
+  date: DateTime
+  expiresAt: DateTime
+  status: String
+  venue: VenueRelateToOneForCreateInput
+  artist: ArtistRelateToOneForCreateInput
+  agency: AgencyRelateToOneForCreateInput
+  event: EventRelateToOneForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type Offer {
+  id: ID!
+  breakevenBasis: String
+  radiusClause: String
+  notes: String
+  acceptedTermsHash: String
+  version: Int
+  guaranteeCents: Int
+  percentageBps: Int
+  promoterProfitBps: Int
+  expenseCapCents: Int
+  merchSplitBps: Int
+  hardMerchSplitBps: Int
+  hospitalityRiderCents: Int
+  depositCents: Int
+  acceptedTerms: JSON
+  depositDueAt: DateTime
+  status: String
+  dealType: String
+  event: Event
+  artist: Artist
+  eventArtist: EventArtist
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input OfferWhereUniqueInput {
+  id: ID
+}
+
+input OfferWhereInput {
+  AND: [OfferWhereInput!]
+  OR: [OfferWhereInput!]
+  NOT: [OfferWhereInput!]
+  id: IDFilter
+  breakevenBasis: StringFilter
+  radiusClause: StringFilter
+  notes: StringFilter
+  acceptedTermsHash: StringFilter
+  version: IntNullableFilter
+  guaranteeCents: IntNullableFilter
+  percentageBps: IntNullableFilter
+  promoterProfitBps: IntNullableFilter
+  expenseCapCents: IntNullableFilter
+  merchSplitBps: IntNullableFilter
+  hardMerchSplitBps: IntNullableFilter
+  hospitalityRiderCents: IntNullableFilter
+  depositCents: IntNullableFilter
+  depositDueAt: DateTimeNullableFilter
+  status: StringNullableFilter
+  dealType: StringNullableFilter
+  event: EventWhereInput
+  artist: ArtistWhereInput
+  eventArtist: EventArtistWhereInput
+  currencyCode: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input OfferOrderByInput {
+  id: OrderDirection
+  breakevenBasis: OrderDirection
+  radiusClause: OrderDirection
+  notes: OrderDirection
+  acceptedTermsHash: OrderDirection
+  version: OrderDirection
+  guaranteeCents: OrderDirection
+  percentageBps: OrderDirection
+  promoterProfitBps: OrderDirection
+  expenseCapCents: OrderDirection
+  merchSplitBps: OrderDirection
+  hardMerchSplitBps: OrderDirection
+  hospitalityRiderCents: OrderDirection
+  depositCents: OrderDirection
+  depositDueAt: OrderDirection
+  status: OrderDirection
+  dealType: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input OfferUpdateInput {
+  breakevenBasis: String
+  radiusClause: String
+  notes: String
+  acceptedTermsHash: String
+  version: Int
+  guaranteeCents: Int
+  percentageBps: Int
+  promoterProfitBps: Int
+  expenseCapCents: Int
+  merchSplitBps: Int
+  hardMerchSplitBps: Int
+  hospitalityRiderCents: Int
+  depositCents: Int
+  acceptedTerms: JSON
+  depositDueAt: DateTime
+  status: String
+  dealType: String
+  event: EventRelateToOneForUpdateInput
+  artist: ArtistRelateToOneForUpdateInput
+  eventArtist: EventArtistRelateToOneForUpdateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input EventArtistRelateToOneForUpdateInput {
+  create: EventArtistCreateInput
+  connect: EventArtistWhereUniqueInput
+  disconnect: Boolean
+}
+
+input OfferUpdateArgs {
+  where: OfferWhereUniqueInput!
+  data: OfferUpdateInput!
+}
+
+input OfferCreateInput {
+  breakevenBasis: String
+  radiusClause: String
+  notes: String
+  acceptedTermsHash: String
+  version: Int
+  guaranteeCents: Int
+  percentageBps: Int
+  promoterProfitBps: Int
+  expenseCapCents: Int
+  merchSplitBps: Int
+  hardMerchSplitBps: Int
+  hospitalityRiderCents: Int
+  depositCents: Int
+  acceptedTerms: JSON
+  depositDueAt: DateTime
+  status: String
+  dealType: String
+  event: EventRelateToOneForCreateInput
+  artist: ArtistRelateToOneForCreateInput
+  eventArtist: EventArtistRelateToOneForCreateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input EventArtistRelateToOneForCreateInput {
+  create: EventArtistCreateInput
+  connect: EventArtistWhereUniqueInput
+}
+
+type EventExpense {
+  id: ID!
+  vendor: String
+  receipt: String
+  notes: String
+  budgetCents: Int
+  actualCents: Int
+  isCapped: Boolean
+  category: String
+  event: Event
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input EventExpenseWhereUniqueInput {
+  id: ID
+}
+
+input EventExpenseWhereInput {
+  AND: [EventExpenseWhereInput!]
+  OR: [EventExpenseWhereInput!]
+  NOT: [EventExpenseWhereInput!]
+  id: IDFilter
+  vendor: StringFilter
+  receipt: StringFilter
+  notes: StringFilter
+  budgetCents: IntNullableFilter
+  actualCents: IntNullableFilter
+  isCapped: BooleanFilter
+  category: StringNullableFilter
+  event: EventWhereInput
+  currencyCode: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input EventExpenseOrderByInput {
+  id: OrderDirection
+  vendor: OrderDirection
+  receipt: OrderDirection
+  notes: OrderDirection
+  budgetCents: OrderDirection
+  actualCents: OrderDirection
+  isCapped: OrderDirection
+  category: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input EventExpenseUpdateInput {
+  vendor: String
+  receipt: String
+  notes: String
+  budgetCents: Int
+  actualCents: Int
+  isCapped: Boolean
+  category: String
+  event: EventRelateToOneForUpdateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input EventExpenseUpdateArgs {
+  where: EventExpenseWhereUniqueInput!
+  data: EventExpenseUpdateInput!
+}
+
+input EventExpenseCreateInput {
+  vendor: String
+  receipt: String
+  notes: String
+  budgetCents: Int
+  actualCents: Int
+  isCapped: Boolean
+  category: String
+  event: EventRelateToOneForCreateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type PriceLevel {
+  id: ID!
+  name: String
+  priceCents: Int
+  feeCents: Int
+  facilityFeeCents: Int
+  capacity: Int
+  sold: Int
+  held: Int
+  perOrderLimit: Int
+  productionHeld: Int
+  salesStartAt: DateTime
+  salesEndAt: DateTime
+  status: String
+  event: Event
+  sections(where: ChartSectionWhereInput! = {}, orderBy: [ChartSectionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChartSectionWhereUniqueInput): [ChartSection!]
+  sectionsCount(where: ChartSectionWhereInput! = {}): Int
+  priceLevelPhase_priceLevel(where: PriceLevelPhaseWhereInput! = {}, orderBy: [PriceLevelPhaseOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PriceLevelPhaseWhereUniqueInput): [PriceLevelPhase!]
+  priceLevelPhase_priceLevelCount(where: PriceLevelPhaseWhereInput! = {}): Int
+  seatInventory_priceLevel(where: SeatInventoryWhereInput! = {}, orderBy: [SeatInventoryOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SeatInventoryWhereUniqueInput): [SeatInventory!]
+  seatInventory_priceLevelCount(where: SeatInventoryWhereInput! = {}): Int
+  productionHold_priceLevel(where: ProductionHoldWhereInput! = {}, orderBy: [ProductionHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ProductionHoldWhereUniqueInput): [ProductionHold!]
+  productionHold_priceLevelCount(where: ProductionHoldWhereInput! = {}): Int
+  inventoryHold_priceLevel(where: InventoryHoldWhereInput! = {}, orderBy: [InventoryHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: InventoryHoldWhereUniqueInput): [InventoryHold!]
+  inventoryHold_priceLevelCount(where: InventoryHoldWhereInput! = {}): Int
+  promoCode_priceLevels(where: PromoCodeWhereInput! = {}, orderBy: [PromoCodeOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PromoCodeWhereUniqueInput): [PromoCode!]
+  promoCode_priceLevelsCount(where: PromoCodeWhereInput! = {}): Int
+  ticketOrderLine_priceLevel(where: TicketOrderLineWhereInput! = {}, orderBy: [TicketOrderLineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketOrderLineWhereUniqueInput): [TicketOrderLine!]
+  ticketOrderLine_priceLevelCount(where: TicketOrderLineWhereInput! = {}): Int
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PriceLevelWhereUniqueInput {
+  id: ID
+}
+
+input PriceLevelWhereInput {
+  AND: [PriceLevelWhereInput!]
+  OR: [PriceLevelWhereInput!]
+  NOT: [PriceLevelWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  priceCents: IntNullableFilter
+  feeCents: IntNullableFilter
+  facilityFeeCents: IntNullableFilter
+  capacity: IntNullableFilter
+  sold: IntNullableFilter
+  held: IntNullableFilter
+  perOrderLimit: IntNullableFilter
+  productionHeld: IntNullableFilter
+  salesStartAt: DateTimeNullableFilter
+  salesEndAt: DateTimeNullableFilter
+  status: StringNullableFilter
+  event: EventWhereInput
+  sections: ChartSectionManyRelationFilter
+  priceLevelPhase_priceLevel: PriceLevelPhaseManyRelationFilter
+  seatInventory_priceLevel: SeatInventoryManyRelationFilter
+  productionHold_priceLevel: ProductionHoldManyRelationFilter
+  inventoryHold_priceLevel: InventoryHoldManyRelationFilter
+  promoCode_priceLevels: PromoCodeManyRelationFilter
+  ticketOrderLine_priceLevel: TicketOrderLineManyRelationFilter
+  currencyCode: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input PriceLevelPhaseManyRelationFilter {
+  every: PriceLevelPhaseWhereInput
+  some: PriceLevelPhaseWhereInput
+  none: PriceLevelPhaseWhereInput
+}
+
+input TicketOrderLineManyRelationFilter {
+  every: TicketOrderLineWhereInput
+  some: TicketOrderLineWhereInput
+  none: TicketOrderLineWhereInput
+}
+
+input PriceLevelOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  priceCents: OrderDirection
+  feeCents: OrderDirection
+  facilityFeeCents: OrderDirection
+  capacity: OrderDirection
+  sold: OrderDirection
+  held: OrderDirection
+  perOrderLimit: OrderDirection
+  productionHeld: OrderDirection
+  salesStartAt: OrderDirection
+  salesEndAt: OrderDirection
+  status: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input PriceLevelUpdateInput {
+  name: String
+  priceCents: Int
+  feeCents: Int
+  facilityFeeCents: Int
+  capacity: Int
+  sold: Int
+  held: Int
+  perOrderLimit: Int
+  productionHeld: Int
+  salesStartAt: DateTime
+  salesEndAt: DateTime
+  status: String
+  event: EventRelateToOneForUpdateInput
+  sections: ChartSectionRelateToManyForUpdateInput
+  priceLevelPhase_priceLevel: PriceLevelPhaseRelateToManyForUpdateInput
+  seatInventory_priceLevel: SeatInventoryRelateToManyForUpdateInput
+  productionHold_priceLevel: ProductionHoldRelateToManyForUpdateInput
+  inventoryHold_priceLevel: InventoryHoldRelateToManyForUpdateInput
+  promoCode_priceLevels: PromoCodeRelateToManyForUpdateInput
+  ticketOrderLine_priceLevel: TicketOrderLineRelateToManyForUpdateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PriceLevelPhaseRelateToManyForUpdateInput {
+  disconnect: [PriceLevelPhaseWhereUniqueInput!]
+  set: [PriceLevelPhaseWhereUniqueInput!]
+  create: [PriceLevelPhaseCreateInput!]
+  connect: [PriceLevelPhaseWhereUniqueInput!]
+}
+
+input TicketOrderLineRelateToManyForUpdateInput {
+  disconnect: [TicketOrderLineWhereUniqueInput!]
+  set: [TicketOrderLineWhereUniqueInput!]
+  create: [TicketOrderLineCreateInput!]
+  connect: [TicketOrderLineWhereUniqueInput!]
+}
+
+input PriceLevelUpdateArgs {
+  where: PriceLevelWhereUniqueInput!
+  data: PriceLevelUpdateInput!
+}
+
+input PriceLevelCreateInput {
+  name: String
+  priceCents: Int
+  feeCents: Int
+  facilityFeeCents: Int
+  capacity: Int
+  sold: Int
+  held: Int
+  perOrderLimit: Int
+  productionHeld: Int
+  salesStartAt: DateTime
+  salesEndAt: DateTime
+  status: String
+  event: EventRelateToOneForCreateInput
+  sections: ChartSectionRelateToManyForCreateInput
+  priceLevelPhase_priceLevel: PriceLevelPhaseRelateToManyForCreateInput
+  seatInventory_priceLevel: SeatInventoryRelateToManyForCreateInput
+  productionHold_priceLevel: ProductionHoldRelateToManyForCreateInput
+  inventoryHold_priceLevel: InventoryHoldRelateToManyForCreateInput
+  promoCode_priceLevels: PromoCodeRelateToManyForCreateInput
+  ticketOrderLine_priceLevel: TicketOrderLineRelateToManyForCreateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PriceLevelPhaseRelateToManyForCreateInput {
+  create: [PriceLevelPhaseCreateInput!]
+  connect: [PriceLevelPhaseWhereUniqueInput!]
+}
+
+input TicketOrderLineRelateToManyForCreateInput {
+  create: [TicketOrderLineCreateInput!]
+  connect: [TicketOrderLineWhereUniqueInput!]
+}
+
+type PriceLevelPhase {
+  id: ID!
+  name: String
+  priceCents: Int
+  quantity: Int
+  sold: Int
+  sort: Int
+  startsAt: DateTime
+  priceLevel: PriceLevel
+  inventoryHold_phase(where: InventoryHoldWhereInput! = {}, orderBy: [InventoryHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: InventoryHoldWhereUniqueInput): [InventoryHold!]
+  inventoryHold_phaseCount(where: InventoryHoldWhereInput! = {}): Int
+  ticketOrderLine_phase(where: TicketOrderLineWhereInput! = {}, orderBy: [TicketOrderLineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketOrderLineWhereUniqueInput): [TicketOrderLine!]
+  ticketOrderLine_phaseCount(where: TicketOrderLineWhereInput! = {}): Int
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PriceLevelPhaseWhereUniqueInput {
+  id: ID
+}
+
+input PriceLevelPhaseWhereInput {
+  AND: [PriceLevelPhaseWhereInput!]
+  OR: [PriceLevelPhaseWhereInput!]
+  NOT: [PriceLevelPhaseWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  priceCents: IntNullableFilter
+  quantity: IntNullableFilter
+  sold: IntNullableFilter
+  sort: IntNullableFilter
+  startsAt: DateTimeNullableFilter
+  priceLevel: PriceLevelWhereInput
+  inventoryHold_phase: InventoryHoldManyRelationFilter
+  ticketOrderLine_phase: TicketOrderLineManyRelationFilter
+  currencyCode: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input PriceLevelPhaseOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  priceCents: OrderDirection
+  quantity: OrderDirection
+  sold: OrderDirection
+  sort: OrderDirection
+  startsAt: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input PriceLevelPhaseUpdateInput {
+  name: String
+  priceCents: Int
+  quantity: Int
+  sold: Int
+  sort: Int
+  startsAt: DateTime
+  priceLevel: PriceLevelRelateToOneForUpdateInput
+  inventoryHold_phase: InventoryHoldRelateToManyForUpdateInput
+  ticketOrderLine_phase: TicketOrderLineRelateToManyForUpdateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PriceLevelRelateToOneForUpdateInput {
+  create: PriceLevelCreateInput
+  connect: PriceLevelWhereUniqueInput
+  disconnect: Boolean
+}
+
+input PriceLevelPhaseUpdateArgs {
+  where: PriceLevelPhaseWhereUniqueInput!
+  data: PriceLevelPhaseUpdateInput!
+}
+
+input PriceLevelPhaseCreateInput {
+  name: String
+  priceCents: Int
+  quantity: Int
+  sold: Int
+  sort: Int
+  startsAt: DateTime
+  priceLevel: PriceLevelRelateToOneForCreateInput
+  inventoryHold_phase: InventoryHoldRelateToManyForCreateInput
+  ticketOrderLine_phase: TicketOrderLineRelateToManyForCreateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PriceLevelRelateToOneForCreateInput {
+  create: PriceLevelCreateInput
+  connect: PriceLevelWhereUniqueInput
+}
+
+type SeatInventory {
+  id: ID!
+  holdKey: String
+  occupancyKey: String
+  eventSeatKey: String
+  status: String
+  event: Event
+  seat: Seat
+  priceLevel: PriceLevel
+  productionHold_seats(where: ProductionHoldWhereInput! = {}, orderBy: [ProductionHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ProductionHoldWhereUniqueInput): [ProductionHold!]
+  productionHold_seatsCount(where: ProductionHoldWhereInput! = {}): Int
+  inventoryHold_seats(where: InventoryHoldWhereInput! = {}, orderBy: [InventoryHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: InventoryHoldWhereUniqueInput): [InventoryHold!]
+  inventoryHold_seatsCount(where: InventoryHoldWhereInput! = {}): Int
+  ticket_seatInventory(where: TicketWhereInput! = {}, orderBy: [TicketOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketWhereUniqueInput): [Ticket!]
+  ticket_seatInventoryCount(where: TicketWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SeatInventoryWhereUniqueInput {
+  id: ID
+  holdKey: String
+  occupancyKey: String
+  eventSeatKey: String
+}
+
+input SeatInventoryWhereInput {
+  AND: [SeatInventoryWhereInput!]
+  OR: [SeatInventoryWhereInput!]
+  NOT: [SeatInventoryWhereInput!]
+  id: IDFilter
+  holdKey: StringNullableFilter
+  occupancyKey: StringNullableFilter
+  eventSeatKey: StringNullableFilter
+  status: StringNullableFilter
+  event: EventWhereInput
+  seat: SeatWhereInput
+  priceLevel: PriceLevelWhereInput
+  productionHold_seats: ProductionHoldManyRelationFilter
+  inventoryHold_seats: InventoryHoldManyRelationFilter
+  ticket_seatInventory: TicketManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input SeatInventoryOrderByInput {
+  id: OrderDirection
+  holdKey: OrderDirection
+  occupancyKey: OrderDirection
+  eventSeatKey: OrderDirection
+  status: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input SeatInventoryUpdateInput {
+  holdKey: String
+  occupancyKey: String
+  eventSeatKey: String
+  status: String
+  event: EventRelateToOneForUpdateInput
+  seat: SeatRelateToOneForUpdateInput
+  priceLevel: PriceLevelRelateToOneForUpdateInput
+  productionHold_seats: ProductionHoldRelateToManyForUpdateInput
+  inventoryHold_seats: InventoryHoldRelateToManyForUpdateInput
+  ticket_seatInventory: TicketRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SeatRelateToOneForUpdateInput {
+  create: SeatCreateInput
+  connect: SeatWhereUniqueInput
+  disconnect: Boolean
+}
+
+input SeatInventoryUpdateArgs {
+  where: SeatInventoryWhereUniqueInput!
+  data: SeatInventoryUpdateInput!
+}
+
+input SeatInventoryCreateInput {
+  holdKey: String
+  occupancyKey: String
+  eventSeatKey: String
+  status: String
+  event: EventRelateToOneForCreateInput
+  seat: SeatRelateToOneForCreateInput
+  priceLevel: PriceLevelRelateToOneForCreateInput
+  productionHold_seats: ProductionHoldRelateToManyForCreateInput
+  inventoryHold_seats: InventoryHoldRelateToManyForCreateInput
+  ticket_seatInventory: TicketRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SeatRelateToOneForCreateInput {
+  create: SeatCreateInput
+  connect: SeatWhereUniqueInput
+}
+
+type ProductionHold {
+  id: ID!
+  quantity: Int
+  releaseAt: DateTime
+  holdType: String
+  status: String
+  event: Event
+  priceLevel: PriceLevel
+  seats(where: SeatInventoryWhereInput! = {}, orderBy: [SeatInventoryOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SeatInventoryWhereUniqueInput): [SeatInventory!]
+  seatsCount(where: SeatInventoryWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ProductionHoldWhereUniqueInput {
+  id: ID
+}
+
+input ProductionHoldWhereInput {
+  AND: [ProductionHoldWhereInput!]
+  OR: [ProductionHoldWhereInput!]
+  NOT: [ProductionHoldWhereInput!]
+  id: IDFilter
+  quantity: IntNullableFilter
+  releaseAt: DateTimeNullableFilter
+  holdType: StringNullableFilter
+  status: StringNullableFilter
+  event: EventWhereInput
+  priceLevel: PriceLevelWhereInput
+  seats: SeatInventoryManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input ProductionHoldOrderByInput {
+  id: OrderDirection
+  quantity: OrderDirection
+  releaseAt: OrderDirection
+  holdType: OrderDirection
+  status: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input ProductionHoldUpdateInput {
+  quantity: Int
+  releaseAt: DateTime
+  holdType: String
+  status: String
+  event: EventRelateToOneForUpdateInput
+  priceLevel: PriceLevelRelateToOneForUpdateInput
+  seats: SeatInventoryRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ProductionHoldUpdateArgs {
+  where: ProductionHoldWhereUniqueInput!
+  data: ProductionHoldUpdateInput!
+}
+
+input ProductionHoldCreateInput {
+  quantity: Int
+  releaseAt: DateTime
+  holdType: String
+  status: String
+  event: EventRelateToOneForCreateInput
+  priceLevel: PriceLevelRelateToOneForCreateInput
+  seats: SeatInventoryRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type InventoryHold {
+  id: ID!
+  holdKey: String
+  secretHash: String
+  presaleCode: String
+  quantity: Int
+  quoteSnapshot: JSON
+  expiresAt: DateTime
+  status: String
+  event: Event
+  priceLevel: PriceLevel
+  phase: PriceLevelPhase
+  customer: User
+  seats(where: SeatInventoryWhereInput! = {}, orderBy: [SeatInventoryOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SeatInventoryWhereUniqueInput): [SeatInventory!]
+  seatsCount(where: SeatInventoryWhereInput! = {}): Int
+  order: TicketOrder
+  promoCode: PromoCode
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input InventoryHoldWhereUniqueInput {
+  id: ID
+  holdKey: String
+}
+
+input InventoryHoldWhereInput {
+  AND: [InventoryHoldWhereInput!]
+  OR: [InventoryHoldWhereInput!]
+  NOT: [InventoryHoldWhereInput!]
+  id: IDFilter
+  holdKey: StringNullableFilter
+  secretHash: StringFilter
+  presaleCode: StringFilter
+  quantity: IntNullableFilter
+  expiresAt: DateTimeNullableFilter
+  status: StringNullableFilter
+  event: EventWhereInput
+  priceLevel: PriceLevelWhereInput
+  phase: PriceLevelPhaseWhereInput
+  customer: UserWhereInput
+  seats: SeatInventoryManyRelationFilter
+  order: TicketOrderWhereInput
+  promoCode: PromoCodeWhereInput
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input InventoryHoldOrderByInput {
+  id: OrderDirection
+  holdKey: OrderDirection
+  secretHash: OrderDirection
+  presaleCode: OrderDirection
+  quantity: OrderDirection
+  expiresAt: OrderDirection
+  status: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input InventoryHoldUpdateInput {
+  holdKey: String
+  secretHash: String
+  presaleCode: String
+  quantity: Int
+  quoteSnapshot: JSON
+  expiresAt: DateTime
+  status: String
+  event: EventRelateToOneForUpdateInput
+  priceLevel: PriceLevelRelateToOneForUpdateInput
+  phase: PriceLevelPhaseRelateToOneForUpdateInput
+  customer: UserRelateToOneForUpdateInput
+  seats: SeatInventoryRelateToManyForUpdateInput
+  order: TicketOrderRelateToOneForUpdateInput
+  promoCode: PromoCodeRelateToOneForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PriceLevelPhaseRelateToOneForUpdateInput {
+  create: PriceLevelPhaseCreateInput
+  connect: PriceLevelPhaseWhereUniqueInput
+  disconnect: Boolean
+}
+
+input TicketOrderRelateToOneForUpdateInput {
+  create: TicketOrderCreateInput
+  connect: TicketOrderWhereUniqueInput
+  disconnect: Boolean
+}
+
+input PromoCodeRelateToOneForUpdateInput {
+  create: PromoCodeCreateInput
+  connect: PromoCodeWhereUniqueInput
+  disconnect: Boolean
+}
+
+input InventoryHoldUpdateArgs {
+  where: InventoryHoldWhereUniqueInput!
+  data: InventoryHoldUpdateInput!
+}
+
+input InventoryHoldCreateInput {
+  holdKey: String
+  secretHash: String
+  presaleCode: String
+  quantity: Int
+  quoteSnapshot: JSON
+  expiresAt: DateTime
+  status: String
+  event: EventRelateToOneForCreateInput
+  priceLevel: PriceLevelRelateToOneForCreateInput
+  phase: PriceLevelPhaseRelateToOneForCreateInput
+  customer: UserRelateToOneForCreateInput
+  seats: SeatInventoryRelateToManyForCreateInput
+  order: TicketOrderRelateToOneForCreateInput
+  promoCode: PromoCodeRelateToOneForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PriceLevelPhaseRelateToOneForCreateInput {
+  create: PriceLevelPhaseCreateInput
+  connect: PriceLevelPhaseWhereUniqueInput
+}
+
+input TicketOrderRelateToOneForCreateInput {
+  create: TicketOrderCreateInput
+  connect: TicketOrderWhereUniqueInput
+}
+
+input PromoCodeRelateToOneForCreateInput {
+  create: PromoCodeCreateInput
+  connect: PromoCodeWhereUniqueInput
+}
+
+type PromoCode {
+  id: ID!
+  code: String
+  scope: String
+  maxUses: Int
+  uses: Int
+  reservedUses: Int
+  discountBps: Int
+  startsAt: DateTime
+  endsAt: DateTime
+  status: String
+  event: Event
+  priceLevels(where: PriceLevelWhereInput! = {}, orderBy: [PriceLevelOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PriceLevelWhereUniqueInput): [PriceLevel!]
+  priceLevelsCount(where: PriceLevelWhereInput! = {}): Int
+  inventoryHold_promoCode(where: InventoryHoldWhereInput! = {}, orderBy: [InventoryHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: InventoryHoldWhereUniqueInput): [InventoryHold!]
+  inventoryHold_promoCodeCount(where: InventoryHoldWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PromoCodeWhereUniqueInput {
+  id: ID
+  code: String
+}
+
+input PromoCodeWhereInput {
+  AND: [PromoCodeWhereInput!]
+  OR: [PromoCodeWhereInput!]
+  NOT: [PromoCodeWhereInput!]
+  id: IDFilter
+  code: StringNullableFilter
+  scope: StringFilter
+  maxUses: IntNullableFilter
+  uses: IntNullableFilter
+  reservedUses: IntNullableFilter
+  discountBps: IntNullableFilter
+  startsAt: DateTimeNullableFilter
+  endsAt: DateTimeNullableFilter
+  status: StringNullableFilter
+  event: EventWhereInput
+  priceLevels: PriceLevelManyRelationFilter
+  inventoryHold_promoCode: InventoryHoldManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input PromoCodeOrderByInput {
+  id: OrderDirection
+  code: OrderDirection
+  scope: OrderDirection
+  maxUses: OrderDirection
+  uses: OrderDirection
+  reservedUses: OrderDirection
+  discountBps: OrderDirection
+  startsAt: OrderDirection
+  endsAt: OrderDirection
+  status: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input PromoCodeUpdateInput {
+  code: String
+  scope: String
+  maxUses: Int
+  uses: Int
+  reservedUses: Int
+  discountBps: Int
+  startsAt: DateTime
+  endsAt: DateTime
+  status: String
+  event: EventRelateToOneForUpdateInput
+  priceLevels: PriceLevelRelateToManyForUpdateInput
+  inventoryHold_promoCode: InventoryHoldRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PromoCodeUpdateArgs {
+  where: PromoCodeWhereUniqueInput!
+  data: PromoCodeUpdateInput!
+}
+
+input PromoCodeCreateInput {
+  code: String
+  scope: String
+  maxUses: Int
+  uses: Int
+  reservedUses: Int
+  discountBps: Int
+  startsAt: DateTime
+  endsAt: DateTime
+  status: String
+  event: EventRelateToOneForCreateInput
+  priceLevels: PriceLevelRelateToManyForCreateInput
+  inventoryHold_promoCode: InventoryHoldRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type TicketOrder {
+  id: ID!
+  orderNumber: String
+  guestEmail: String
+  guestName: String
+  secretKey: String
+  subtotalCents: Int
+  serviceFeesCents: Int
+  facilityFeesCents: Int
+  taxCents: Int
+  discountCents: Int
+  totalCents: Int
+  refundedCents: Int
+  ageAttested: Boolean
+  status: String
+  source: String
+  customer: User
+  event: Event
+  paymentCollection: PaymentCollection
+  inventoryHold_order(where: InventoryHoldWhereInput! = {}, orderBy: [InventoryHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: InventoryHoldWhereUniqueInput): [InventoryHold!]
+  inventoryHold_orderCount(where: InventoryHoldWhereInput! = {}): Int
+  ticketOrderLine_order(where: TicketOrderLineWhereInput! = {}, orderBy: [TicketOrderLineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketOrderLineWhereUniqueInput): [TicketOrderLine!]
+  ticketOrderLine_orderCount(where: TicketOrderLineWhereInput! = {}): Int
+  ticket_order(where: TicketWhereInput! = {}, orderBy: [TicketOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketWhereUniqueInput): [Ticket!]
+  ticket_orderCount(where: TicketWhereInput! = {}): Int
+  currencyCode: String
+  payments(where: PaymentWhereInput! = {}, orderBy: [PaymentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentWhereUniqueInput): [Payment!]
+  paymentsCount(where: PaymentWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input TicketOrderWhereUniqueInput {
+  id: ID
+  orderNumber: String
+}
+
+input TicketOrderWhereInput {
+  AND: [TicketOrderWhereInput!]
+  OR: [TicketOrderWhereInput!]
+  NOT: [TicketOrderWhereInput!]
+  id: IDFilter
+  orderNumber: StringNullableFilter
+  guestEmail: StringFilter
+  guestName: StringFilter
+  secretKey: StringFilter
+  subtotalCents: IntNullableFilter
+  serviceFeesCents: IntNullableFilter
+  facilityFeesCents: IntNullableFilter
+  taxCents: IntNullableFilter
+  discountCents: IntNullableFilter
+  totalCents: IntNullableFilter
+  refundedCents: IntNullableFilter
+  ageAttested: BooleanFilter
+  status: StringNullableFilter
+  source: StringNullableFilter
+  customer: UserWhereInput
+  event: EventWhereInput
+  paymentCollection: PaymentCollectionWhereInput
+  inventoryHold_order: InventoryHoldManyRelationFilter
+  ticketOrderLine_order: TicketOrderLineManyRelationFilter
+  ticket_order: TicketManyRelationFilter
+  currencyCode: StringFilter
+  payments: PaymentManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input PaymentManyRelationFilter {
+  every: PaymentWhereInput
+  some: PaymentWhereInput
+  none: PaymentWhereInput
+}
+
+input TicketOrderOrderByInput {
+  id: OrderDirection
+  orderNumber: OrderDirection
+  guestEmail: OrderDirection
+  guestName: OrderDirection
+  secretKey: OrderDirection
+  subtotalCents: OrderDirection
+  serviceFeesCents: OrderDirection
+  facilityFeesCents: OrderDirection
+  taxCents: OrderDirection
+  discountCents: OrderDirection
+  totalCents: OrderDirection
+  refundedCents: OrderDirection
+  ageAttested: OrderDirection
+  status: OrderDirection
+  source: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input TicketOrderUpdateInput {
+  orderNumber: String
+  guestEmail: String
+  guestName: String
+  secretKey: String
+  subtotalCents: Int
+  serviceFeesCents: Int
+  facilityFeesCents: Int
+  taxCents: Int
+  discountCents: Int
+  totalCents: Int
+  refundedCents: Int
+  ageAttested: Boolean
+  status: String
+  source: String
+  customer: UserRelateToOneForUpdateInput
+  event: EventRelateToOneForUpdateInput
+  paymentCollection: PaymentCollectionRelateToOneForUpdateInput
+  inventoryHold_order: InventoryHoldRelateToManyForUpdateInput
+  ticketOrderLine_order: TicketOrderLineRelateToManyForUpdateInput
+  ticket_order: TicketRelateToManyForUpdateInput
+  currencyCode: String
+  payments: PaymentRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentCollectionRelateToOneForUpdateInput {
+  create: PaymentCollectionCreateInput
+  connect: PaymentCollectionWhereUniqueInput
+  disconnect: Boolean
+}
+
+input PaymentRelateToManyForUpdateInput {
+  disconnect: [PaymentWhereUniqueInput!]
+  set: [PaymentWhereUniqueInput!]
+  create: [PaymentCreateInput!]
+  connect: [PaymentWhereUniqueInput!]
+}
+
+input TicketOrderUpdateArgs {
+  where: TicketOrderWhereUniqueInput!
+  data: TicketOrderUpdateInput!
+}
+
+input TicketOrderCreateInput {
+  orderNumber: String
+  guestEmail: String
+  guestName: String
+  secretKey: String
+  subtotalCents: Int
+  serviceFeesCents: Int
+  facilityFeesCents: Int
+  taxCents: Int
+  discountCents: Int
+  totalCents: Int
+  refundedCents: Int
+  ageAttested: Boolean
+  status: String
+  source: String
+  customer: UserRelateToOneForCreateInput
+  event: EventRelateToOneForCreateInput
+  paymentCollection: PaymentCollectionRelateToOneForCreateInput
+  inventoryHold_order: InventoryHoldRelateToManyForCreateInput
+  ticketOrderLine_order: TicketOrderLineRelateToManyForCreateInput
+  ticket_order: TicketRelateToManyForCreateInput
+  currencyCode: String
+  payments: PaymentRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentCollectionRelateToOneForCreateInput {
+  create: PaymentCollectionCreateInput
+  connect: PaymentCollectionWhereUniqueInput
+}
+
+input PaymentRelateToManyForCreateInput {
+  create: [PaymentCreateInput!]
+  connect: [PaymentWhereUniqueInput!]
+}
+
+type TicketOrderLine {
+  id: ID!
+  title: String
+  levelName: String
+  phaseName: String
+  seatLabel: String
+  unitPriceCents: Int
+  serviceFeeCents: Int
+  facilityFeeCents: Int
+  taxCents: Int
+  quantity: Int
+  discountCents: Int
+  totalCents: Int
+  order: TicketOrder
+  priceLevel: PriceLevel
+  phase: PriceLevelPhase
+  ticket_line(where: TicketWhereInput! = {}, orderBy: [TicketOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketWhereUniqueInput): [Ticket!]
+  ticket_lineCount(where: TicketWhereInput! = {}): Int
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input TicketOrderLineWhereUniqueInput {
+  id: ID
+}
+
+input TicketOrderLineWhereInput {
+  AND: [TicketOrderLineWhereInput!]
+  OR: [TicketOrderLineWhereInput!]
+  NOT: [TicketOrderLineWhereInput!]
+  id: IDFilter
+  title: StringFilter
+  levelName: StringFilter
+  phaseName: StringFilter
+  seatLabel: StringFilter
+  unitPriceCents: IntNullableFilter
+  serviceFeeCents: IntNullableFilter
+  facilityFeeCents: IntNullableFilter
+  taxCents: IntNullableFilter
+  quantity: IntNullableFilter
+  discountCents: IntNullableFilter
+  totalCents: IntNullableFilter
+  order: TicketOrderWhereInput
+  priceLevel: PriceLevelWhereInput
+  phase: PriceLevelPhaseWhereInput
+  ticket_line: TicketManyRelationFilter
+  currencyCode: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input TicketOrderLineOrderByInput {
+  id: OrderDirection
+  title: OrderDirection
+  levelName: OrderDirection
+  phaseName: OrderDirection
+  seatLabel: OrderDirection
+  unitPriceCents: OrderDirection
+  serviceFeeCents: OrderDirection
+  facilityFeeCents: OrderDirection
+  taxCents: OrderDirection
+  quantity: OrderDirection
+  discountCents: OrderDirection
+  totalCents: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input TicketOrderLineUpdateInput {
+  title: String
+  levelName: String
+  phaseName: String
+  seatLabel: String
+  unitPriceCents: Int
+  serviceFeeCents: Int
+  facilityFeeCents: Int
+  taxCents: Int
+  quantity: Int
+  discountCents: Int
+  totalCents: Int
+  order: TicketOrderRelateToOneForUpdateInput
+  priceLevel: PriceLevelRelateToOneForUpdateInput
+  phase: PriceLevelPhaseRelateToOneForUpdateInput
+  ticket_line: TicketRelateToManyForUpdateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input TicketOrderLineUpdateArgs {
+  where: TicketOrderLineWhereUniqueInput!
+  data: TicketOrderLineUpdateInput!
+}
+
+input TicketOrderLineCreateInput {
+  title: String
+  levelName: String
+  phaseName: String
+  seatLabel: String
+  unitPriceCents: Int
+  serviceFeeCents: Int
+  facilityFeeCents: Int
+  taxCents: Int
+  quantity: Int
+  discountCents: Int
+  totalCents: Int
+  order: TicketOrderRelateToOneForCreateInput
+  priceLevel: PriceLevelRelateToOneForCreateInput
+  phase: PriceLevelPhaseRelateToOneForCreateInput
+  ticket_line: TicketRelateToManyForCreateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type Ticket {
+  id: ID!
+  ticketCode: String
+  tokenHash: String
+  holderName: String
+  holderEmail: String
+  status: String
+  order: TicketOrder
+  event: Event
+  line: TicketOrderLine
+  seatInventory: SeatInventory
+  transferredFrom: Ticket
+  ticket_transferredFrom(where: TicketWhereInput! = {}, orderBy: [TicketOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketWhereUniqueInput): [Ticket!]
+  ticket_transferredFromCount(where: TicketWhereInput! = {}): Int
+  scanEvent_ticket(where: ScanEventWhereInput! = {}, orderBy: [ScanEventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ScanEventWhereUniqueInput): [ScanEvent!]
+  scanEvent_ticketCount(where: ScanEventWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input TicketWhereUniqueInput {
+  id: ID
+  ticketCode: String
+}
+
+input TicketWhereInput {
+  AND: [TicketWhereInput!]
+  OR: [TicketWhereInput!]
+  NOT: [TicketWhereInput!]
+  id: IDFilter
+  ticketCode: StringNullableFilter
+  tokenHash: StringFilter
+  holderName: StringFilter
+  holderEmail: StringFilter
+  status: StringNullableFilter
+  order: TicketOrderWhereInput
+  event: EventWhereInput
+  line: TicketOrderLineWhereInput
+  seatInventory: SeatInventoryWhereInput
+  transferredFrom: TicketWhereInput
+  ticket_transferredFrom: TicketManyRelationFilter
+  scanEvent_ticket: ScanEventManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input TicketOrderByInput {
+  id: OrderDirection
+  ticketCode: OrderDirection
+  tokenHash: OrderDirection
+  holderName: OrderDirection
+  holderEmail: OrderDirection
+  status: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input TicketUpdateInput {
+  ticketCode: String
+  tokenHash: String
+  holderName: String
+  holderEmail: String
+  status: String
+  order: TicketOrderRelateToOneForUpdateInput
+  event: EventRelateToOneForUpdateInput
+  line: TicketOrderLineRelateToOneForUpdateInput
+  seatInventory: SeatInventoryRelateToOneForUpdateInput
+  transferredFrom: TicketRelateToOneForUpdateInput
+  ticket_transferredFrom: TicketRelateToManyForUpdateInput
+  scanEvent_ticket: ScanEventRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input TicketOrderLineRelateToOneForUpdateInput {
+  create: TicketOrderLineCreateInput
+  connect: TicketOrderLineWhereUniqueInput
+  disconnect: Boolean
+}
+
+input SeatInventoryRelateToOneForUpdateInput {
+  create: SeatInventoryCreateInput
+  connect: SeatInventoryWhereUniqueInput
+  disconnect: Boolean
+}
+
+input TicketRelateToOneForUpdateInput {
+  create: TicketCreateInput
+  connect: TicketWhereUniqueInput
+  disconnect: Boolean
+}
+
+input TicketUpdateArgs {
+  where: TicketWhereUniqueInput!
+  data: TicketUpdateInput!
+}
+
+input TicketCreateInput {
+  ticketCode: String
+  tokenHash: String
+  holderName: String
+  holderEmail: String
+  status: String
+  order: TicketOrderRelateToOneForCreateInput
+  event: EventRelateToOneForCreateInput
+  line: TicketOrderLineRelateToOneForCreateInput
+  seatInventory: SeatInventoryRelateToOneForCreateInput
+  transferredFrom: TicketRelateToOneForCreateInput
+  ticket_transferredFrom: TicketRelateToManyForCreateInput
+  scanEvent_ticket: ScanEventRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input TicketOrderLineRelateToOneForCreateInput {
+  create: TicketOrderLineCreateInput
+  connect: TicketOrderLineWhereUniqueInput
+}
+
+input SeatInventoryRelateToOneForCreateInput {
+  create: SeatInventoryCreateInput
+  connect: SeatInventoryWhereUniqueInput
+}
+
+input TicketRelateToOneForCreateInput {
+  create: TicketCreateInput
+  connect: TicketWhereUniqueInput
+}
+
+type ScanEvent {
+  id: ID!
+  gate: String
+  at: DateTime
+  result: String
+  ticket: Ticket
+  event: Event
+  scannedBy: User
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ScanEventWhereUniqueInput {
+  id: ID
+}
+
+input ScanEventWhereInput {
+  AND: [ScanEventWhereInput!]
+  OR: [ScanEventWhereInput!]
+  NOT: [ScanEventWhereInput!]
+  id: IDFilter
+  gate: StringFilter
+  at: DateTimeNullableFilter
+  result: StringNullableFilter
+  ticket: TicketWhereInput
+  event: EventWhereInput
+  scannedBy: UserWhereInput
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input ScanEventOrderByInput {
+  id: OrderDirection
+  gate: OrderDirection
+  at: OrderDirection
+  result: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input ScanEventUpdateInput {
+  gate: String
+  at: DateTime
+  result: String
+  ticket: TicketRelateToOneForUpdateInput
+  event: EventRelateToOneForUpdateInput
+  scannedBy: UserRelateToOneForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ScanEventUpdateArgs {
+  where: ScanEventWhereUniqueInput!
+  data: ScanEventUpdateInput!
+}
+
+input ScanEventCreateInput {
+  gate: String
+  at: DateTime
+  result: String
+  ticket: TicketRelateToOneForCreateInput
+  event: EventRelateToOneForCreateInput
+  scannedBy: UserRelateToOneForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type MerchSales {
+  id: ID!
+  softGrossCents: Int
+  hardGrossCents: Int
+  venueSoftSplitBps: Int
+  venueHardSplitBps: Int
+  venueShareCents: Int
+  sellerFeeCents: Int
+  countIn: JSON
+  countOut: JSON
+  event: Event
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input MerchSalesWhereUniqueInput {
+  id: ID
+}
+
+input MerchSalesWhereInput {
+  AND: [MerchSalesWhereInput!]
+  OR: [MerchSalesWhereInput!]
+  NOT: [MerchSalesWhereInput!]
+  id: IDFilter
+  softGrossCents: IntNullableFilter
+  hardGrossCents: IntNullableFilter
+  venueSoftSplitBps: IntNullableFilter
+  venueHardSplitBps: IntNullableFilter
+  venueShareCents: IntNullableFilter
+  sellerFeeCents: IntNullableFilter
+  event: EventWhereInput
+  currencyCode: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input MerchSalesOrderByInput {
+  id: OrderDirection
+  softGrossCents: OrderDirection
+  hardGrossCents: OrderDirection
+  venueSoftSplitBps: OrderDirection
+  venueHardSplitBps: OrderDirection
+  venueShareCents: OrderDirection
+  sellerFeeCents: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input MerchSalesUpdateInput {
+  softGrossCents: Int
+  hardGrossCents: Int
+  venueSoftSplitBps: Int
+  venueHardSplitBps: Int
+  venueShareCents: Int
+  sellerFeeCents: Int
+  countIn: JSON
+  countOut: JSON
+  event: EventRelateToOneForUpdateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input MerchSalesUpdateArgs {
+  where: MerchSalesWhereUniqueInput!
+  data: MerchSalesUpdateInput!
+}
+
+input MerchSalesCreateInput {
+  softGrossCents: Int
+  hardGrossCents: Int
+  venueSoftSplitBps: Int
+  venueHardSplitBps: Int
+  venueShareCents: Int
+  sellerFeeCents: Int
+  countIn: JSON
+  countOut: JSON
+  event: EventRelateToOneForCreateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type BarSales {
+  id: ID!
+  grossCents: Int
+  promoterShareBps: Int
+  event: Event
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input BarSalesWhereUniqueInput {
+  id: ID
+}
+
+input BarSalesWhereInput {
+  AND: [BarSalesWhereInput!]
+  OR: [BarSalesWhereInput!]
+  NOT: [BarSalesWhereInput!]
+  id: IDFilter
+  grossCents: IntNullableFilter
+  promoterShareBps: IntNullableFilter
+  event: EventWhereInput
+  currencyCode: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input BarSalesOrderByInput {
+  id: OrderDirection
+  grossCents: OrderDirection
+  promoterShareBps: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input BarSalesUpdateInput {
+  grossCents: Int
+  promoterShareBps: Int
+  event: EventRelateToOneForUpdateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input BarSalesUpdateArgs {
+  where: BarSalesWhereUniqueInput!
+  data: BarSalesUpdateInput!
+}
+
+input BarSalesCreateInput {
+  grossCents: Int
+  promoterShareBps: Int
+  event: EventRelateToOneForCreateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type Settlement {
+  id: ID!
+  hash: String
+  version: Int
+  ticketGrossCents: Int
+  ticketFeesCents: Int
+  taxCents: Int
+  compCount: Int
+  paidCount: Int
+  netBoxOfficeCents: Int
+  totalExpensesCents: Int
+  cappedExpensesCents: Int
+  breakevenCents: Int
+  splitPointCents: Int
+  artistGuaranteeCents: Int
+  artistOverageCents: Int
+  artistTotalCents: Int
+  merchVenueShareCents: Int
+  depositsPaidCents: Int
+  balanceDueArtistCents: Int
+  promoterNetCents: Int
+  computedSnapshot: JSON
+  approvals: JSON
+  status: String
+  event: Event
+  previousVersion: Settlement
+  settlement_previousVersion(where: SettlementWhereInput! = {}, orderBy: [SettlementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SettlementWhereUniqueInput): [Settlement!]
+  settlement_previousVersionCount(where: SettlementWhereInput! = {}): Int
+  settlementLine_settlement(where: SettlementLineWhereInput! = {}, orderBy: [SettlementLineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SettlementLineWhereUniqueInput): [SettlementLine!]
+  settlementLine_settlementCount(where: SettlementLineWhereInput! = {}): Int
+  artistPayment_settlement(where: ArtistPaymentWhereInput! = {}, orderBy: [ArtistPaymentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ArtistPaymentWhereUniqueInput): [ArtistPayment!]
+  artistPayment_settlementCount(where: ArtistPaymentWhereInput! = {}): Int
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SettlementWhereUniqueInput {
+  id: ID
+}
+
+input SettlementWhereInput {
+  AND: [SettlementWhereInput!]
+  OR: [SettlementWhereInput!]
+  NOT: [SettlementWhereInput!]
+  id: IDFilter
+  hash: StringFilter
+  version: IntNullableFilter
+  ticketGrossCents: IntNullableFilter
+  ticketFeesCents: IntNullableFilter
+  taxCents: IntNullableFilter
+  compCount: IntNullableFilter
+  paidCount: IntNullableFilter
+  netBoxOfficeCents: IntNullableFilter
+  totalExpensesCents: IntNullableFilter
+  cappedExpensesCents: IntNullableFilter
+  breakevenCents: IntNullableFilter
+  splitPointCents: IntNullableFilter
+  artistGuaranteeCents: IntNullableFilter
+  artistOverageCents: IntNullableFilter
+  artistTotalCents: IntNullableFilter
+  merchVenueShareCents: IntNullableFilter
+  depositsPaidCents: IntNullableFilter
+  balanceDueArtistCents: IntNullableFilter
+  promoterNetCents: IntNullableFilter
+  status: StringNullableFilter
+  event: EventWhereInput
+  previousVersion: SettlementWhereInput
+  settlement_previousVersion: SettlementManyRelationFilter
+  settlementLine_settlement: SettlementLineManyRelationFilter
+  artistPayment_settlement: ArtistPaymentManyRelationFilter
+  currencyCode: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input ArtistPaymentManyRelationFilter {
+  every: ArtistPaymentWhereInput
+  some: ArtistPaymentWhereInput
+  none: ArtistPaymentWhereInput
+}
+
+input SettlementOrderByInput {
+  id: OrderDirection
+  hash: OrderDirection
+  version: OrderDirection
+  ticketGrossCents: OrderDirection
+  ticketFeesCents: OrderDirection
+  taxCents: OrderDirection
+  compCount: OrderDirection
+  paidCount: OrderDirection
+  netBoxOfficeCents: OrderDirection
+  totalExpensesCents: OrderDirection
+  cappedExpensesCents: OrderDirection
+  breakevenCents: OrderDirection
+  splitPointCents: OrderDirection
+  artistGuaranteeCents: OrderDirection
+  artistOverageCents: OrderDirection
+  artistTotalCents: OrderDirection
+  merchVenueShareCents: OrderDirection
+  depositsPaidCents: OrderDirection
+  balanceDueArtistCents: OrderDirection
+  promoterNetCents: OrderDirection
+  status: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input SettlementUpdateInput {
+  hash: String
+  version: Int
+  ticketGrossCents: Int
+  ticketFeesCents: Int
+  taxCents: Int
+  compCount: Int
+  paidCount: Int
+  netBoxOfficeCents: Int
+  totalExpensesCents: Int
+  cappedExpensesCents: Int
+  breakevenCents: Int
+  splitPointCents: Int
+  artistGuaranteeCents: Int
+  artistOverageCents: Int
+  artistTotalCents: Int
+  merchVenueShareCents: Int
+  depositsPaidCents: Int
+  balanceDueArtistCents: Int
+  promoterNetCents: Int
+  computedSnapshot: JSON
+  approvals: JSON
+  status: String
+  event: EventRelateToOneForUpdateInput
+  previousVersion: SettlementRelateToOneForUpdateInput
+  settlement_previousVersion: SettlementRelateToManyForUpdateInput
+  settlementLine_settlement: SettlementLineRelateToManyForUpdateInput
+  artistPayment_settlement: ArtistPaymentRelateToManyForUpdateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SettlementRelateToOneForUpdateInput {
+  create: SettlementCreateInput
+  connect: SettlementWhereUniqueInput
+  disconnect: Boolean
+}
+
+input ArtistPaymentRelateToManyForUpdateInput {
+  disconnect: [ArtistPaymentWhereUniqueInput!]
+  set: [ArtistPaymentWhereUniqueInput!]
+  create: [ArtistPaymentCreateInput!]
+  connect: [ArtistPaymentWhereUniqueInput!]
+}
+
+input SettlementUpdateArgs {
+  where: SettlementWhereUniqueInput!
+  data: SettlementUpdateInput!
+}
+
+input SettlementCreateInput {
+  hash: String
+  version: Int
+  ticketGrossCents: Int
+  ticketFeesCents: Int
+  taxCents: Int
+  compCount: Int
+  paidCount: Int
+  netBoxOfficeCents: Int
+  totalExpensesCents: Int
+  cappedExpensesCents: Int
+  breakevenCents: Int
+  splitPointCents: Int
+  artistGuaranteeCents: Int
+  artistOverageCents: Int
+  artistTotalCents: Int
+  merchVenueShareCents: Int
+  depositsPaidCents: Int
+  balanceDueArtistCents: Int
+  promoterNetCents: Int
+  computedSnapshot: JSON
+  approvals: JSON
+  status: String
+  event: EventRelateToOneForCreateInput
+  previousVersion: SettlementRelateToOneForCreateInput
+  settlement_previousVersion: SettlementRelateToManyForCreateInput
+  settlementLine_settlement: SettlementLineRelateToManyForCreateInput
+  artistPayment_settlement: ArtistPaymentRelateToManyForCreateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SettlementRelateToOneForCreateInput {
+  create: SettlementCreateInput
+  connect: SettlementWhereUniqueInput
+}
+
+input ArtistPaymentRelateToManyForCreateInput {
+  create: [ArtistPaymentCreateInput!]
+  connect: [ArtistPaymentWhereUniqueInput!]
+}
+
+type SettlementLine {
+  id: ID!
+  label: String
+  sourceRef: String
+  reason: String
+  amountCents: Int
+  roundingRemainder: Int
+  kind: String
+  settlement: Settlement
+  approvedBy: User
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SettlementLineWhereUniqueInput {
+  id: ID
+}
+
+input SettlementLineWhereInput {
+  AND: [SettlementLineWhereInput!]
+  OR: [SettlementLineWhereInput!]
+  NOT: [SettlementLineWhereInput!]
+  id: IDFilter
+  label: StringFilter
+  sourceRef: StringFilter
+  reason: StringFilter
+  amountCents: IntNullableFilter
+  roundingRemainder: IntNullableFilter
+  kind: StringNullableFilter
+  settlement: SettlementWhereInput
+  approvedBy: UserWhereInput
+  currencyCode: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input SettlementLineOrderByInput {
+  id: OrderDirection
+  label: OrderDirection
+  sourceRef: OrderDirection
+  reason: OrderDirection
+  amountCents: OrderDirection
+  roundingRemainder: OrderDirection
+  kind: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input SettlementLineUpdateInput {
+  label: String
+  sourceRef: String
+  reason: String
+  amountCents: Int
+  roundingRemainder: Int
+  kind: String
+  settlement: SettlementRelateToOneForUpdateInput
+  approvedBy: UserRelateToOneForUpdateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input SettlementLineUpdateArgs {
+  where: SettlementLineWhereUniqueInput!
+  data: SettlementLineUpdateInput!
+}
+
+input SettlementLineCreateInput {
+  label: String
+  sourceRef: String
+  reason: String
+  amountCents: Int
+  roundingRemainder: Int
+  kind: String
+  settlement: SettlementRelateToOneForCreateInput
+  approvedBy: UserRelateToOneForCreateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type ArtistPayment {
+  id: ID!
+  method: String
+  reference: String
+  amountCents: Int
+  kind: String
+  status: String
+  settlement: Settlement
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ArtistPaymentWhereUniqueInput {
+  id: ID
+}
+
+input ArtistPaymentWhereInput {
+  AND: [ArtistPaymentWhereInput!]
+  OR: [ArtistPaymentWhereInput!]
+  NOT: [ArtistPaymentWhereInput!]
+  id: IDFilter
+  method: StringFilter
+  reference: StringFilter
+  amountCents: IntNullableFilter
+  kind: StringNullableFilter
+  status: StringNullableFilter
+  settlement: SettlementWhereInput
+  currencyCode: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input ArtistPaymentOrderByInput {
+  id: OrderDirection
+  method: OrderDirection
+  reference: OrderDirection
+  amountCents: OrderDirection
+  kind: OrderDirection
+  status: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input ArtistPaymentUpdateInput {
+  method: String
+  reference: String
+  amountCents: Int
+  kind: String
+  status: String
+  settlement: SettlementRelateToOneForUpdateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ArtistPaymentUpdateArgs {
+  where: ArtistPaymentWhereUniqueInput!
+  data: ArtistPaymentUpdateInput!
+}
+
+input ArtistPaymentCreateInput {
+  method: String
+  reference: String
+  amountCents: Int
+  kind: String
+  status: String
+  settlement: SettlementRelateToOneForCreateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type AuditEvent {
+  id: ID!
+  action: String
+  targetList: String
+  targetId: String
+  reason: String
+  requestId: String
+  before: JSON
+  after: JSON
+  actor: User
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input AuditEventWhereUniqueInput {
+  id: ID
+}
+
+input AuditEventWhereInput {
+  AND: [AuditEventWhereInput!]
+  OR: [AuditEventWhereInput!]
+  NOT: [AuditEventWhereInput!]
+  id: IDFilter
+  action: StringFilter
+  targetList: StringFilter
+  targetId: StringFilter
+  reason: StringFilter
+  requestId: StringFilter
+  actor: UserWhereInput
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input AuditEventOrderByInput {
+  id: OrderDirection
+  action: OrderDirection
+  targetList: OrderDirection
+  targetId: OrderDirection
+  reason: OrderDirection
+  requestId: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input AuditEventUpdateInput {
+  action: String
+  targetList: String
+  targetId: String
+  reason: String
+  requestId: String
+  before: JSON
+  after: JSON
+  actor: UserRelateToOneForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input AuditEventUpdateArgs {
+  where: AuditEventWhereUniqueInput!
+  data: AuditEventUpdateInput!
+}
+
+input AuditEventCreateInput {
+  action: String
+  targetList: String
+  targetId: String
+  reason: String
+  requestId: String
+  before: JSON
+  after: JSON
+  actor: UserRelateToOneForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type StoreSettings {
+  id: ID!
+  name: String
+  refundApprovalThresholdCents: Int
+  manager: User
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input StoreSettingsWhereUniqueInput {
+  id: ID
+}
+
+input StoreSettingsWhereInput {
+  AND: [StoreSettingsWhereInput!]
+  OR: [StoreSettingsWhereInput!]
+  NOT: [StoreSettingsWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  refundApprovalThresholdCents: IntNullableFilter
+  manager: UserWhereInput
+  currencyCode: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input StoreSettingsOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  refundApprovalThresholdCents: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input StoreSettingsUpdateInput {
+  name: String
+  refundApprovalThresholdCents: Int
+  manager: UserRelateToOneForUpdateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input StoreSettingsUpdateArgs {
+  where: StoreSettingsWhereUniqueInput!
+  data: StoreSettingsUpdateInput!
+}
+
+input StoreSettingsCreateInput {
+  name: String
+  refundApprovalThresholdCents: Int
+  manager: UserRelateToOneForCreateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type PaymentProvider {
+  id: ID!
+  name: String
+  code: String
+  isInstalled: Boolean
+  credentials: JSON
+  metadata: JSON
+  createPaymentFunction: String
+  capturePaymentFunction: String
+  refundPaymentFunction: String
+  getPaymentStatusFunction: String
+  generatePaymentLinkFunction: String
+  handleWebhookFunction: String
+  sessions(where: PaymentSessionWhereInput! = {}, orderBy: [PaymentSessionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentSessionWhereUniqueInput): [PaymentSession!]
+  sessionsCount(where: PaymentSessionWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentProviderWhereUniqueInput {
+  id: ID
+  code: String
+}
+
+input PaymentProviderWhereInput {
+  AND: [PaymentProviderWhereInput!]
+  OR: [PaymentProviderWhereInput!]
+  NOT: [PaymentProviderWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  code: StringFilter
+  isInstalled: BooleanFilter
+  createPaymentFunction: StringFilter
+  capturePaymentFunction: StringFilter
+  refundPaymentFunction: StringFilter
+  getPaymentStatusFunction: StringFilter
+  generatePaymentLinkFunction: StringFilter
+  handleWebhookFunction: StringFilter
+  sessions: PaymentSessionManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input PaymentSessionManyRelationFilter {
+  every: PaymentSessionWhereInput
+  some: PaymentSessionWhereInput
+  none: PaymentSessionWhereInput
+}
+
+input PaymentProviderOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  code: OrderDirection
+  isInstalled: OrderDirection
+  createPaymentFunction: OrderDirection
+  capturePaymentFunction: OrderDirection
+  refundPaymentFunction: OrderDirection
+  getPaymentStatusFunction: OrderDirection
+  generatePaymentLinkFunction: OrderDirection
+  handleWebhookFunction: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input PaymentProviderUpdateInput {
+  name: String
+  code: String
+  isInstalled: Boolean
+  credentials: JSON
+  metadata: JSON
+  createPaymentFunction: String
+  capturePaymentFunction: String
+  refundPaymentFunction: String
+  getPaymentStatusFunction: String
+  generatePaymentLinkFunction: String
+  handleWebhookFunction: String
+  sessions: PaymentSessionRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentSessionRelateToManyForUpdateInput {
+  disconnect: [PaymentSessionWhereUniqueInput!]
+  set: [PaymentSessionWhereUniqueInput!]
+  create: [PaymentSessionCreateInput!]
+  connect: [PaymentSessionWhereUniqueInput!]
+}
+
+input PaymentProviderUpdateArgs {
+  where: PaymentProviderWhereUniqueInput!
+  data: PaymentProviderUpdateInput!
+}
+
+input PaymentProviderCreateInput {
+  name: String
+  code: String
+  isInstalled: Boolean
+  credentials: JSON
+  metadata: JSON
+  createPaymentFunction: String
+  capturePaymentFunction: String
+  refundPaymentFunction: String
+  getPaymentStatusFunction: String
+  generatePaymentLinkFunction: String
+  handleWebhookFunction: String
+  sessions: PaymentSessionRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentSessionRelateToManyForCreateInput {
+  create: [PaymentSessionCreateInput!]
+  connect: [PaymentSessionWhereUniqueInput!]
+}
+
+type PaymentCollection {
+  id: ID!
+  description: PaymentCollectionDescriptionType
+  amount: Int
+  authorizedAmount: Int
+  refundedAmount: Int
+  metadata: JSON
+  paymentSessions(where: PaymentSessionWhereInput! = {}, orderBy: [PaymentSessionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentSessionWhereUniqueInput): [PaymentSession!]
+  paymentSessionsCount(where: PaymentSessionWhereInput! = {}): Int
+  payments(where: PaymentWhereInput! = {}, orderBy: [PaymentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentWhereUniqueInput): [Payment!]
+  paymentsCount(where: PaymentWhereInput! = {}): Int
+  ticketOrder_paymentCollection(where: TicketOrderWhereInput! = {}, orderBy: [TicketOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketOrderWhereUniqueInput): [TicketOrder!]
+  ticketOrder_paymentCollectionCount(where: TicketOrderWhereInput! = {}): Int
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+enum PaymentCollectionDescriptionType {
+  default
+  refund
+}
+
+input PaymentCollectionWhereUniqueInput {
+  id: ID
+}
+
+input PaymentCollectionWhereInput {
+  AND: [PaymentCollectionWhereInput!]
+  OR: [PaymentCollectionWhereInput!]
+  NOT: [PaymentCollectionWhereInput!]
+  id: IDFilter
+  description: PaymentCollectionDescriptionTypeNullableFilter
+  amount: IntFilter
+  authorizedAmount: IntNullableFilter
+  refundedAmount: IntNullableFilter
+  paymentSessions: PaymentSessionManyRelationFilter
+  payments: PaymentManyRelationFilter
+  ticketOrder_paymentCollection: TicketOrderManyRelationFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input PaymentCollectionDescriptionTypeNullableFilter {
+  equals: PaymentCollectionDescriptionType
+  in: [PaymentCollectionDescriptionType!]
+  notIn: [PaymentCollectionDescriptionType!]
+  not: PaymentCollectionDescriptionTypeNullableFilter
+}
+
+input IntFilter {
+  equals: Int
+  in: [Int!]
+  notIn: [Int!]
+  lt: Int
+  lte: Int
+  gt: Int
+  gte: Int
+  not: IntFilter
+}
+
+input PaymentCollectionOrderByInput {
+  id: OrderDirection
+  description: OrderDirection
+  amount: OrderDirection
+  authorizedAmount: OrderDirection
+  refundedAmount: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input PaymentCollectionUpdateInput {
+  description: PaymentCollectionDescriptionType
+  amount: Int
+  authorizedAmount: Int
+  refundedAmount: Int
+  metadata: JSON
+  paymentSessions: PaymentSessionRelateToManyForUpdateInput
+  payments: PaymentRelateToManyForUpdateInput
+  ticketOrder_paymentCollection: TicketOrderRelateToManyForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentCollectionUpdateArgs {
+  where: PaymentCollectionWhereUniqueInput!
+  data: PaymentCollectionUpdateInput!
+}
+
+input PaymentCollectionCreateInput {
+  description: PaymentCollectionDescriptionType
+  amount: Int
+  authorizedAmount: Int
+  refundedAmount: Int
+  metadata: JSON
+  paymentSessions: PaymentSessionRelateToManyForCreateInput
+  payments: PaymentRelateToManyForCreateInput
+  ticketOrder_paymentCollection: TicketOrderRelateToManyForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type PaymentSession {
+  id: ID!
+  isSelected: Boolean
+  isInitiated: Boolean
+  amount: Int
+  data: JSON
+  idempotencyKey: String
+  paymentCollection: PaymentCollection
+  paymentProvider: PaymentProvider
+  paymentAuthorizedAt: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentSessionWhereUniqueInput {
+  id: ID
+  idempotencyKey: String
+}
+
+input PaymentSessionWhereInput {
+  AND: [PaymentSessionWhereInput!]
+  OR: [PaymentSessionWhereInput!]
+  NOT: [PaymentSessionWhereInput!]
+  id: IDFilter
+  isSelected: BooleanFilter
+  isInitiated: BooleanFilter
+  amount: IntFilter
+  idempotencyKey: StringFilter
+  paymentCollection: PaymentCollectionWhereInput
+  paymentProvider: PaymentProviderWhereInput
+  paymentAuthorizedAt: DateTimeNullableFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input PaymentSessionOrderByInput {
+  id: OrderDirection
+  isSelected: OrderDirection
+  isInitiated: OrderDirection
+  amount: OrderDirection
+  idempotencyKey: OrderDirection
+  paymentAuthorizedAt: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input PaymentSessionUpdateInput {
+  isSelected: Boolean
+  isInitiated: Boolean
+  amount: Int
+  data: JSON
+  idempotencyKey: String
+  paymentCollection: PaymentCollectionRelateToOneForUpdateInput
+  paymentProvider: PaymentProviderRelateToOneForUpdateInput
+  paymentAuthorizedAt: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentProviderRelateToOneForUpdateInput {
+  create: PaymentProviderCreateInput
+  connect: PaymentProviderWhereUniqueInput
+  disconnect: Boolean
+}
+
+input PaymentSessionUpdateArgs {
+  where: PaymentSessionWhereUniqueInput!
+  data: PaymentSessionUpdateInput!
+}
+
+input PaymentSessionCreateInput {
+  isSelected: Boolean
+  isInitiated: Boolean
+  amount: Int
+  data: JSON
+  idempotencyKey: String
+  paymentCollection: PaymentCollectionRelateToOneForCreateInput
+  paymentProvider: PaymentProviderRelateToOneForCreateInput
+  paymentAuthorizedAt: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentProviderRelateToOneForCreateInput {
+  create: PaymentProviderCreateInput
+  connect: PaymentProviderWhereUniqueInput
+}
+
+type Payment {
+  id: ID!
+  idempotencyKey: String
+  reservedAt: DateTime
+  refundedAmount: Int
+  amount: Int
+  data: JSON
+  currencyCode: String
+  status: String
+  paymentMethod: String
+  paymentProvider: PaymentProvider
+  providerPaymentId: String
+  cardLast4: String
+  cardBrand: String
+  tipAmount: Int
+  isSplitPayment: Boolean
+  splitPaymentIndex: Int
+  splitTotal: Int
+  processedAt: DateTime
+  errorMessage: String
+  notes: String
+  order: TicketOrder
+  paymentCollection: PaymentCollection
+  processedBy: User
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentWhereUniqueInput {
+  id: ID
+  idempotencyKey: String
+}
+
+input PaymentWhereInput {
+  AND: [PaymentWhereInput!]
+  OR: [PaymentWhereInput!]
+  NOT: [PaymentWhereInput!]
+  id: IDFilter
+  idempotencyKey: StringFilter
+  reservedAt: DateTimeNullableFilter
+  refundedAmount: IntNullableFilter
+  amount: IntFilter
+  currencyCode: StringFilter
+  status: StringFilter
+  paymentMethod: StringNullableFilter
+  paymentProvider: PaymentProviderWhereInput
+  providerPaymentId: StringFilter
+  cardLast4: StringFilter
+  cardBrand: StringFilter
+  tipAmount: IntNullableFilter
+  isSplitPayment: BooleanFilter
+  splitPaymentIndex: IntNullableFilter
+  splitTotal: IntNullableFilter
+  processedAt: DateTimeNullableFilter
+  errorMessage: StringFilter
+  notes: StringFilter
+  order: TicketOrderWhereInput
+  paymentCollection: PaymentCollectionWhereInput
+  processedBy: UserWhereInput
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input PaymentOrderByInput {
+  id: OrderDirection
+  idempotencyKey: OrderDirection
+  reservedAt: OrderDirection
+  refundedAmount: OrderDirection
+  amount: OrderDirection
+  currencyCode: OrderDirection
+  status: OrderDirection
+  paymentMethod: OrderDirection
+  providerPaymentId: OrderDirection
+  cardLast4: OrderDirection
+  cardBrand: OrderDirection
+  tipAmount: OrderDirection
+  isSplitPayment: OrderDirection
+  splitPaymentIndex: OrderDirection
+  splitTotal: OrderDirection
+  processedAt: OrderDirection
+  errorMessage: OrderDirection
+  notes: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input PaymentUpdateInput {
+  idempotencyKey: String
+  reservedAt: DateTime
+  refundedAmount: Int
+  amount: Int
+  data: JSON
+  currencyCode: String
+  status: String
+  paymentMethod: String
+  paymentProvider: PaymentProviderRelateToOneForUpdateInput
+  providerPaymentId: String
+  cardLast4: String
+  cardBrand: String
+  tipAmount: Int
+  isSplitPayment: Boolean
+  splitPaymentIndex: Int
+  splitTotal: Int
+  processedAt: DateTime
+  errorMessage: String
+  notes: String
+  order: TicketOrderRelateToOneForUpdateInput
+  paymentCollection: PaymentCollectionRelateToOneForUpdateInput
+  processedBy: UserRelateToOneForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentUpdateArgs {
+  where: PaymentWhereUniqueInput!
+  data: PaymentUpdateInput!
+}
+
+input PaymentCreateInput {
+  idempotencyKey: String
+  reservedAt: DateTime
+  refundedAmount: Int
+  amount: Int
+  data: JSON
+  currencyCode: String
+  status: String
+  paymentMethod: String
+  paymentProvider: PaymentProviderRelateToOneForCreateInput
+  providerPaymentId: String
+  cardLast4: String
+  cardBrand: String
+  tipAmount: Int
+  isSplitPayment: Boolean
+  splitPaymentIndex: Int
+  splitTotal: Int
+  processedAt: DateTime
+  errorMessage: String
+  notes: String
+  order: TicketOrderRelateToOneForCreateInput
+  paymentCollection: PaymentCollectionRelateToOneForCreateInput
+  processedBy: UserRelateToOneForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type Refund {
+  id: ID!
+  idempotencyKey: String
+  amount: Int
+  currencyCode: String
+  status: String
+  reason: String
+  providerRefundId: String
+  providerData: JSON
+  processedAt: DateTime
+  payment: Payment
+  order: TicketOrder
+  requestedBy: User
+  approvedBy: User
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input RefundWhereUniqueInput {
+  id: ID
+  idempotencyKey: String
+}
+
+input RefundWhereInput {
+  AND: [RefundWhereInput!]
+  OR: [RefundWhereInput!]
+  NOT: [RefundWhereInput!]
+  id: IDFilter
+  idempotencyKey: StringFilter
+  amount: IntFilter
+  currencyCode: StringFilter
+  status: StringFilter
+  reason: StringFilter
+  providerRefundId: StringFilter
+  processedAt: DateTimeNullableFilter
+  payment: PaymentWhereInput
+  order: TicketOrderWhereInput
+  requestedBy: UserWhereInput
+  approvedBy: UserWhereInput
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input RefundOrderByInput {
+  id: OrderDirection
+  idempotencyKey: OrderDirection
+  amount: OrderDirection
+  currencyCode: OrderDirection
+  status: OrderDirection
+  reason: OrderDirection
+  providerRefundId: OrderDirection
+  processedAt: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input RefundUpdateInput {
+  idempotencyKey: String
+  amount: Int
+  currencyCode: String
+  status: String
+  reason: String
+  providerRefundId: String
+  providerData: JSON
+  processedAt: DateTime
+  payment: PaymentRelateToOneForUpdateInput
+  order: TicketOrderRelateToOneForUpdateInput
+  requestedBy: UserRelateToOneForUpdateInput
+  approvedBy: UserRelateToOneForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentRelateToOneForUpdateInput {
+  create: PaymentCreateInput
+  connect: PaymentWhereUniqueInput
+  disconnect: Boolean
+}
+
+input RefundUpdateArgs {
+  where: RefundWhereUniqueInput!
+  data: RefundUpdateInput!
+}
+
+input RefundCreateInput {
+  idempotencyKey: String
+  amount: Int
+  currencyCode: String
+  status: String
+  reason: String
+  providerRefundId: String
+  providerData: JSON
+  processedAt: DateTime
+  payment: PaymentRelateToOneForCreateInput
+  order: TicketOrderRelateToOneForCreateInput
+  requestedBy: UserRelateToOneForCreateInput
+  approvedBy: UserRelateToOneForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentRelateToOneForCreateInput {
+  create: PaymentCreateInput
+  connect: PaymentWhereUniqueInput
+}
+
+type PaymentWebhookEvent {
+  id: ID!
+  eventKey: String
+  providerCode: String
+  providerEventId: String
+  eventType: String
+  status: String
+  payload: JSON
+  rawBody: String
+  error: String
+  attempts: Int
+  receivedAt: DateTime
+  processedAt: DateTime
+  payment: Payment
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentWebhookEventWhereUniqueInput {
+  id: ID
+  eventKey: String
+}
+
+input PaymentWebhookEventWhereInput {
+  AND: [PaymentWebhookEventWhereInput!]
+  OR: [PaymentWebhookEventWhereInput!]
+  NOT: [PaymentWebhookEventWhereInput!]
+  id: IDFilter
+  eventKey: StringFilter
+  providerCode: StringFilter
+  providerEventId: StringFilter
+  eventType: StringFilter
+  status: StringNullableFilter
+  rawBody: StringFilter
+  error: StringFilter
+  attempts: IntNullableFilter
+  receivedAt: DateTimeNullableFilter
+  processedAt: DateTimeNullableFilter
+  payment: PaymentWhereInput
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input PaymentWebhookEventOrderByInput {
+  id: OrderDirection
+  eventKey: OrderDirection
+  providerCode: OrderDirection
+  providerEventId: OrderDirection
+  eventType: OrderDirection
+  status: OrderDirection
+  rawBody: OrderDirection
+  error: OrderDirection
+  attempts: OrderDirection
+  receivedAt: OrderDirection
+  processedAt: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input PaymentWebhookEventUpdateInput {
+  eventKey: String
+  providerCode: String
+  providerEventId: String
+  eventType: String
+  status: String
+  payload: JSON
+  rawBody: String
+  error: String
+  attempts: Int
+  receivedAt: DateTime
+  processedAt: DateTime
+  payment: PaymentRelateToOneForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input PaymentWebhookEventUpdateArgs {
+  where: PaymentWebhookEventWhereUniqueInput!
+  data: PaymentWebhookEventUpdateInput!
+}
+
+input PaymentWebhookEventCreateInput {
+  eventKey: String
+  providerCode: String
+  providerEventId: String
+  eventType: String
+  status: String
+  payload: JSON
+  rawBody: String
+  error: String
+  attempts: Int
+  receivedAt: DateTime
+  processedAt: DateTime
+  payment: PaymentRelateToOneForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type IdempotencyKey {
+  id: ID!
+  idempotencyKey: String
+  requestMethod: String
+  requestParams: JSON
+  requestPath: String
+  responseCode: Int
+  responseBody: JSON
+  recoveryPoint: String
+  lockedAt: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input IdempotencyKeyWhereUniqueInput {
+  id: ID
+  idempotencyKey: String
+}
+
+input IdempotencyKeyWhereInput {
+  AND: [IdempotencyKeyWhereInput!]
+  OR: [IdempotencyKeyWhereInput!]
+  NOT: [IdempotencyKeyWhereInput!]
+  id: IDFilter
+  idempotencyKey: StringFilter
+  requestMethod: StringFilter
+  requestPath: StringFilter
+  responseCode: IntNullableFilter
+  recoveryPoint: StringFilter
+  lockedAt: DateTimeNullableFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input IdempotencyKeyOrderByInput {
+  id: OrderDirection
+  idempotencyKey: OrderDirection
+  requestMethod: OrderDirection
+  requestPath: OrderDirection
+  responseCode: OrderDirection
+  recoveryPoint: OrderDirection
+  lockedAt: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input IdempotencyKeyUpdateInput {
+  idempotencyKey: String
+  requestMethod: String
+  requestParams: JSON
+  requestPath: String
+  responseCode: Int
+  responseBody: JSON
+  recoveryPoint: String
+  lockedAt: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input IdempotencyKeyUpdateArgs {
+  where: IdempotencyKeyWhereUniqueInput!
+  data: IdempotencyKeyUpdateInput!
+}
+
+input IdempotencyKeyCreateInput {
+  idempotencyKey: String
+  requestMethod: String
+  requestParams: JSON
+  requestPath: String
+  responseCode: Int
+  responseBody: JSON
+  recoveryPoint: String
+  lockedAt: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -790,18 +4886,6 @@ type Mutation {
   updateRoles(data: [RoleUpdateArgs!]!): [Role]
   deleteRole(where: RoleWhereUniqueInput!): Role
   deleteRoles(where: [RoleWhereUniqueInput!]!): [Role]
-  createTodo(data: TodoCreateInput!): Todo
-  createTodos(data: [TodoCreateInput!]!): [Todo]
-  updateTodo(where: TodoWhereUniqueInput!, data: TodoUpdateInput!): Todo
-  updateTodos(data: [TodoUpdateArgs!]!): [Todo]
-  deleteTodo(where: TodoWhereUniqueInput!): Todo
-  deleteTodos(where: [TodoWhereUniqueInput!]!): [Todo]
-  createTodoImage(data: TodoImageCreateInput!): TodoImage
-  createTodoImages(data: [TodoImageCreateInput!]!): [TodoImage]
-  updateTodoImage(where: TodoImageWhereUniqueInput!, data: TodoImageUpdateInput!): TodoImage
-  updateTodoImages(data: [TodoImageUpdateArgs!]!): [TodoImage]
-  deleteTodoImage(where: TodoImageWhereUniqueInput!): TodoImage
-  deleteTodoImages(where: [TodoImageWhereUniqueInput!]!): [TodoImage]
   createOAuthApp(data: OAuthAppCreateInput!): OAuthApp
   createOAuthApps(data: [OAuthAppCreateInput!]!): [OAuthApp]
   updateOAuthApp(where: OAuthAppWhereUniqueInput!, data: OAuthAppUpdateInput!): OAuthApp
@@ -814,6 +4898,222 @@ type Mutation {
   updateOAuthTokens(data: [OAuthTokenUpdateArgs!]!): [OAuthToken]
   deleteOAuthToken(where: OAuthTokenWhereUniqueInput!): OAuthToken
   deleteOAuthTokens(where: [OAuthTokenWhereUniqueInput!]!): [OAuthToken]
+  createVenue(data: VenueCreateInput!): Venue
+  createVenues(data: [VenueCreateInput!]!): [Venue]
+  updateVenue(where: VenueWhereUniqueInput!, data: VenueUpdateInput!): Venue
+  updateVenues(data: [VenueUpdateArgs!]!): [Venue]
+  deleteVenue(where: VenueWhereUniqueInput!): Venue
+  deleteVenues(where: [VenueWhereUniqueInput!]!): [Venue]
+  createSeatingChart(data: SeatingChartCreateInput!): SeatingChart
+  createSeatingCharts(data: [SeatingChartCreateInput!]!): [SeatingChart]
+  updateSeatingChart(where: SeatingChartWhereUniqueInput!, data: SeatingChartUpdateInput!): SeatingChart
+  updateSeatingCharts(data: [SeatingChartUpdateArgs!]!): [SeatingChart]
+  deleteSeatingChart(where: SeatingChartWhereUniqueInput!): SeatingChart
+  deleteSeatingCharts(where: [SeatingChartWhereUniqueInput!]!): [SeatingChart]
+  createChartSection(data: ChartSectionCreateInput!): ChartSection
+  createChartSections(data: [ChartSectionCreateInput!]!): [ChartSection]
+  updateChartSection(where: ChartSectionWhereUniqueInput!, data: ChartSectionUpdateInput!): ChartSection
+  updateChartSections(data: [ChartSectionUpdateArgs!]!): [ChartSection]
+  deleteChartSection(where: ChartSectionWhereUniqueInput!): ChartSection
+  deleteChartSections(where: [ChartSectionWhereUniqueInput!]!): [ChartSection]
+  createSeat(data: SeatCreateInput!): Seat
+  createSeats(data: [SeatCreateInput!]!): [Seat]
+  updateSeat(where: SeatWhereUniqueInput!, data: SeatUpdateInput!): Seat
+  updateSeats(data: [SeatUpdateArgs!]!): [Seat]
+  deleteSeat(where: SeatWhereUniqueInput!): Seat
+  deleteSeats(where: [SeatWhereUniqueInput!]!): [Seat]
+  createAgency(data: AgencyCreateInput!): Agency
+  createAgencies(data: [AgencyCreateInput!]!): [Agency]
+  updateAgency(where: AgencyWhereUniqueInput!, data: AgencyUpdateInput!): Agency
+  updateAgencies(data: [AgencyUpdateArgs!]!): [Agency]
+  deleteAgency(where: AgencyWhereUniqueInput!): Agency
+  deleteAgencies(where: [AgencyWhereUniqueInput!]!): [Agency]
+  createArtist(data: ArtistCreateInput!): Artist
+  createArtists(data: [ArtistCreateInput!]!): [Artist]
+  updateArtist(where: ArtistWhereUniqueInput!, data: ArtistUpdateInput!): Artist
+  updateArtists(data: [ArtistUpdateArgs!]!): [Artist]
+  deleteArtist(where: ArtistWhereUniqueInput!): Artist
+  deleteArtists(where: [ArtistWhereUniqueInput!]!): [Artist]
+  createTour(data: TourCreateInput!): Tour
+  createTours(data: [TourCreateInput!]!): [Tour]
+  updateTour(where: TourWhereUniqueInput!, data: TourUpdateInput!): Tour
+  updateTours(data: [TourUpdateArgs!]!): [Tour]
+  deleteTour(where: TourWhereUniqueInput!): Tour
+  deleteTours(where: [TourWhereUniqueInput!]!): [Tour]
+  createEvent(data: EventCreateInput!): Event
+  createEvents(data: [EventCreateInput!]!): [Event]
+  updateEvent(where: EventWhereUniqueInput!, data: EventUpdateInput!): Event
+  updateEvents(data: [EventUpdateArgs!]!): [Event]
+  deleteEvent(where: EventWhereUniqueInput!): Event
+  deleteEvents(where: [EventWhereUniqueInput!]!): [Event]
+  createEventArtist(data: EventArtistCreateInput!): EventArtist
+  createEventArtists(data: [EventArtistCreateInput!]!): [EventArtist]
+  updateEventArtist(where: EventArtistWhereUniqueInput!, data: EventArtistUpdateInput!): EventArtist
+  updateEventArtists(data: [EventArtistUpdateArgs!]!): [EventArtist]
+  deleteEventArtist(where: EventArtistWhereUniqueInput!): EventArtist
+  deleteEventArtists(where: [EventArtistWhereUniqueInput!]!): [EventArtist]
+  createDateHold(data: DateHoldCreateInput!): DateHold
+  createDateHolds(data: [DateHoldCreateInput!]!): [DateHold]
+  updateDateHold(where: DateHoldWhereUniqueInput!, data: DateHoldUpdateInput!): DateHold
+  updateDateHolds(data: [DateHoldUpdateArgs!]!): [DateHold]
+  deleteDateHold(where: DateHoldWhereUniqueInput!): DateHold
+  deleteDateHolds(where: [DateHoldWhereUniqueInput!]!): [DateHold]
+  createOffer(data: OfferCreateInput!): Offer
+  createOffers(data: [OfferCreateInput!]!): [Offer]
+  updateOffer(where: OfferWhereUniqueInput!, data: OfferUpdateInput!): Offer
+  updateOffers(data: [OfferUpdateArgs!]!): [Offer]
+  deleteOffer(where: OfferWhereUniqueInput!): Offer
+  deleteOffers(where: [OfferWhereUniqueInput!]!): [Offer]
+  createEventExpense(data: EventExpenseCreateInput!): EventExpense
+  createEventExpenses(data: [EventExpenseCreateInput!]!): [EventExpense]
+  updateEventExpense(where: EventExpenseWhereUniqueInput!, data: EventExpenseUpdateInput!): EventExpense
+  updateEventExpenses(data: [EventExpenseUpdateArgs!]!): [EventExpense]
+  deleteEventExpense(where: EventExpenseWhereUniqueInput!): EventExpense
+  deleteEventExpenses(where: [EventExpenseWhereUniqueInput!]!): [EventExpense]
+  createPriceLevel(data: PriceLevelCreateInput!): PriceLevel
+  createPriceLevels(data: [PriceLevelCreateInput!]!): [PriceLevel]
+  updatePriceLevel(where: PriceLevelWhereUniqueInput!, data: PriceLevelUpdateInput!): PriceLevel
+  updatePriceLevels(data: [PriceLevelUpdateArgs!]!): [PriceLevel]
+  deletePriceLevel(where: PriceLevelWhereUniqueInput!): PriceLevel
+  deletePriceLevels(where: [PriceLevelWhereUniqueInput!]!): [PriceLevel]
+  createPriceLevelPhase(data: PriceLevelPhaseCreateInput!): PriceLevelPhase
+  createPriceLevelPhases(data: [PriceLevelPhaseCreateInput!]!): [PriceLevelPhase]
+  updatePriceLevelPhase(where: PriceLevelPhaseWhereUniqueInput!, data: PriceLevelPhaseUpdateInput!): PriceLevelPhase
+  updatePriceLevelPhases(data: [PriceLevelPhaseUpdateArgs!]!): [PriceLevelPhase]
+  deletePriceLevelPhase(where: PriceLevelPhaseWhereUniqueInput!): PriceLevelPhase
+  deletePriceLevelPhases(where: [PriceLevelPhaseWhereUniqueInput!]!): [PriceLevelPhase]
+  createSeatInventory(data: SeatInventoryCreateInput!): SeatInventory
+  createSeatInventories(data: [SeatInventoryCreateInput!]!): [SeatInventory]
+  updateSeatInventory(where: SeatInventoryWhereUniqueInput!, data: SeatInventoryUpdateInput!): SeatInventory
+  updateSeatInventories(data: [SeatInventoryUpdateArgs!]!): [SeatInventory]
+  deleteSeatInventory(where: SeatInventoryWhereUniqueInput!): SeatInventory
+  deleteSeatInventories(where: [SeatInventoryWhereUniqueInput!]!): [SeatInventory]
+  createProductionHold(data: ProductionHoldCreateInput!): ProductionHold
+  createProductionHolds(data: [ProductionHoldCreateInput!]!): [ProductionHold]
+  updateProductionHold(where: ProductionHoldWhereUniqueInput!, data: ProductionHoldUpdateInput!): ProductionHold
+  updateProductionHolds(data: [ProductionHoldUpdateArgs!]!): [ProductionHold]
+  deleteProductionHold(where: ProductionHoldWhereUniqueInput!): ProductionHold
+  deleteProductionHolds(where: [ProductionHoldWhereUniqueInput!]!): [ProductionHold]
+  createInventoryHold(data: InventoryHoldCreateInput!): InventoryHold
+  createInventoryHolds(data: [InventoryHoldCreateInput!]!): [InventoryHold]
+  updateInventoryHold(where: InventoryHoldWhereUniqueInput!, data: InventoryHoldUpdateInput!): InventoryHold
+  updateInventoryHolds(data: [InventoryHoldUpdateArgs!]!): [InventoryHold]
+  deleteInventoryHold(where: InventoryHoldWhereUniqueInput!): InventoryHold
+  deleteInventoryHolds(where: [InventoryHoldWhereUniqueInput!]!): [InventoryHold]
+  createPromoCode(data: PromoCodeCreateInput!): PromoCode
+  createPromoCodes(data: [PromoCodeCreateInput!]!): [PromoCode]
+  updatePromoCode(where: PromoCodeWhereUniqueInput!, data: PromoCodeUpdateInput!): PromoCode
+  updatePromoCodes(data: [PromoCodeUpdateArgs!]!): [PromoCode]
+  deletePromoCode(where: PromoCodeWhereUniqueInput!): PromoCode
+  deletePromoCodes(where: [PromoCodeWhereUniqueInput!]!): [PromoCode]
+  createTicketOrder(data: TicketOrderCreateInput!): TicketOrder
+  createTicketOrders(data: [TicketOrderCreateInput!]!): [TicketOrder]
+  updateTicketOrder(where: TicketOrderWhereUniqueInput!, data: TicketOrderUpdateInput!): TicketOrder
+  updateTicketOrders(data: [TicketOrderUpdateArgs!]!): [TicketOrder]
+  deleteTicketOrder(where: TicketOrderWhereUniqueInput!): TicketOrder
+  deleteTicketOrders(where: [TicketOrderWhereUniqueInput!]!): [TicketOrder]
+  createTicketOrderLine(data: TicketOrderLineCreateInput!): TicketOrderLine
+  createTicketOrderLines(data: [TicketOrderLineCreateInput!]!): [TicketOrderLine]
+  updateTicketOrderLine(where: TicketOrderLineWhereUniqueInput!, data: TicketOrderLineUpdateInput!): TicketOrderLine
+  updateTicketOrderLines(data: [TicketOrderLineUpdateArgs!]!): [TicketOrderLine]
+  deleteTicketOrderLine(where: TicketOrderLineWhereUniqueInput!): TicketOrderLine
+  deleteTicketOrderLines(where: [TicketOrderLineWhereUniqueInput!]!): [TicketOrderLine]
+  createTicket(data: TicketCreateInput!): Ticket
+  createTickets(data: [TicketCreateInput!]!): [Ticket]
+  updateTicket(where: TicketWhereUniqueInput!, data: TicketUpdateInput!): Ticket
+  updateTickets(data: [TicketUpdateArgs!]!): [Ticket]
+  deleteTicket(where: TicketWhereUniqueInput!): Ticket
+  deleteTickets(where: [TicketWhereUniqueInput!]!): [Ticket]
+  createScanEvent(data: ScanEventCreateInput!): ScanEvent
+  createScanEvents(data: [ScanEventCreateInput!]!): [ScanEvent]
+  updateScanEvent(where: ScanEventWhereUniqueInput!, data: ScanEventUpdateInput!): ScanEvent
+  updateScanEvents(data: [ScanEventUpdateArgs!]!): [ScanEvent]
+  deleteScanEvent(where: ScanEventWhereUniqueInput!): ScanEvent
+  deleteScanEvents(where: [ScanEventWhereUniqueInput!]!): [ScanEvent]
+  createMerchSales(data: MerchSalesCreateInput!): MerchSales
+  createMerchSalesRecords(data: [MerchSalesCreateInput!]!): [MerchSales]
+  updateMerchSales(where: MerchSalesWhereUniqueInput!, data: MerchSalesUpdateInput!): MerchSales
+  updateMerchSalesRecords(data: [MerchSalesUpdateArgs!]!): [MerchSales]
+  deleteMerchSales(where: MerchSalesWhereUniqueInput!): MerchSales
+  deleteMerchSalesRecords(where: [MerchSalesWhereUniqueInput!]!): [MerchSales]
+  createBarSales(data: BarSalesCreateInput!): BarSales
+  createBarSalesRecords(data: [BarSalesCreateInput!]!): [BarSales]
+  updateBarSales(where: BarSalesWhereUniqueInput!, data: BarSalesUpdateInput!): BarSales
+  updateBarSalesRecords(data: [BarSalesUpdateArgs!]!): [BarSales]
+  deleteBarSales(where: BarSalesWhereUniqueInput!): BarSales
+  deleteBarSalesRecords(where: [BarSalesWhereUniqueInput!]!): [BarSales]
+  createSettlement(data: SettlementCreateInput!): Settlement
+  createSettlements(data: [SettlementCreateInput!]!): [Settlement]
+  updateSettlement(where: SettlementWhereUniqueInput!, data: SettlementUpdateInput!): Settlement
+  updateSettlements(data: [SettlementUpdateArgs!]!): [Settlement]
+  deleteSettlement(where: SettlementWhereUniqueInput!): Settlement
+  deleteSettlements(where: [SettlementWhereUniqueInput!]!): [Settlement]
+  createSettlementLine(data: SettlementLineCreateInput!): SettlementLine
+  createSettlementLines(data: [SettlementLineCreateInput!]!): [SettlementLine]
+  updateSettlementLine(where: SettlementLineWhereUniqueInput!, data: SettlementLineUpdateInput!): SettlementLine
+  updateSettlementLines(data: [SettlementLineUpdateArgs!]!): [SettlementLine]
+  deleteSettlementLine(where: SettlementLineWhereUniqueInput!): SettlementLine
+  deleteSettlementLines(where: [SettlementLineWhereUniqueInput!]!): [SettlementLine]
+  createArtistPayment(data: ArtistPaymentCreateInput!): ArtistPayment
+  createArtistPayments(data: [ArtistPaymentCreateInput!]!): [ArtistPayment]
+  updateArtistPayment(where: ArtistPaymentWhereUniqueInput!, data: ArtistPaymentUpdateInput!): ArtistPayment
+  updateArtistPayments(data: [ArtistPaymentUpdateArgs!]!): [ArtistPayment]
+  deleteArtistPayment(where: ArtistPaymentWhereUniqueInput!): ArtistPayment
+  deleteArtistPayments(where: [ArtistPaymentWhereUniqueInput!]!): [ArtistPayment]
+  createAuditEvent(data: AuditEventCreateInput!): AuditEvent
+  createAuditEvents(data: [AuditEventCreateInput!]!): [AuditEvent]
+  updateAuditEvent(where: AuditEventWhereUniqueInput!, data: AuditEventUpdateInput!): AuditEvent
+  updateAuditEvents(data: [AuditEventUpdateArgs!]!): [AuditEvent]
+  deleteAuditEvent(where: AuditEventWhereUniqueInput!): AuditEvent
+  deleteAuditEvents(where: [AuditEventWhereUniqueInput!]!): [AuditEvent]
+  createStoreSettings(data: StoreSettingsCreateInput!): StoreSettings
+  createStoreSettingsRecords(data: [StoreSettingsCreateInput!]!): [StoreSettings]
+  updateStoreSettings(where: StoreSettingsWhereUniqueInput!, data: StoreSettingsUpdateInput!): StoreSettings
+  updateStoreSettingsRecords(data: [StoreSettingsUpdateArgs!]!): [StoreSettings]
+  deleteStoreSettings(where: StoreSettingsWhereUniqueInput!): StoreSettings
+  deleteStoreSettingsRecords(where: [StoreSettingsWhereUniqueInput!]!): [StoreSettings]
+  createPaymentProvider(data: PaymentProviderCreateInput!): PaymentProvider
+  createPaymentProviders(data: [PaymentProviderCreateInput!]!): [PaymentProvider]
+  updatePaymentProvider(where: PaymentProviderWhereUniqueInput!, data: PaymentProviderUpdateInput!): PaymentProvider
+  updatePaymentProviders(data: [PaymentProviderUpdateArgs!]!): [PaymentProvider]
+  deletePaymentProvider(where: PaymentProviderWhereUniqueInput!): PaymentProvider
+  deletePaymentProviders(where: [PaymentProviderWhereUniqueInput!]!): [PaymentProvider]
+  createPaymentCollection(data: PaymentCollectionCreateInput!): PaymentCollection
+  createPaymentCollections(data: [PaymentCollectionCreateInput!]!): [PaymentCollection]
+  updatePaymentCollection(where: PaymentCollectionWhereUniqueInput!, data: PaymentCollectionUpdateInput!): PaymentCollection
+  updatePaymentCollections(data: [PaymentCollectionUpdateArgs!]!): [PaymentCollection]
+  deletePaymentCollection(where: PaymentCollectionWhereUniqueInput!): PaymentCollection
+  deletePaymentCollections(where: [PaymentCollectionWhereUniqueInput!]!): [PaymentCollection]
+  createPaymentSession(data: PaymentSessionCreateInput!): PaymentSession
+  createPaymentSessions(data: [PaymentSessionCreateInput!]!): [PaymentSession]
+  updatePaymentSession(where: PaymentSessionWhereUniqueInput!, data: PaymentSessionUpdateInput!): PaymentSession
+  updatePaymentSessions(data: [PaymentSessionUpdateArgs!]!): [PaymentSession]
+  deletePaymentSession(where: PaymentSessionWhereUniqueInput!): PaymentSession
+  deletePaymentSessions(where: [PaymentSessionWhereUniqueInput!]!): [PaymentSession]
+  createPayment(data: PaymentCreateInput!): Payment
+  createPayments(data: [PaymentCreateInput!]!): [Payment]
+  updatePayment(where: PaymentWhereUniqueInput!, data: PaymentUpdateInput!): Payment
+  updatePayments(data: [PaymentUpdateArgs!]!): [Payment]
+  deletePayment(where: PaymentWhereUniqueInput!): Payment
+  deletePayments(where: [PaymentWhereUniqueInput!]!): [Payment]
+  createRefund(data: RefundCreateInput!): Refund
+  createRefunds(data: [RefundCreateInput!]!): [Refund]
+  updateRefund(where: RefundWhereUniqueInput!, data: RefundUpdateInput!): Refund
+  updateRefunds(data: [RefundUpdateArgs!]!): [Refund]
+  deleteRefund(where: RefundWhereUniqueInput!): Refund
+  deleteRefunds(where: [RefundWhereUniqueInput!]!): [Refund]
+  createPaymentWebhookEvent(data: PaymentWebhookEventCreateInput!): PaymentWebhookEvent
+  createPaymentWebhookEvents(data: [PaymentWebhookEventCreateInput!]!): [PaymentWebhookEvent]
+  updatePaymentWebhookEvent(where: PaymentWebhookEventWhereUniqueInput!, data: PaymentWebhookEventUpdateInput!): PaymentWebhookEvent
+  updatePaymentWebhookEvents(data: [PaymentWebhookEventUpdateArgs!]!): [PaymentWebhookEvent]
+  deletePaymentWebhookEvent(where: PaymentWebhookEventWhereUniqueInput!): PaymentWebhookEvent
+  deletePaymentWebhookEvents(where: [PaymentWebhookEventWhereUniqueInput!]!): [PaymentWebhookEvent]
+  createIdempotencyKey(data: IdempotencyKeyCreateInput!): IdempotencyKey
+  createIdempotencyKeys(data: [IdempotencyKeyCreateInput!]!): [IdempotencyKey]
+  updateIdempotencyKey(where: IdempotencyKeyWhereUniqueInput!, data: IdempotencyKeyUpdateInput!): IdempotencyKey
+  updateIdempotencyKeys(data: [IdempotencyKeyUpdateArgs!]!): [IdempotencyKey]
+  deleteIdempotencyKey(where: IdempotencyKeyWhereUniqueInput!): IdempotencyKey
+  deleteIdempotencyKeys(where: [IdempotencyKeyWhereUniqueInput!]!): [IdempotencyKey]
   endSession: Boolean!
   authenticateUserWithPassword(email: String!, password: String!): UserAuthenticationWithPasswordResult
   createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
@@ -856,18 +5156,120 @@ type Query {
   role(where: RoleWhereUniqueInput!): Role
   roles(where: RoleWhereInput! = {}, orderBy: [RoleOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: RoleWhereUniqueInput): [Role!]
   rolesCount(where: RoleWhereInput! = {}): Int
-  todo(where: TodoWhereUniqueInput!): Todo
-  todos(where: TodoWhereInput! = {}, orderBy: [TodoOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TodoWhereUniqueInput): [Todo!]
-  todosCount(where: TodoWhereInput! = {}): Int
-  todoImage(where: TodoImageWhereUniqueInput!): TodoImage
-  todoImages(where: TodoImageWhereInput! = {}, orderBy: [TodoImageOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TodoImageWhereUniqueInput): [TodoImage!]
-  todoImagesCount(where: TodoImageWhereInput! = {}): Int
   oAuthApp(where: OAuthAppWhereUniqueInput!): OAuthApp
   oAuthApps(where: OAuthAppWhereInput! = {}, orderBy: [OAuthAppOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: OAuthAppWhereUniqueInput): [OAuthApp!]
   oAuthAppsCount(where: OAuthAppWhereInput! = {}): Int
   oAuthToken(where: OAuthTokenWhereUniqueInput!): OAuthToken
   oAuthTokens(where: OAuthTokenWhereInput! = {}, orderBy: [OAuthTokenOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: OAuthTokenWhereUniqueInput): [OAuthToken!]
   oAuthTokensCount(where: OAuthTokenWhereInput! = {}): Int
+  venue(where: VenueWhereUniqueInput!): Venue
+  venues(where: VenueWhereInput! = {}, orderBy: [VenueOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: VenueWhereUniqueInput): [Venue!]
+  venuesCount(where: VenueWhereInput! = {}): Int
+  seatingChart(where: SeatingChartWhereUniqueInput!): SeatingChart
+  seatingCharts(where: SeatingChartWhereInput! = {}, orderBy: [SeatingChartOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SeatingChartWhereUniqueInput): [SeatingChart!]
+  seatingChartsCount(where: SeatingChartWhereInput! = {}): Int
+  chartSection(where: ChartSectionWhereUniqueInput!): ChartSection
+  chartSections(where: ChartSectionWhereInput! = {}, orderBy: [ChartSectionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ChartSectionWhereUniqueInput): [ChartSection!]
+  chartSectionsCount(where: ChartSectionWhereInput! = {}): Int
+  seat(where: SeatWhereUniqueInput!): Seat
+  seats(where: SeatWhereInput! = {}, orderBy: [SeatOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SeatWhereUniqueInput): [Seat!]
+  seatsCount(where: SeatWhereInput! = {}): Int
+  agency(where: AgencyWhereUniqueInput!): Agency
+  agencies(where: AgencyWhereInput! = {}, orderBy: [AgencyOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: AgencyWhereUniqueInput): [Agency!]
+  agenciesCount(where: AgencyWhereInput! = {}): Int
+  artist(where: ArtistWhereUniqueInput!): Artist
+  artists(where: ArtistWhereInput! = {}, orderBy: [ArtistOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ArtistWhereUniqueInput): [Artist!]
+  artistsCount(where: ArtistWhereInput! = {}): Int
+  tour(where: TourWhereUniqueInput!): Tour
+  tours(where: TourWhereInput! = {}, orderBy: [TourOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TourWhereUniqueInput): [Tour!]
+  toursCount(where: TourWhereInput! = {}): Int
+  event(where: EventWhereUniqueInput!): Event
+  events(where: EventWhereInput! = {}, orderBy: [EventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: EventWhereUniqueInput): [Event!]
+  eventsCount(where: EventWhereInput! = {}): Int
+  eventArtist(where: EventArtistWhereUniqueInput!): EventArtist
+  eventArtists(where: EventArtistWhereInput! = {}, orderBy: [EventArtistOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: EventArtistWhereUniqueInput): [EventArtist!]
+  eventArtistsCount(where: EventArtistWhereInput! = {}): Int
+  dateHold(where: DateHoldWhereUniqueInput!): DateHold
+  dateHolds(where: DateHoldWhereInput! = {}, orderBy: [DateHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: DateHoldWhereUniqueInput): [DateHold!]
+  dateHoldsCount(where: DateHoldWhereInput! = {}): Int
+  offer(where: OfferWhereUniqueInput!): Offer
+  offers(where: OfferWhereInput! = {}, orderBy: [OfferOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: OfferWhereUniqueInput): [Offer!]
+  offersCount(where: OfferWhereInput! = {}): Int
+  eventExpense(where: EventExpenseWhereUniqueInput!): EventExpense
+  eventExpenses(where: EventExpenseWhereInput! = {}, orderBy: [EventExpenseOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: EventExpenseWhereUniqueInput): [EventExpense!]
+  eventExpensesCount(where: EventExpenseWhereInput! = {}): Int
+  priceLevel(where: PriceLevelWhereUniqueInput!): PriceLevel
+  priceLevels(where: PriceLevelWhereInput! = {}, orderBy: [PriceLevelOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PriceLevelWhereUniqueInput): [PriceLevel!]
+  priceLevelsCount(where: PriceLevelWhereInput! = {}): Int
+  priceLevelPhase(where: PriceLevelPhaseWhereUniqueInput!): PriceLevelPhase
+  priceLevelPhases(where: PriceLevelPhaseWhereInput! = {}, orderBy: [PriceLevelPhaseOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PriceLevelPhaseWhereUniqueInput): [PriceLevelPhase!]
+  priceLevelPhasesCount(where: PriceLevelPhaseWhereInput! = {}): Int
+  seatInventory(where: SeatInventoryWhereUniqueInput!): SeatInventory
+  seatInventories(where: SeatInventoryWhereInput! = {}, orderBy: [SeatInventoryOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SeatInventoryWhereUniqueInput): [SeatInventory!]
+  seatInventoriesCount(where: SeatInventoryWhereInput! = {}): Int
+  productionHold(where: ProductionHoldWhereUniqueInput!): ProductionHold
+  productionHolds(where: ProductionHoldWhereInput! = {}, orderBy: [ProductionHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ProductionHoldWhereUniqueInput): [ProductionHold!]
+  productionHoldsCount(where: ProductionHoldWhereInput! = {}): Int
+  inventoryHold(where: InventoryHoldWhereUniqueInput!): InventoryHold
+  inventoryHolds(where: InventoryHoldWhereInput! = {}, orderBy: [InventoryHoldOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: InventoryHoldWhereUniqueInput): [InventoryHold!]
+  inventoryHoldsCount(where: InventoryHoldWhereInput! = {}): Int
+  promoCode(where: PromoCodeWhereUniqueInput!): PromoCode
+  promoCodes(where: PromoCodeWhereInput! = {}, orderBy: [PromoCodeOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PromoCodeWhereUniqueInput): [PromoCode!]
+  promoCodesCount(where: PromoCodeWhereInput! = {}): Int
+  ticketOrder(where: TicketOrderWhereUniqueInput!): TicketOrder
+  ticketOrders(where: TicketOrderWhereInput! = {}, orderBy: [TicketOrderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketOrderWhereUniqueInput): [TicketOrder!]
+  ticketOrdersCount(where: TicketOrderWhereInput! = {}): Int
+  ticketOrderLine(where: TicketOrderLineWhereUniqueInput!): TicketOrderLine
+  ticketOrderLines(where: TicketOrderLineWhereInput! = {}, orderBy: [TicketOrderLineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketOrderLineWhereUniqueInput): [TicketOrderLine!]
+  ticketOrderLinesCount(where: TicketOrderLineWhereInput! = {}): Int
+  ticket(where: TicketWhereUniqueInput!): Ticket
+  tickets(where: TicketWhereInput! = {}, orderBy: [TicketOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: TicketWhereUniqueInput): [Ticket!]
+  ticketsCount(where: TicketWhereInput! = {}): Int
+  scanEvent(where: ScanEventWhereUniqueInput!): ScanEvent
+  scanEvents(where: ScanEventWhereInput! = {}, orderBy: [ScanEventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ScanEventWhereUniqueInput): [ScanEvent!]
+  scanEventsCount(where: ScanEventWhereInput! = {}): Int
+  merchSales(where: MerchSalesWhereUniqueInput!): MerchSales
+  merchSalesRecords(where: MerchSalesWhereInput! = {}, orderBy: [MerchSalesOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: MerchSalesWhereUniqueInput): [MerchSales!]
+  merchSalesRecordsCount(where: MerchSalesWhereInput! = {}): Int
+  barSales(where: BarSalesWhereUniqueInput!): BarSales
+  barSalesRecords(where: BarSalesWhereInput! = {}, orderBy: [BarSalesOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: BarSalesWhereUniqueInput): [BarSales!]
+  barSalesRecordsCount(where: BarSalesWhereInput! = {}): Int
+  settlement(where: SettlementWhereUniqueInput!): Settlement
+  settlements(where: SettlementWhereInput! = {}, orderBy: [SettlementOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SettlementWhereUniqueInput): [Settlement!]
+  settlementsCount(where: SettlementWhereInput! = {}): Int
+  settlementLine(where: SettlementLineWhereUniqueInput!): SettlementLine
+  settlementLines(where: SettlementLineWhereInput! = {}, orderBy: [SettlementLineOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: SettlementLineWhereUniqueInput): [SettlementLine!]
+  settlementLinesCount(where: SettlementLineWhereInput! = {}): Int
+  artistPayment(where: ArtistPaymentWhereUniqueInput!): ArtistPayment
+  artistPayments(where: ArtistPaymentWhereInput! = {}, orderBy: [ArtistPaymentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ArtistPaymentWhereUniqueInput): [ArtistPayment!]
+  artistPaymentsCount(where: ArtistPaymentWhereInput! = {}): Int
+  auditEvent(where: AuditEventWhereUniqueInput!): AuditEvent
+  auditEvents(where: AuditEventWhereInput! = {}, orderBy: [AuditEventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: AuditEventWhereUniqueInput): [AuditEvent!]
+  auditEventsCount(where: AuditEventWhereInput! = {}): Int
+  storeSettings(where: StoreSettingsWhereUniqueInput!): StoreSettings
+  storeSettingsRecords(where: StoreSettingsWhereInput! = {}, orderBy: [StoreSettingsOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: StoreSettingsWhereUniqueInput): [StoreSettings!]
+  storeSettingsRecordsCount(where: StoreSettingsWhereInput! = {}): Int
+  paymentProvider(where: PaymentProviderWhereUniqueInput!): PaymentProvider
+  paymentProviders(where: PaymentProviderWhereInput! = {}, orderBy: [PaymentProviderOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentProviderWhereUniqueInput): [PaymentProvider!]
+  paymentProvidersCount(where: PaymentProviderWhereInput! = {}): Int
+  paymentCollection(where: PaymentCollectionWhereUniqueInput!): PaymentCollection
+  paymentCollections(where: PaymentCollectionWhereInput! = {}, orderBy: [PaymentCollectionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentCollectionWhereUniqueInput): [PaymentCollection!]
+  paymentCollectionsCount(where: PaymentCollectionWhereInput! = {}): Int
+  paymentSession(where: PaymentSessionWhereUniqueInput!): PaymentSession
+  paymentSessions(where: PaymentSessionWhereInput! = {}, orderBy: [PaymentSessionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentSessionWhereUniqueInput): [PaymentSession!]
+  paymentSessionsCount(where: PaymentSessionWhereInput! = {}): Int
+  payment(where: PaymentWhereUniqueInput!): Payment
+  payments(where: PaymentWhereInput! = {}, orderBy: [PaymentOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentWhereUniqueInput): [Payment!]
+  paymentsCount(where: PaymentWhereInput! = {}): Int
+  refund(where: RefundWhereUniqueInput!): Refund
+  refunds(where: RefundWhereInput! = {}, orderBy: [RefundOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: RefundWhereUniqueInput): [Refund!]
+  refundsCount(where: RefundWhereInput! = {}): Int
+  paymentWebhookEvent(where: PaymentWebhookEventWhereUniqueInput!): PaymentWebhookEvent
+  paymentWebhookEvents(where: PaymentWebhookEventWhereInput! = {}, orderBy: [PaymentWebhookEventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PaymentWebhookEventWhereUniqueInput): [PaymentWebhookEvent!]
+  paymentWebhookEventsCount(where: PaymentWebhookEventWhereInput! = {}): Int
+  idempotencyKey(where: IdempotencyKeyWhereUniqueInput!): IdempotencyKey
+  idempotencyKeys(where: IdempotencyKeyWhereInput! = {}, orderBy: [IdempotencyKeyOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: IdempotencyKeyWhereUniqueInput): [IdempotencyKey!]
+  idempotencyKeysCount(where: IdempotencyKeyWhereInput! = {}): Int
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
   validateUserPasswordResetToken(email: String!, token: String!): ValidateUserPasswordResetTokenResult
