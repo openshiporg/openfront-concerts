@@ -7,7 +7,7 @@ export const SeatInventory = list({
  access: commandAccess,
  
  fields: {
-  holdKey: text({ isIndexed: 'unique', db: { isNullable: true } }),
+  holdKey: text({ isIndexed: true, db: { isNullable: true } }),
   occupancyKey: text({ isIndexed: 'unique', db: { isNullable: true } }),
   eventSeatKey: text({ isIndexed: 'unique', db: { isNullable: true } }),
   status: select({ type: 'string', options: ['open', 'held', 'sold', 'killed', 'comp', 'reserved_hold'], defaultValue: 'open', access: { update: () => false } }),

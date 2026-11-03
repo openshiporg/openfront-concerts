@@ -376,7 +376,7 @@ export function Sidebar({ adminMeta, user, onOpenDialog }: SidebarProps) {
               try {
                 await dismissOnboarding();
               } catch (error) {
-                console.error('Error dismissing onboarding:', error);
+                console.error('Dashboard operation failed (details redacted).');
               }
             }}
             onOpenDialog={onOpenDialog}

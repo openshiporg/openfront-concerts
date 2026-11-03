@@ -426,7 +426,7 @@ model PriceLevelPhase {
 
 model SeatInventory {
   id                   String           @id @default(cuid())
-  holdKey              String?          @unique
+  holdKey              String?
   occupancyKey         String?          @unique
   eventSeatKey         String?          @unique
   status               String?          @default("open")
@@ -442,6 +442,7 @@ model SeatInventory {
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @default(now()) @updatedAt
 
+  @@index([holdKey])
   @@index([eventId])
   @@index([seatId])
   @@index([priceLevelId])

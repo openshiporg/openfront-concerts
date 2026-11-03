@@ -145,7 +145,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tra
           properties: {
             operation: {
               type: 'string',
-              description: 'The GraphQL operation name (e.g., "users", "todos", "roles")'
+              description: 'The GraphQL operation name (e.g., "users", "events", "roles")'
             },
             fields: {
               type: 'string',
@@ -162,7 +162,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tra
           properties: {
             searchTerm: {
               type: 'string',
-              description: 'The search term to find models (e.g., "User", "Todo", "Role")'
+              description: 'The search term to find models (e.g., "User", "Event", "Role")'
             }
           },
           required: ['searchTerm']
@@ -175,7 +175,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tra
           properties: {
             typeName: {
               type: 'string',
-              description: 'The GraphQL type name to get fields for (e.g., "User", "Todo", "Role")'
+              description: 'The GraphQL type name to get fields for (e.g., "User", "Event", "Role")'
             }
           },
           required: ['typeName']
@@ -188,7 +188,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tra
           properties: {
             inputTypeName: {
               type: 'string',
-              description: 'The GraphQL input type name (e.g., "UserCreateInput", "TodoUpdateInput")'
+              description: 'The GraphQL input type name (e.g., "UserCreateInput", "EventUpdateInput")'
             }
           },
           required: ['inputTypeName']
@@ -201,7 +201,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tra
           properties: {
             operation: {
               type: 'string',
-              description: 'The GraphQL create mutation name (e.g., "createUser", "createTodo")'
+              description: 'The GraphQL create mutation name (e.g., "createUser", "createVenue")'
             },
             data: {
               type: 'string',
@@ -222,7 +222,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tra
           properties: {
             operation: {
               type: 'string',
-              description: 'The GraphQL update mutation name (e.g., "updateUser", "updateTodo")'
+              description: 'The GraphQL update mutation name (e.g., "updateUser", "updateVenue")'
             },
             where: {
               type: 'string',
@@ -247,7 +247,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tra
           properties: {
             operation: {
               type: 'string',
-              description: 'The GraphQL delete mutation name (e.g., "deleteUser", "deleteTodo")'
+              description: 'The GraphQL delete mutation name (e.g., "deleteUser", "deleteVenue")'
             },
             where: {
               type: 'string',
@@ -268,7 +268,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tra
           properties: {
             modelName: {
               type: 'string',
-              description: 'The model name to search (e.g., "Product", "User", "Todo"). Will be automatically converted to the correct GraphQL operation name.'
+              description: 'The model name to search (e.g., "Event", "User", "Venue"). Will be automatically converted to the correct GraphQL operation name.'
             },
             searchQuery: {
               type: 'string',

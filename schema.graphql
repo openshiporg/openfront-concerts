@@ -2626,7 +2626,6 @@ type SeatInventory {
 
 input SeatInventoryWhereUniqueInput {
   id: ID
-  holdKey: String
   occupancyKey: String
   eventSeatKey: String
 }
