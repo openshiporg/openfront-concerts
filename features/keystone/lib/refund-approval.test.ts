@@ -9,6 +9,9 @@ test('approval is bound to order, amount and reason', () => {
   assert.notEqual(fp, refundApprovalFingerprint(refundApprovalPayload('o2', 5000, 'Show cancelled')));
   assert.doesNotThrow(() => assertApprovalUsable(ok, { actorId: 'a', fingerprint: fp }));
 });
+test('a card refund approval cannot authorise a cash refund, and vice versa', () => {
+  assert.notEqual(fp, refundApprovalFingerprint(refundApprovalPayload('o1', 5000, 'Show cancelled', 'cash_refund')));
+});
 test('refusals: wrong requester, self approval, pending, consumed, expired, other amount', () => {
   const t = (a: any, f = fp, actor = 'a') => assert.throws(() => assertApprovalUsable({ ...ok, ...a }, { actorId: actor, fingerprint: f }));
   t({}, fp, 'c'); t({ approvedById: 'a' }); t({ approvedById: null }); t({ status: 'pending' }); t({ status: 'consumed' });

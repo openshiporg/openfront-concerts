@@ -10,11 +10,14 @@ export async function requestRefundApproval(_: any, { input }: any, context: any
   const actor = context.session.itemId;
   const reason = String(input.reason || '').trim();
   if (!reason) throw new Error('Reason required');
-  const payload = refundApprovalPayload(input.orderId, input.amountCents, reason);
+  const payload = refundApprovalPayload(input.orderId, input.amountCents, reason, input.cash ? 'cash_refund' : 'refund_payment');
   return context.prisma.$transaction(async (tx: any) => {
     const order = await tx.ticketOrder.findUnique({ where: { id: input.orderId } });
     if (!order || !['paid', 'partially_refunded'].includes(order.status)) throw new Error('Order is not refundable');
     if (payload.amount > order.totalCents - order.refundedCents) throw new Error('Refund exceeds unrefunded balance');
+    const door = await tx.payment.findFirst({ where: { orderId: order.id, status: { in: ['succeeded', 'partially_refunded'] } } });
+    if (!door) throw new Error('No captured payment');
+    if (Boolean(input.cash) !== !door.providerPaymentId) throw new Error(input.cash ? 'Only door cash and terminal sales use a cash refund' : 'Door sales are refunded as a cash refund');
     const fingerprint = refundApprovalFingerprint(payload);
     const existing = await tx.managerApproval.findFirst({ where: { requestFingerprint: fingerprint, requestedById: actor, status: { in: ['pending', 'approved'] }, expiresAt: { gt: new Date() } } });
     if (existing) return { id: existing.id, status: existing.status, expiresAt: existing.expiresAt };

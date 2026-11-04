@@ -1,10 +1,11 @@
 import { createHash } from 'node:crypto';
 
 /** Binds an approval to exactly one order and exact amount; a changed amount or order invalidates it. */
-export function refundApprovalPayload(orderId: string, amountCents: number, reason: string) {
+export type RefundActionType = 'refund_payment' | 'cash_refund';
+export function refundApprovalPayload(orderId: string, amountCents: number, reason: string, actionType: RefundActionType = 'refund_payment') {
   if (!orderId) throw new Error('Order required');
   if (!Number.isSafeInteger(amountCents) || amountCents < 1) throw new Error('Refund amount must be a positive whole number of cents');
-  return { actionType: 'refund_payment', targetId: orderId, amount: amountCents, reason: String(reason || '').trim() };
+  return { actionType, targetId: orderId, amount: amountCents, reason: String(reason || '').trim() };
 }
 export function refundApprovalFingerprint(payload: ReturnType<typeof refundApprovalPayload>) {
   return createHash('sha256').update(JSON.stringify([payload.actionType, payload.targetId, payload.amount, payload.reason])).digest('hex');

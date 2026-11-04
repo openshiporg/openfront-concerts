@@ -7,7 +7,7 @@ import { trackingFields } from './trackingFields';
 export const ManagerApproval = list({
   access: { operation: { query: ({ session }) => permissions.canIssueRefunds({ session }) || permissions.canApproveAdjustments({ session }), create: () => false, update: () => false, delete: () => false } },
   fields: {
-    actionType: select({ type: 'string', options: ['refund_payment'], validation: { isRequired: true }, isIndexed: true }),
+    actionType: select({ type: 'string', options: ['refund_payment', 'cash_refund'], validation: { isRequired: true }, isIndexed: true }),
     targetId: text({ validation: { isRequired: true }, isIndexed: true }),
     reason: text({ validation: { isRequired: true } }),
     amount: integer(),
