@@ -11,7 +11,8 @@ type AccessArgs = { session?: Session };
 export const isSignedIn = ({ session }: AccessArgs) => Boolean(session);
 export const permissions = Object.fromEntries(permissionNames.map(name => [name, ({ session }: AccessArgs) => session?.data.role?.[name] === true])) as Record<Permission, (args: AccessArgs) => boolean>;
 export const commandAccess = { operation: { query: permissions.canAccessDashboard, create: () => false, update: () => false, delete: () => false } };
-export const catalogAccess = { operation: { query: permissions.canAccessDashboard, create: permissions.canManageEvents, update: permissions.canManageEvents, delete: () => false } };
+export const catalogAccessFor = (permission: Permission) => ({ operation: { query: permissions.canAccessDashboard, create: permissions[permission], update: permissions[permission], delete: () => false } });
+export const catalogAccess = catalogAccessFor('canManageEvents');
 export const rules = {
   canReadPeople: ({ session }: AccessArgs) => !session ? false : session.data.role?.canSeeOtherPeople ? true : { id: { equals: session.itemId } },
   canUpdatePeople: ({ session }: AccessArgs) => !session ? false : session.data.role?.canEditOtherPeople ? true : { id: { equals: session.itemId } },
