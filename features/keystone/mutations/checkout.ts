@@ -150,6 +150,7 @@ export async function refundTicketOrder(_: any, { input }: any, context: any) {
     if (!order || !['paid', 'partially_refunded'].includes(order.status)) throw new Error('Order is not refundable');
     const payment = await tx.payment.findFirst({ where: { orderId, status: { in: ['succeeded', 'partially_refunded'] } } });
     if (!payment) throw new Error('No captured payment');
+    if (!payment.providerPaymentId) throw new Error('Cash and terminal sales are refunded at the box office, not through Stripe');
     const outstanding = await tx.refund.findMany({ where: { paymentId: payment.id, status: { in: ['processing', 'unknown', 'succeeded'] } } });
     const available = payment.amount - outstanding.reduce((n: number, r: any) => n + r.amount, 0);
     refundableCents(order.totalCents, order.totalCents - available);

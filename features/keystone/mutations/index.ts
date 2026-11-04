@@ -5,6 +5,7 @@ import { availability, createHold } from './inventory';
 import { operator } from './operators';
 import { publishSeatingChart } from './charts';
 import { requestRefundApproval, decideRefundApproval } from './approvals';
+import { issueDoorSale, issueComp } from './doorSales';
 import updateActiveUser from './updateActiveUser';
 import seedConcerts from './seedConcerts';
 import { startTicketCheckout, completeTicketCheckout, lookupTicketOrder, transferTicket, refundTicketOrder } from './checkout';
@@ -23,6 +24,8 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
       input CompleteTicketCheckoutInput { orderId: ID! proof: String! }
       input TransferTicketInput { ticketCode: String! orderId: ID! proof: String! toEmail: String! toName: String idempotencyKey: String! }
       input RefundTicketOrderInput { orderId: ID! amountCents: Int reason: String! idempotencyKey: String! approvalId: ID }
+      input DoorTenderInput { kind: String! tenderedCents: Int reference: String }
+      input DoorSaleInput { eventId: ID! levelId: ID! qty: Int! name: String! email: String ageAttested: Boolean reason: String tender: DoorTenderInput idempotencyKey: String! }
       input RefundApprovalRequestInput { orderId: ID! amountCents: Int! reason: String! }
       input RefundApprovalDecisionInput { approvalId: ID! decision: String! note: String }
       type Query {
@@ -42,6 +45,8 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         seedConcerts(section: String!, data: JSON!): JSON
         publishSeatingChart(input: OperatorCommandInput!): JSON
         requestRefundApproval(input: RefundApprovalRequestInput!): JSON
+        issueDoorSale(input: DoorSaleInput!): JSON
+        issueComp(input: DoorSaleInput!): JSON
         decideRefundApproval(input: RefundApprovalDecisionInput!): JSON
         ${operatorCommands.map(name => `${name}(input: OperatorCommandInput!): JSON`).join('\n        ')}
       }
@@ -57,7 +62,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         createGaHold: createHold,
         createSeatHold: createHold,
         seedConcerts,
-        publishSeatingChart, requestRefundApproval, decideRefundApproval,
+        publishSeatingChart, requestRefundApproval, decideRefundApproval, issueDoorSale, issueComp,
         updateActiveUser,
         startTicketCheckout, completeTicketCheckout, transferTicket, refundTicketOrder,
         ...Object.fromEntries(operatorCommands.map(name => [name, operator(name)])),
