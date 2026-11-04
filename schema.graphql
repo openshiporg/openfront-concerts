@@ -5250,6 +5250,7 @@ type Mutation {
   refundTicketOrder(input: RefundTicketOrderInput!): JSON
   updateActiveUser(data: UserUpdateProfileInput!): User
   seedConcerts(section: String!, data: JSON!): JSON
+  publishSeatingChart(input: OperatorCommandInput!): JSON
   releaseDateHold(input: OperatorCommandInput!): JSON
   advanceEvent(input: OperatorCommandInput!): JSON
   placeDateHold(input: OperatorCommandInput!): JSON

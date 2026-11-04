@@ -1,5 +1,6 @@
 import { gql } from '../../lib/gql';
 import { label } from '../../lib/format';
+import { ActionButton } from '../../components/ActionButton';
 import { Page, Row, Rows } from '../../components/ui-bits';
 
 export async function VenueListPage() {
@@ -7,7 +8,7 @@ export async function VenueListPage() {
   return (
     <Page title="Venues and seating charts">
       <Rows empty="No venues.">
-        {data.venues.map((v: any) => <Row key={v.id} title={v.name} meta={`${v.city} · capacity ${v.capacity} · ${v.ownedByPromoter ? 'owned' : 'partner'}`} right={v.seatingChart_venue.map((c: any) => <div key={c.id}>{c.name} v{c.version} ({label(c.status)}): {c.chartSection_chart.map((s: any) => `${s.name} ${s.kind === 'ga' ? 'GA' : 'reserved'} ${s.capacity}`).join(', ')}</div>)} />)}
+        {data.venues.map((v: any) => <Row key={v.id} title={v.name} meta={`${v.city} · capacity ${v.capacity} · ${v.ownedByPromoter ? 'owned' : 'partner'}`} right={v.seatingChart_venue.map((c: any) => <div key={c.id}>{c.name} v{c.version} <span className="font-mono text-xs uppercase tracking-wide">{label(c.status)}</span> {c.status === 'draft' ? <ActionButton command="publishSeatingChart" input={{ seatingChartId: c.id }}>Publish chart</ActionButton> : null}: {c.chartSection_chart.map((s: any) => `${s.name} ${s.kind === 'ga' ? 'GA' : 'reserved'} ${s.capacity}`).join(', ')}</div>)} />)}
       </Rows>
     </Page>
   );

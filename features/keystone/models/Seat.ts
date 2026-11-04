@@ -1,11 +1,12 @@
 import { list, graphql } from '@keystone-6/core';
 import { text, integer, checkbox, json, select, relationship, timestamp, virtual } from '@keystone-6/core/fields';
 import { trackingFields } from './trackingFields';
+import { validateChartMutation } from '../lib/chart-validation';
 import { commandAccess, catalogAccessFor, permissions } from '../access';
 
 export const Seat = list({
  access: catalogAccessFor('canManageVenues'),
- hooks: { async validate({ operation, item, context, addValidationError }) { if (!item) return; let chart: any = item; const section = await context.prisma.chartSection.findUnique({where:{id: item.chartSectionId as string}}); chart = section && await context.prisma.seatingChart.findUnique({where:{id: section.chartId!}}); if (chart?.status !== 'draft') addValidationError('Published seating charts are immutable; create a new version.'); } },
+ hooks: { validate: args => validateChartMutation(args, 'seat') },
  fields: {
   row: text({}),
   number: text({}),

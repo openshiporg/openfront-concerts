@@ -3,6 +3,7 @@ import type { GraphQLSchema } from 'graphql';
 import redirectToInit from "./redirectToInit";
 import { availability, createHold } from './inventory';
 import { operator } from './operators';
+import { publishSeatingChart } from './charts';
 import updateActiveUser from './updateActiveUser';
 import seedConcerts from './seedConcerts';
 import { startTicketCheckout, completeTicketCheckout, lookupTicketOrder, transferTicket, refundTicketOrder } from './checkout';
@@ -36,6 +37,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         refundTicketOrder(input: RefundTicketOrderInput!): JSON
         updateActiveUser(data: UserUpdateProfileInput!): User
         seedConcerts(section: String!, data: JSON!): JSON
+        publishSeatingChart(input: OperatorCommandInput!): JSON
         ${operatorCommands.map(name => `${name}(input: OperatorCommandInput!): JSON`).join('\n        ')}
       }
     `,
@@ -50,6 +52,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         createGaHold: createHold,
         createSeatHold: createHold,
         seedConcerts,
+        publishSeatingChart,
         updateActiveUser,
         startTicketCheckout, completeTicketCheckout, transferTicket, refundTicketOrder,
         ...Object.fromEntries(operatorCommands.map(name => [name, operator(name)])),
