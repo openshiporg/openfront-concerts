@@ -39,5 +39,6 @@ import { Payment } from './Payment';
 import { Refund } from './Refund';
 import { PaymentWebhookEvent } from './PaymentWebhookEvent';
 import { IdempotencyKey } from './IdempotencyKey';
-export const models = { User, Role, OAuthApp, OAuthToken, Venue, SeatingChart, ChartSection, Seat, Agency, Artist, Tour, Event, EventArtist, DateHold, Offer, EventExpense, PriceLevel, PriceLevelPhase, SeatInventory, ProductionHold, InventoryHold, PromoCode, PromoRedemption, TicketOrder, TicketOrderLine, Ticket, ScanEvent, MerchSales, BarSales, Settlement, SettlementLine, ArtistPayment, AuditEvent, StoreSettings, PaymentProvider, PaymentCollection, PaymentSession, Payment, Refund, PaymentWebhookEvent, IdempotencyKey };
+import { ManagerApproval } from './ManagerApproval';
+export const models = { User, Role, OAuthApp, OAuthToken, Venue, SeatingChart, ChartSection, Seat, Agency, Artist, Tour, Event, EventArtist, DateHold, Offer, EventExpense, PriceLevel, PriceLevelPhase, SeatInventory, ProductionHold, InventoryHold, PromoCode, PromoRedemption, TicketOrder, TicketOrderLine, Ticket, ScanEvent, MerchSales, BarSales, Settlement, SettlementLine, ArtistPayment, AuditEvent, StoreSettings, PaymentProvider, PaymentCollection, PaymentSession, Payment, Refund, PaymentWebhookEvent, IdempotencyKey, ManagerApproval };
 export default models;

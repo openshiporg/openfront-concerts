@@ -4985,6 +4985,112 @@ input IdempotencyKeyCreateInput {
   updatedAt: DateTime
 }
 
+type ManagerApproval {
+  id: ID!
+  actionType: String
+  targetId: String
+  reason: String
+  amount: Int
+  requestFingerprint: String
+  requestPayload: JSON
+  status: String
+  approvedAt: DateTime
+  consumedAt: DateTime
+  expiresAt: DateTime
+  consumedEntityType: String
+  consumedEntityId: String
+  requestedBy: User
+  approvedBy: User
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ManagerApprovalWhereUniqueInput {
+  id: ID
+}
+
+input ManagerApprovalWhereInput {
+  AND: [ManagerApprovalWhereInput!]
+  OR: [ManagerApprovalWhereInput!]
+  NOT: [ManagerApprovalWhereInput!]
+  id: IDFilter
+  actionType: StringFilter
+  targetId: StringFilter
+  reason: StringFilter
+  amount: IntNullableFilter
+  requestFingerprint: StringFilter
+  status: StringFilter
+  approvedAt: DateTimeNullableFilter
+  consumedAt: DateTimeNullableFilter
+  expiresAt: DateTimeFilter
+  consumedEntityType: StringFilter
+  consumedEntityId: StringFilter
+  requestedBy: UserWhereInput
+  approvedBy: UserWhereInput
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input ManagerApprovalOrderByInput {
+  id: OrderDirection
+  actionType: OrderDirection
+  targetId: OrderDirection
+  reason: OrderDirection
+  amount: OrderDirection
+  requestFingerprint: OrderDirection
+  status: OrderDirection
+  approvedAt: OrderDirection
+  consumedAt: OrderDirection
+  expiresAt: OrderDirection
+  consumedEntityType: OrderDirection
+  consumedEntityId: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input ManagerApprovalUpdateInput {
+  actionType: String
+  targetId: String
+  reason: String
+  amount: Int
+  requestFingerprint: String
+  requestPayload: JSON
+  status: String
+  approvedAt: DateTime
+  consumedAt: DateTime
+  expiresAt: DateTime
+  consumedEntityType: String
+  consumedEntityId: String
+  requestedBy: UserRelateToOneForUpdateInput
+  approvedBy: UserRelateToOneForUpdateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input ManagerApprovalUpdateArgs {
+  where: ManagerApprovalWhereUniqueInput!
+  data: ManagerApprovalUpdateInput!
+}
+
+input ManagerApprovalCreateInput {
+  actionType: String
+  targetId: String
+  reason: String
+  amount: Int
+  requestFingerprint: String
+  requestPayload: JSON
+  status: String
+  approvedAt: DateTime
+  consumedAt: DateTime
+  expiresAt: DateTime
+  consumedEntityType: String
+  consumedEntityId: String
+  requestedBy: UserRelateToOneForCreateInput
+  approvedBy: UserRelateToOneForCreateInput
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -5237,6 +5343,12 @@ type Mutation {
   updateIdempotencyKeys(data: [IdempotencyKeyUpdateArgs!]!): [IdempotencyKey]
   deleteIdempotencyKey(where: IdempotencyKeyWhereUniqueInput!): IdempotencyKey
   deleteIdempotencyKeys(where: [IdempotencyKeyWhereUniqueInput!]!): [IdempotencyKey]
+  createManagerApproval(data: ManagerApprovalCreateInput!): ManagerApproval
+  createManagerApprovals(data: [ManagerApprovalCreateInput!]!): [ManagerApproval]
+  updateManagerApproval(where: ManagerApprovalWhereUniqueInput!, data: ManagerApprovalUpdateInput!): ManagerApproval
+  updateManagerApprovals(data: [ManagerApprovalUpdateArgs!]!): [ManagerApproval]
+  deleteManagerApproval(where: ManagerApprovalWhereUniqueInput!): ManagerApproval
+  deleteManagerApprovals(where: [ManagerApprovalWhereUniqueInput!]!): [ManagerApproval]
   endSession: Boolean!
   authenticateUserWithPassword(email: String!, password: String!): UserAuthenticationWithPasswordResult
   createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
@@ -5251,6 +5363,8 @@ type Mutation {
   updateActiveUser(data: UserUpdateProfileInput!): User
   seedConcerts(section: String!, data: JSON!): JSON
   publishSeatingChart(input: OperatorCommandInput!): JSON
+  requestRefundApproval(input: RefundApprovalRequestInput!): JSON
+  decideRefundApproval(input: RefundApprovalDecisionInput!): JSON
   releaseDateHold(input: OperatorCommandInput!): JSON
   advanceEvent(input: OperatorCommandInput!): JSON
   placeDateHold(input: OperatorCommandInput!): JSON
@@ -5423,6 +5537,9 @@ type Query {
   idempotencyKey(where: IdempotencyKeyWhereUniqueInput!): IdempotencyKey
   idempotencyKeys(where: IdempotencyKeyWhereInput! = {}, orderBy: [IdempotencyKeyOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: IdempotencyKeyWhereUniqueInput): [IdempotencyKey!]
   idempotencyKeysCount(where: IdempotencyKeyWhereInput! = {}): Int
+  managerApproval(where: ManagerApprovalWhereUniqueInput!): ManagerApproval
+  managerApprovals(where: ManagerApprovalWhereInput! = {}, orderBy: [ManagerApprovalOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ManagerApprovalWhereUniqueInput): [ManagerApproval!]
+  managerApprovalsCount(where: ManagerApprovalWhereInput! = {}): Int
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
   validateUserPasswordResetToken(email: String!, token: String!): ValidateUserPasswordResetTokenResult
@@ -5649,5 +5766,17 @@ input RefundTicketOrderInput {
   amountCents: Int
   reason: String!
   idempotencyKey: String!
-  approvedById: ID
+  approvalId: ID
+}
+
+input RefundApprovalRequestInput {
+  orderId: ID!
+  amountCents: Int!
+  reason: String!
+}
+
+input RefundApprovalDecisionInput {
+  approvalId: ID!
+  decision: String!
+  note: String
 }

@@ -3,6 +3,7 @@ import { command, checkedClient, lockTransactionKey } from '../lib/transaction';
 import { appendAuditEvent } from '../lib/audit';
 import { createProof, verifyProof, ownedHold, ownedOrder, opaqueToken, digest, humanCode } from '../lib/guest-proof';
 import { refundableCents } from '../lib/settlement';
+import { refundApprovalPayload, refundApprovalFingerprint, assertApprovalUsable } from '../lib/refund-approval';
 import { createPayment, getPaymentStatus, refundPayment as providerRefund, cancelPayment, handleWebhook } from '../utils/paymentProviderAdapter';
 import { assertCheckoutProviderObservation } from '../utils/checkoutProviderObservation';
 import { getPublicPaymentProviderConfig } from '../utils/paymentProviderConfig';
@@ -140,11 +141,11 @@ export async function transferTicket(_: any, { input }: any, context: any) {
 
 export async function refundTicketOrder(_: any, { input }: any, context: any) {
   if (!permissions.canIssueRefunds({ session: context.session })) throw new Error('Permission required: canIssueRefunds');
-  const { orderId, reason, idempotencyKey, approvedById } = input;
+  const { orderId, reason, idempotencyKey, approvalId } = input;
   if (!idempotencyKey || !String(reason || '').trim()) throw new Error('Reason and idempotency key required');
   const actor = context.session.itemId; const prisma = context.prisma;
   const provider = await stripeProvider(context);
-  const reserve = await command(context, { operation: 'refundTicketOrder', idempotencyKey, lock: `event:${(await prisma.ticketOrder.findUnique({ where: { id: orderId } }))?.eventId}`, params: { orderId, amountCents: input.amountCents ?? null, reason, approvedById: approvedById ?? null } }, async tx => {
+  const reserve = await command(context, { operation: 'refundTicketOrder', idempotencyKey, lock: `event:${(await prisma.ticketOrder.findUnique({ where: { id: orderId } }))?.eventId}`, params: { orderId, amountCents: input.amountCents ?? null, reason, approvalId: approvalId ?? null } }, async tx => {
     const order = await tx.ticketOrder.findUnique({ where: { id: orderId } });
     if (!order || !['paid', 'partially_refunded'].includes(order.status)) throw new Error('Order is not refundable');
     const payment = await tx.payment.findFirst({ where: { orderId, status: { in: ['succeeded', 'partially_refunded'] } } });
@@ -156,12 +157,17 @@ export async function refundTicketOrder(_: any, { input }: any, context: any) {
     if (!Number.isSafeInteger(amount) || amount < 1 || amount > available) throw new Error('Refund exceeds unrefunded balance');
     const settings = await tx.storeSettings.findFirst();
     const threshold = settings?.refundApprovalThresholdCents ?? 0;
+    let approvedById: string | null = null;
     if (amount > threshold) {
-      if (!approvedById || approvedById === actor) throw new Error('A different manager must approve this refund');
-      const approver = await tx.user.findUnique({ where: { id: approvedById }, include: { role: true } });
-      if (!approver?.role?.canApproveAdjustments) throw new Error('Approver lacks manager permission');
+      // Approval is bound to this order, exact amount and reason, and consumed in this same transaction.
+      if (!approvalId) throw new Error('A different manager must approve this refund');
+      const approval = await tx.managerApproval.findUnique({ where: { id: approvalId } });
+      assertApprovalUsable(approval, { actorId: actor, fingerprint: refundApprovalFingerprint(refundApprovalPayload(orderId, amount, reason)) });
+      const consumed = await tx.managerApproval.updateMany({ where: { id: approvalId, status: 'approved', expiresAt: { gt: new Date() } }, data: { status: 'consumed', consumedAt: new Date(), consumedEntityType: 'TicketOrder', consumedEntityId: orderId } });
+      if (consumed.count !== 1) throw new Error('Approval was already used or expired');
+      approvedById = approval.approvedById;
     }
-    const refund = await tx.refund.create({ data: { idempotencyKey: `refund:${idempotencyKey}`, amount, currencyCode: payment.currencyCode, status: 'processing', reason, paymentId: payment.id, orderId, requestedById: actor, approvedById: approvedById || null } });
+    const refund = await tx.refund.create({ data: { idempotencyKey: `refund:${idempotencyKey}`, amount, currencyCode: payment.currencyCode, status: 'processing', reason, paymentId: payment.id, orderId, requestedById: actor, approvedById } });
     await appendAuditEvent(tx, actor, { action: 'refund.reserved', targetList: 'Refund', targetId: refund.id, after: { amount }, reason });
     return { refundId: refund.id, amount, paymentId: payment.id, providerPaymentId: payment.providerPaymentId, currency: payment.currencyCode, full: amount === order.totalCents - order.refundedCents, key: refund.idempotencyKey };
   });
