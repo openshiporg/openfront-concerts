@@ -1,3 +1,5 @@
+import { ticketQuote } from './settlement';
+
 /** Pure rules for box-office door sales and comps (no I/O, unit tested). */
 export const DOOR_STATUSES = ['presale', 'on_sale', 'doors', 'in_progress'];
 export const MAX_DOOR_QTY = 8;
@@ -22,6 +24,25 @@ export function settleTender(totalCents: number, tender: any): { method: 'cash' 
     return { method: 'credit_card', changeCents: 0, reference };
   }
   throw new Error('Choose cash or card terminal');
+}
+type PhaseRow = { id: string; name: string; priceCents: number; quantity: number; sold: number };
+/** First started phase with room for qty (sold plus live holds). null when there are no phases; throws when all are exhausted. */
+export function pickPhase(phases: PhaseRow[], reservedByPhase: Record<string, number>, qty: number): PhaseRow | null {
+  if (!phases.length) return null;
+  const hit = phases.find((p) => p.sold + (reservedByPhase[p.id] || 0) + qty <= p.quantity);
+  if (!hit) throw new Error('Pricing phase exhausted');
+  return hit;
+}
+/**
+ * The ONE price rule for door sales and comps. Door sales charge the active phase price (else the level price),
+ * the facility fee and venue tax; no online service fee at the door. Comps are zero. Preview and charge both call this.
+ */
+export function priceDoorSale(kind: 'door' | 'comp', level: { priceCents: number; facilityFeeCents: number }, phase: { priceCents: number } | null, qty: number, taxBps: number) {
+  const unitPriceCents = kind === 'comp' ? 0 : phase?.priceCents ?? level.priceCents;
+  const quote = kind === 'comp'
+    ? { subtotalCents: 0, serviceFeesCents: 0, facilityFeesCents: 0, discountCents: 0, taxCents: 0, totalCents: 0 }
+    : ticketQuote({ priceCents: unitPriceCents, feeCents: 0, facilityFeeCents: level.facilityFeeCents, quantity: qty, taxBps });
+  return { unitPriceCents, quote };
 }
 /** Remaining capacity of a level; production holds, live holds and sold all count. */
 export function levelRoom(level: { capacity: number; sold: number; held: number; productionHeld: number }) {

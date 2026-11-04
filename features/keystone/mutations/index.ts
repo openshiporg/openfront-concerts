@@ -5,7 +5,7 @@ import { availability, createHold } from './inventory';
 import { operator } from './operators';
 import { publishSeatingChart } from './charts';
 import { requestRefundApproval, decideRefundApproval } from './approvals';
-import { issueDoorSale, issueComp } from './doorSales';
+import { issueDoorSale, issueComp, previewDoorSale } from './doorSales';
 import { refundDoorSale } from './doorRefunds';
 import updateActiveUser from './updateActiveUser';
 import seedConcerts from './seedConcerts';
@@ -26,6 +26,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
       input TransferTicketInput { ticketCode: String! orderId: ID! proof: String! toEmail: String! toName: String idempotencyKey: String! }
       input RefundTicketOrderInput { orderId: ID! amountCents: Int reason: String! idempotencyKey: String! approvalId: ID }
       input DoorTenderInput { kind: String! tenderedCents: Int reference: String }
+      input DoorPreviewInput { eventId: ID! levelId: ID! qty: Int! comp: Boolean }
       input DoorSaleInput { eventId: ID! levelId: ID! qty: Int! name: String! email: String ageAttested: Boolean reason: String tender: DoorTenderInput idempotencyKey: String! }
       input RefundApprovalRequestInput { orderId: ID! amountCents: Int! reason: String! cash: Boolean }
       input RefundApprovalDecisionInput { approvalId: ID! decision: String! note: String }
@@ -48,6 +49,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         requestRefundApproval(input: RefundApprovalRequestInput!): JSON
         issueDoorSale(input: DoorSaleInput!): JSON
         issueComp(input: DoorSaleInput!): JSON
+        previewDoorSale(input: DoorPreviewInput!): JSON
         refundDoorSale(input: RefundTicketOrderInput!): JSON
         decideRefundApproval(input: RefundApprovalDecisionInput!): JSON
         ${operatorCommands.map(name => `${name}(input: OperatorCommandInput!): JSON`).join('\n        ')}
@@ -64,7 +66,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         createGaHold: createHold,
         createSeatHold: createHold,
         seedConcerts,
-        publishSeatingChart, requestRefundApproval, decideRefundApproval, issueDoorSale, issueComp, refundDoorSale,
+        publishSeatingChart, requestRefundApproval, decideRefundApproval, issueDoorSale, issueComp, previewDoorSale, refundDoorSale,
         updateActiveUser,
         startTicketCheckout, completeTicketCheckout, transferTicket, refundTicketOrder,
         ...Object.fromEntries(operatorCommands.map(name => [name, operator(name)])),

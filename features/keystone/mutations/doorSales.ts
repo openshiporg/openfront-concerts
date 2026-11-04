@@ -2,11 +2,29 @@ import { permissions } from '../access';
 import { command } from '../lib/transaction';
 import { appendAuditEvent } from '../lib/audit';
 import { digest, humanCode, opaqueToken } from '../lib/guest-proof';
-import { ticketQuote } from '../lib/settlement';
-import { DOOR_STATUSES, MAX_COMP_QTY, assertDoorQuantity, assertRoom, settleTender } from '../lib/door-sale';
+import { DOOR_STATUSES, MAX_COMP_QTY, assertDoorQuantity, assertRoom, settleTender, pickPhase, priceDoorSale } from '../lib/door-sale';
 import { expireHolds } from './inventory';
 
 type Kind = 'door' | 'comp';
+
+async function activePhase(tx: any, levelId: string, qty: number) {
+  const phases = await tx.priceLevelPhase.findMany({ where: { priceLevelId: levelId, startsAt: { lte: new Date() } }, orderBy: { sort: 'asc' } });
+  const reserved: Record<string, number> = {};
+  for (const p of phases) reserved[p.id] = (await tx.inventoryHold.aggregate({ where: { phaseId: p.id, status: 'active' }, _sum: { quantity: true } }))._sum.quantity || 0;
+  return pickPhase(phases, reserved, qty);
+}
+
+/** Read-only quote for the panel: same phase lookup and same priceDoorSale() the charge uses. */
+export async function previewDoorSale(_: any, { input }: any, context: any) {
+  if (!permissions.canManageOrders({ session: context.session })) throw new Error('Permission required: canManageOrders');
+  const kind: Kind = input.comp ? 'comp' : 'door';
+  const qty = assertDoorQuantity(input.qty, kind === 'comp' ? MAX_COMP_QTY : undefined);
+  const level = await context.prisma.priceLevel.findUnique({ where: { id: input.levelId }, include: { event: { include: { venue: true } } } });
+  if (!level || level.eventId !== input.eventId) throw new Error('Invalid price level');
+  const phase = kind === 'door' ? await activePhase(context.prisma, level.id, qty) : null;
+  const { unitPriceCents, quote } = priceDoorSale(kind, level, phase, qty, level.event.venue.taxBps);
+  return { unitPriceCents, phaseName: phase?.name || '', ...quote };
+}
 
 /** Door sale and comp share one inventory path: event lock, capacity re-check, order, line, tickets, audit. */
 async function issue(kind: Kind, input: any, context: any) {
@@ -33,19 +51,8 @@ async function issue(kind: Kind, input: any, context: any) {
       const siblings = await tx.priceLevel.findMany({ where: { eventId: event.id, sections: { some: { id: section.id } } } });
       if (siblings.reduce((n: number, l: any) => n + l.sold + l.held + l.productionHeld, 0) + qty > section.capacity) throw new Error('Section capacity exhausted');
     }
-    let phase: any = null;
-    if (kind === 'door') {
-      const phases = await tx.priceLevelPhase.findMany({ where: { priceLevelId: level.id, startsAt: { lte: new Date() } }, orderBy: { sort: 'asc' } });
-      for (const p of phases) {
-        const reserved = await tx.inventoryHold.aggregate({ where: { phaseId: p.id, status: 'active' }, _sum: { quantity: true } });
-        if (p.sold + (reserved._sum.quantity || 0) + qty <= p.quantity) { phase = p; break; }
-      }
-      if (phases.length && !phase) throw new Error('Pricing phase exhausted');
-    }
-    const unit = kind === 'comp' ? 0 : phase?.priceCents ?? level.priceCents;
-    const quote = kind === 'comp'
-      ? { subtotalCents: 0, serviceFeesCents: 0, facilityFeesCents: 0, discountCents: 0, taxCents: 0, totalCents: 0 }
-      : ticketQuote({ priceCents: unit, feeCents: 0, facilityFeeCents: level.facilityFeeCents, quantity: qty, taxBps: event.venue.taxBps });
+    const phase = kind === 'door' ? await activePhase(tx, level.id, qty) : null;
+    const { unitPriceCents: unit, quote } = priceDoorSale(kind, level, phase, qty, event.venue.taxBps);
     const tender = kind === 'door' ? settleTender(quote.totalCents, input.tender) : null;
     const order = await tx.ticketOrder.create({ data: { orderNumber: humanCode('CN'), guestEmail: email, guestName: name, secretKey: digest(opaqueToken()), ...quote, currencyCode: level.currencyCode, ageAttested: kind === 'door' ? !!input.ageAttested : false, status: kind === 'comp' ? 'comp' : 'paid', source: kind === 'comp' ? 'comp' : 'box_office', eventId: event.id, customerId: null, discountSnapshot: kind === 'comp' ? { comp: true, reason } : undefined } });
     const line = await tx.ticketOrderLine.create({ data: { orderId: order.id, title: event.title, levelName: level.name, phaseName: phase?.name || '', seatLabel: '', unitPriceCents: unit, serviceFeeCents: 0, facilityFeeCents: level.facilityFeeCents, taxCents: quote.taxCents, quantity: qty, discountCents: 0, totalCents: quote.totalCents, currencyCode: level.currencyCode, priceLevelId: level.id, phaseId: phase?.id } });

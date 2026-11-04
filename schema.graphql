@@ -5366,6 +5366,7 @@ type Mutation {
   requestRefundApproval(input: RefundApprovalRequestInput!): JSON
   issueDoorSale(input: DoorSaleInput!): JSON
   issueComp(input: DoorSaleInput!): JSON
+  previewDoorSale(input: DoorPreviewInput!): JSON
   refundDoorSale(input: RefundTicketOrderInput!): JSON
   decideRefundApproval(input: RefundApprovalDecisionInput!): JSON
   releaseDateHold(input: OperatorCommandInput!): JSON
@@ -5776,6 +5777,13 @@ input DoorTenderInput {
   kind: String!
   tenderedCents: Int
   reference: String
+}
+
+input DoorPreviewInput {
+  eventId: ID!
+  levelId: ID!
+  qty: Int!
+  comp: Boolean
 }
 
 input DoorSaleInput {
