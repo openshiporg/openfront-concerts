@@ -9,7 +9,7 @@ import { assertEventTransition } from '../lib/event-lifecycle';
 export function authorize(context: any, permission: Permission) {
   if (!permissions[permission]({ session: context.session })) throw new Error(`Permission required: ${permission}`);
 }
-const required: Record<string, Permission> = { advanceEvent: 'canManageEvents', placeDateHold: 'canManageEvents', challengeHold: 'canManageEvents', confirmHold: 'canManageEvents', sendOffer: 'canManageDeals', acceptOffer: 'canManageDeals', publishEvent: 'canManageEvents', setProductionHold: 'canManageInventory', releaseProductionHold: 'canManageInventory', scanTicket: 'canScanTickets', recordMerchSales: 'canManageSettlements', computeSettlement: 'canManageSettlements', adjustSettlement: 'canManageSettlements', signSettlement: 'canManageSettlements', recordArtistPayment: 'canManageSettlements', postponeEvent: 'canManageEvents', cancelEvent: 'canManageEvents' };
+const required: Record<string, Permission> = { releaseDateHold: 'canManageEvents', advanceEvent: 'canManageEvents', placeDateHold: 'canManageEvents', challengeHold: 'canManageEvents', confirmHold: 'canManageEvents', sendOffer: 'canManageDeals', acceptOffer: 'canManageDeals', publishEvent: 'canManageEvents', setProductionHold: 'canManageInventory', releaseProductionHold: 'canManageInventory', scanTicket: 'canScanTickets', recordMerchSales: 'canManageSettlements', computeSettlement: 'canManageSettlements', adjustSettlement: 'canManageSettlements', signSettlement: 'canManageSettlements', recordArtistPayment: 'canManageSettlements', postponeEvent: 'canManageEvents', cancelEvent: 'canManageEvents' };
 export function operator(operation: string) {
   return async (_: any, { input }: any, context: any) => {
     authorize(context, required[operation]);
@@ -17,7 +17,7 @@ export function operator(operation: string) {
     const actor = context.session.itemId;
     // Resolve the authoritative event before choosing the inventory lock; never trust a second event id.
     let eventId = input.eventId;
-    if (input.holdId && ['challengeHold', 'confirmHold'].includes(operation)) {
+    if (input.holdId && ['challengeHold', 'confirmHold', 'releaseDateHold'].includes(operation)) {
       const hold = await context.prisma.dateHold.findUnique({ where: { id: input.holdId } });
       if (!hold) throw new Error('Date hold not found');
       eventId = hold.eventId;
@@ -26,7 +26,7 @@ export function operator(operation: string) {
     if (input.offerId) { const row = await context.prisma.offer.findUnique({ where: { id: input.offerId } }); if (!row) throw new Error('Offer not found'); eventId = row.eventId; }
     if (input.settlementId) { const row = await context.prisma.settlement.findUnique({ where: { id: input.settlementId } }); if (!row) throw new Error('Settlement not found'); eventId = row.eventId; }
     if (input.productionHoldId) { const row = await context.prisma.productionHold.findUnique({ where: { id: input.productionHoldId } }); if (!row) throw new Error('Production hold not found'); eventId = row.eventId; }
-    const lock = operation.includes('Hold') && ['placeDateHold', 'challengeHold', 'confirmHold'].includes(operation) ? `date:${input.venueId}:${String(input.date).slice(0, 10)}` : `event:${eventId}`;
+    const lock = operation.includes('Hold') && ['placeDateHold', 'challengeHold', 'confirmHold', 'releaseDateHold'].includes(operation) ? `date:${input.venueId}:${String(input.date).slice(0, 10)}` : `event:${eventId}`;
     return command(context, { operation, idempotencyKey: input.idempotencyKey, lock, params: input }, async tx => {
       const audit = async (list: string, id: string, after: any, reason = '') => appendAuditEvent(tx, actor, { action: operation, targetList: list, targetId: id, after, reason });
       if (operation === 'placeDateHold') {
@@ -34,6 +34,12 @@ export function operator(operation: string) {
         const rankKey = `${input.venueId}:${date.toISOString().slice(0, 10)}:${input.rank}`;
         const row = await tx.dateHold.create({ data: { venueId: input.venueId, date, artistId: input.artistId, agencyId: input.agencyId, rank: input.rank, rankKey, status: 'held', expiresAt: input.expiresAt ? new Date(input.expiresAt) : new Date(Date.now() + 604800000) } });
         await audit('DateHold', row.id, { rank: row.rank }); return { id: row.id, status: row.status };
+      }
+      if (operation === 'releaseDateHold') {
+        const row = await tx.dateHold.findUnique({ where: { id: input.holdId } });
+        if (!row || !['held', 'challenged'].includes(row.status)) throw new Error('Only an unconfirmed hold can be released');
+        await transition(tx, 'dateHold', row.id, row.status, 'released', actor, input.reason || 'Released by promoter', { rankKey: null });
+        return { id: row.id, status: 'released' };
       }
       if (operation === 'challengeHold') {
         const row = await tx.dateHold.findUnique({ where: { id: input.holdId } });
@@ -43,7 +49,7 @@ export function operator(operation: string) {
       if (operation === 'confirmHold') {
         const row = await tx.dateHold.findUnique({ where: { id: input.holdId } });
         if (!row || !['held', 'challenged'].includes(row.status) || row.expiresAt <= new Date()) throw new Error('Hold cannot be confirmed');
-        const prior = await tx.dateHold.count({ where: { venueId: row.venueId, date: row.date, status: { in: ['held', 'challenged', 'confirmed'] }, rank: { lt: row.rank } } });
+        const prior = await tx.dateHold.count({ where: { venueId: row.venueId, date: row.date, OR: [{ status: 'confirmed' }, { status: { in: ['held', 'challenged'] }, expiresAt: { gt: new Date() }, rank: { lt: row.rank } }] } });
         if (prior) throw new Error('Earlier ranked hold must be released');
         const chart = await tx.seatingChart.findUnique({ where: { id: input.seatingChartId } });
         if (!chart || chart.venueId !== row.venueId || chart.status !== 'published') throw new Error('Published venue chart required');
