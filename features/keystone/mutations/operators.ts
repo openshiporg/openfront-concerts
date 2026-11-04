@@ -4,11 +4,12 @@ import { appendAuditEvent } from '../lib/audit';
 import { digest, canonicalDigest, humanCode, opaqueToken } from '../lib/guest-proof';
 import { computeSettlement as calculate, percentage } from '../lib/settlement';
 import { expireHolds, releaseBlock } from './inventory';
+import { assertEventTransition } from '../lib/event-lifecycle';
 
 export function authorize(context: any, permission: Permission) {
   if (!permissions[permission]({ session: context.session })) throw new Error(`Permission required: ${permission}`);
 }
-const required: Record<string, Permission> = { placeDateHold: 'canManageEvents', challengeHold: 'canManageEvents', confirmHold: 'canManageEvents', sendOffer: 'canManageDeals', acceptOffer: 'canManageDeals', publishEvent: 'canManageEvents', setProductionHold: 'canManageInventory', releaseProductionHold: 'canManageInventory', scanTicket: 'canScanTickets', recordMerchSales: 'canManageSettlements', computeSettlement: 'canManageSettlements', adjustSettlement: 'canManageSettlements', signSettlement: 'canManageSettlements', recordArtistPayment: 'canManageSettlements', postponeEvent: 'canManageEvents', cancelEvent: 'canManageEvents' };
+const required: Record<string, Permission> = { advanceEvent: 'canManageEvents', placeDateHold: 'canManageEvents', challengeHold: 'canManageEvents', confirmHold: 'canManageEvents', sendOffer: 'canManageDeals', acceptOffer: 'canManageDeals', publishEvent: 'canManageEvents', setProductionHold: 'canManageInventory', releaseProductionHold: 'canManageInventory', scanTicket: 'canScanTickets', recordMerchSales: 'canManageSettlements', computeSettlement: 'canManageSettlements', adjustSettlement: 'canManageSettlements', signSettlement: 'canManageSettlements', recordArtistPayment: 'canManageSettlements', postponeEvent: 'canManageEvents', cancelEvent: 'canManageEvents' };
 export function operator(operation: string) {
   return async (_: any, { input }: any, context: any) => {
     authorize(context, required[operation]);
@@ -58,6 +59,17 @@ export function operator(operation: string) {
         const status = operation === 'sendOffer' ? 'sent' : 'accepted';
         await transition(tx, 'offer', offer.id, operation === 'sendOffer' ? 'draft' : 'sent', status, actor, '', status === 'accepted' ? { acceptedTerms: terms, acceptedTermsHash: canonicalDigest((terms)) } : {});
         return { id: offer.id, status };
+      }
+      if (operation === 'advanceEvent') {
+        const event = await tx.event.findUnique({ where: { id: eventId } });
+        if (!event) throw new Error('Event not found');
+        assertEventTransition(event.status, input.status, input.reason);
+        if (['presale', 'on_sale'].includes(input.status)) {
+          const levels = await tx.priceLevel.findMany({ where: { eventId, status: 'active' } });
+          if (!levels.length) throw new Error('Active pricing required before opening sales');
+        }
+        await transition(tx, 'event', eventId, event.status, input.status, actor, input.reason || '');
+        return { id: eventId, status: input.status };
       }
       if (operation === 'publishEvent') {
         const event = await tx.event.findUnique({ where: { id: eventId }, include: { seatingChart: true } });

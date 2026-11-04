@@ -8,7 +8,7 @@ import seedConcerts from './seedConcerts';
 import { startTicketCheckout, completeTicketCheckout, lookupTicketOrder, transferTicket, refundTicketOrder } from './checkout';
 
 const graphql = String.raw;
-const operatorCommands = ['placeDateHold', 'challengeHold', 'confirmHold', 'sendOffer', 'acceptOffer', 'publishEvent', 'setProductionHold', 'releaseProductionHold', 'scanTicket', 'recordMerchSales', 'computeSettlement', 'adjustSettlement', 'signSettlement', 'recordArtistPayment', 'postponeEvent', 'cancelEvent'];
+const operatorCommands = ['advanceEvent', 'placeDateHold', 'challengeHold', 'confirmHold', 'sendOffer', 'acceptOffer', 'publishEvent', 'setProductionHold', 'releaseProductionHold', 'scanTicket', 'recordMerchSales', 'computeSettlement', 'adjustSettlement', 'signSettlement', 'recordArtistPayment', 'postponeEvent', 'cancelEvent'];
 
 export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
   return mergeSchemas({
