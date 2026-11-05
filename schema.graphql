@@ -5708,6 +5708,8 @@ input OperatorCommandInput {
   title: String
   showAt: String
   doorsAt: String
+  showTime: String
+  doorsTime: String
   ageRestriction: String
   levelId: ID
   quantity: Int

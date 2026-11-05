@@ -27,7 +27,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
   return mergeSchemas({
     schemas: [baseSchema],
     typeDefs: graphql`
-      input OperatorCommandInput { idempotencyKey: String! eventId: ID venueId: ID date: String rank: Int artistId: ID agencyId: ID expiresAt: String holdId: ID offerId: ID settlementId: ID productionHoldId: ID seatingChartId: ID title: String showAt: String doorsAt: String ageRestriction: String levelId: ID quantity: Int seatInventoryIds: [ID!] holdType: String releaseAt: String token: String ticketCode: String gate: String softGrossCents: Int hardGrossCents: Int sellerFeeCents: Int countIn: JSON countOut: JSON amountCents: Int reason: String approvedById: ID kind: String method: String reference: String status: String }
+      input OperatorCommandInput { idempotencyKey: String! eventId: ID venueId: ID date: String rank: Int artistId: ID agencyId: ID expiresAt: String holdId: ID offerId: ID settlementId: ID productionHoldId: ID seatingChartId: ID title: String showAt: String doorsAt: String showTime: String doorsTime: String ageRestriction: String levelId: ID quantity: Int seatInventoryIds: [ID!] holdType: String releaseAt: String token: String ticketCode: String gate: String softGrossCents: Int hardGrossCents: Int sellerFeeCents: Int countIn: JSON countOut: JSON amountCents: Int reason: String approvedById: ID kind: String method: String reference: String status: String }
       input UserUpdateProfileInput { email: String name: String password: String onboardingStatus: String }
       input CreateHoldInput { idempotencyKey: String! }
       input StartTicketCheckoutInput { holdId: ID! proof: String! email: String! name: String! ageAttested: Boolean idempotencyKey: String! }

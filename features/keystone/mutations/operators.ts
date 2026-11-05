@@ -5,6 +5,7 @@ import { digest, canonicalDigest, humanCode, opaqueToken } from '../lib/guest-pr
 import { computeSettlement as calculate, percentage } from '../lib/settlement';
 import { expireHolds, releaseBlock } from './inventory';
 import { assertEventTransition } from '../lib/event-lifecycle';
+import { zonedDateTime, holdDay } from '../lib/venue-time';
 
 export function authorize(context: any, permission: Permission) {
   if (!permissions[permission]({ session: context.session })) throw new Error(`Permission required: ${permission}`);
@@ -26,12 +27,19 @@ export function operator(operation: string) {
     if (input.offerId) { const row = await context.prisma.offer.findUnique({ where: { id: input.offerId } }); if (!row) throw new Error('Offer not found'); eventId = row.eventId; }
     if (input.settlementId) { const row = await context.prisma.settlement.findUnique({ where: { id: input.settlementId } }); if (!row) throw new Error('Settlement not found'); eventId = row.eventId; }
     if (input.productionHoldId) { const row = await context.prisma.productionHold.findUnique({ where: { id: input.productionHoldId } }); if (!row) throw new Error('Production hold not found'); eventId = row.eventId; }
+    if (operation === 'placeDateHold') input = { ...input, date: holdDay(input.date) };
     const lock = operation.includes('Hold') && ['placeDateHold', 'challengeHold', 'confirmHold', 'releaseDateHold'].includes(operation) ? `date:${input.venueId}:${String(input.date).slice(0, 10)}` : `event:${eventId}`;
     return command(context, { operation, idempotencyKey: input.idempotencyKey, lock, params: input }, async tx => {
       const audit = async (list: string, id: string, after: any, reason = '') => appendAuditEvent(tx, actor, { action: operation, targetList: list, targetId: id, after, reason });
       if (operation === 'placeDateHold') {
         const date = new Date(input.date); if (Number.isNaN(+date) || !Number.isInteger(input.rank) || input.rank < 1) throw new Error('Valid date and positive rank required');
+        if (!input.venueId || !(await tx.venue.findUnique({ where: { id: input.venueId } }))) throw new Error('Venue required');
+        if (date < new Date(holdDay(new Date().toISOString()))) throw new Error('Date is in the past');
+        if (input.artistId && !(await tx.artist.findUnique({ where: { id: input.artistId } }))) throw new Error('Artist not found');
+        if (input.expiresAt && !(new Date(input.expiresAt) > new Date())) throw new Error('Expiry must be in the future');
+        if (await tx.dateHold.count({ where: { venueId: input.venueId, date, status: 'confirmed' } })) throw new Error('Date is already confirmed');
         const rankKey = `${input.venueId}:${date.toISOString().slice(0, 10)}:${input.rank}`;
+        if (await tx.dateHold.findUnique({ where: { rankKey } })) throw new Error(`Rank ${input.rank} is already held for this date`);
         const row = await tx.dateHold.create({ data: { venueId: input.venueId, date, artistId: input.artistId, agencyId: input.agencyId, rank: input.rank, rankKey, status: 'held', expiresAt: input.expiresAt ? new Date(input.expiresAt) : new Date(Date.now() + 604800000) } });
         await audit('DateHold', row.id, { rank: row.rank }); return { id: row.id, status: row.status };
       }
@@ -51,9 +59,17 @@ export function operator(operation: string) {
         if (!row || !['held', 'challenged'].includes(row.status) || row.expiresAt <= new Date()) throw new Error('Hold cannot be confirmed');
         const prior = await tx.dateHold.count({ where: { venueId: row.venueId, date: row.date, OR: [{ status: 'confirmed' }, { status: { in: ['held', 'challenged'] }, expiresAt: { gt: new Date() }, rank: { lt: row.rank } }] } });
         if (prior) throw new Error('Earlier ranked hold must be released');
+        const title = String(input.title || '').trim();
+        if (!title) throw new Error('Event title required');
         const chart = await tx.seatingChart.findUnique({ where: { id: input.seatingChartId } });
         if (!chart || chart.venueId !== row.venueId || chart.status !== 'published') throw new Error('Published venue chart required');
-        const event = await tx.event.create({ data: { title: input.title, venueId: row.venueId, seatingChartId: chart.id, showAt: new Date(input.showAt || row.date), doorsAt: new Date(input.doorsAt || row.date), status: 'hold', promoterId: actor, ageRestriction: input.ageRestriction || 'all_ages' } });
+        if (input.ageRestriction && !['all_ages', '18_plus', '21_plus'].includes(input.ageRestriction)) throw new Error('Unknown age restriction');
+        const venue = await tx.venue.findUnique({ where: { id: row.venueId } });
+        const day = row.date.toISOString().slice(0, 10);
+        const showAt = input.showTime ? zonedDateTime(day, input.showTime, venue?.timezone || 'UTC') : new Date(input.showAt || row.date);
+        const doorsAt = input.doorsTime ? zonedDateTime(day, input.doorsTime, venue?.timezone || 'UTC') : new Date(input.doorsAt || row.date);
+        if (Number.isNaN(+showAt) || Number.isNaN(+doorsAt) || doorsAt > showAt) throw new Error('Doors must open before the show');
+        const event = await tx.event.create({ data: { title, venueId: row.venueId, seatingChartId: chart.id, showAt, doorsAt, status: 'hold', promoterId: actor, ageRestriction: input.ageRestriction || 'all_ages' } });
         await transition(tx, 'dateHold', row.id, row.status, 'confirmed', actor, '', { eventId: event.id });
         if (row.artistId) await tx.eventArtist.create({ data: { eventId: event.id, artistId: row.artistId, billing: 'headliner', position: 1 } });
         await audit('Event', event.id, { status: 'hold' }); return { id: row.id, eventId: event.id, status: 'confirmed' };
