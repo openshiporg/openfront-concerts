@@ -8,6 +8,7 @@ import { requestRefundApproval, decideRefundApproval } from './approvals';
 import { issueDoorSale, issueComp, previewDoorSale } from './doorSales';
 import { refundDoorSale } from './doorRefunds';
 import { editorMutations } from './editors';
+import { openCashDrawer, closeCashDrawer } from './cashDrawers';
 import updateActiveUser from './updateActiveUser';
 import seedConcerts from './seedConcerts';
 import { startTicketCheckout, completeTicketCheckout, lookupTicketOrder, transferTicket, refundTicketOrder } from './checkout';
@@ -39,6 +40,8 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
       input DoorPreviewInput { eventId: ID! levelId: ID! qty: Int! comp: Boolean }
       input DoorSaleInput { eventId: ID! levelId: ID! qty: Int! name: String! email: String ageAttested: Boolean reason: String tender: DoorTenderInput idempotencyKey: String! }
       input RefundApprovalRequestInput { orderId: ID! amountCents: Int! reason: String! cash: Boolean }
+      input OpenCashDrawerInput { label: String! openingFloatCents: Int! idempotencyKey: String! }
+      input CloseCashDrawerInput { drawerId: ID! count: JSON! reason: String idempotencyKey: String! }
       input RefundApprovalDecisionInput { approvalId: ID! decision: String! note: String }
       type Query {
         redirectToInit: Boolean
@@ -62,6 +65,8 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         previewDoorSale(input: DoorPreviewInput!): JSON
         refundDoorSale(input: RefundTicketOrderInput!): JSON
         decideRefundApproval(input: RefundApprovalDecisionInput!): JSON
+        openCashDrawer(input: OpenCashDrawerInput!): JSON
+        closeCashDrawer(input: CloseCashDrawerInput!): JSON
         ${Object.keys(editorMutations).map(name => `${name}(input: OperatorCommandInput!): JSON`).join('\n        ')}
         ${operatorCommands.map(name => `${name}(input: OperatorCommandInput!): JSON`).join('\n        ')}
       }
@@ -77,7 +82,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         createGaHold: createHold,
         createSeatHold: createHold,
         seedConcerts,
-        publishSeatingChart, requestRefundApproval, decideRefundApproval, issueDoorSale, issueComp, previewDoorSale, refundDoorSale,
+        publishSeatingChart, requestRefundApproval, decideRefundApproval, issueDoorSale, issueComp, previewDoorSale, refundDoorSale, openCashDrawer, closeCashDrawer,
         updateActiveUser,
         startTicketCheckout, completeTicketCheckout, transferTicket, refundTicketOrder,
         ...editorMutations,

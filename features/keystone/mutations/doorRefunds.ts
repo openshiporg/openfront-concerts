@@ -3,6 +3,7 @@ import { command } from '../lib/transaction';
 import { appendAuditEvent } from '../lib/audit';
 import { refundApprovalPayload, refundApprovalFingerprint, assertApprovalUsable } from '../lib/refund-approval';
 import { successfulRefundTotal } from '../utils/paymentState';
+import { bookDrawer } from './cashDrawers';
 
 /**
  * Door cash and external-terminal sales have no provider to call: the refund is the money handed back at the
@@ -30,7 +31,8 @@ export async function refundDoorSale(_: any, { input }: any, context: any) {
     assertApprovalUsable(approval, { actorId: actor, fingerprint: refundApprovalFingerprint(refundApprovalPayload(orderId, amount, reason, 'cash_refund')) });
     const consumed = await tx.managerApproval.updateMany({ where: { id: approvalId, status: 'approved', expiresAt: { gt: new Date() } }, data: { status: 'consumed', consumedAt: new Date(), consumedEntityType: 'TicketOrder', consumedEntityId: orderId } });
     if (consumed.count !== 1) throw new Error('Approval was already used or expired');
-    const refund = await tx.refund.create({ data: { idempotencyKey: `door-refund:${idempotencyKey}`, amount, currencyCode: payment.currencyCode, status: 'succeeded', reason, paymentId: payment.id, orderId, requestedById: actor, approvedById: approval.approvedById, processedAt: new Date(), providerData: { channel: 'door', method: payment.paymentMethod } } });
+    const drawerId = payment.paymentMethod === 'cash' ? await bookDrawer(tx, actor, 'cashRefundsCents', amount) : null;
+    const refund = await tx.refund.create({ data: { idempotencyKey: `door-refund:${idempotencyKey}`, amount, currencyCode: payment.currencyCode, status: 'succeeded', reason, paymentId: payment.id, orderId, requestedById: actor, approvedById: approval.approvedById, processedAt: new Date(), providerData: { channel: 'door', method: payment.paymentMethod, drawerId } } });
     const total = successfulRefundTotal([...rows.filter((r: any) => r.status === 'succeeded'), refund]);
     const full = total >= order.totalCents;
     await tx.payment.update({ where: { id: payment.id }, data: { refundedAmount: total, status: full ? 'refunded' : 'partially_refunded' } });

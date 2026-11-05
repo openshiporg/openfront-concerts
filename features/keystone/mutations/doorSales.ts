@@ -4,6 +4,7 @@ import { appendAuditEvent } from '../lib/audit';
 import { digest, humanCode, opaqueToken } from '../lib/guest-proof';
 import { DOOR_STATUSES, MAX_COMP_QTY, assertDoorQuantity, assertRoom, settleTender, pickPhase, priceDoorSale } from '../lib/door-sale';
 import { expireHolds } from './inventory';
+import { bookDrawer } from './cashDrawers';
 
 type Kind = 'door' | 'comp';
 
@@ -65,7 +66,8 @@ async function issue(kind: Kind, input: any, context: any) {
     const lvl = await tx.priceLevel.updateMany({ where: { id: level.id, sold: level.sold }, data: { sold: { increment: qty } } });
     if (lvl.count !== 1) throw new Error('Level counters changed; retry');
     if (phase) await tx.priceLevelPhase.update({ where: { id: phase.id }, data: { sold: { increment: qty } } });
-    if (tender) await tx.payment.create({ data: { idempotencyKey: `door:${input.idempotencyKey}`, amount: quote.totalCents, currencyCode: level.currencyCode, status: 'succeeded', paymentMethod: tender.method, orderId: order.id, processedAt: new Date(), notes: tender.method === 'cash' ? 'Door cash' : 'Door card terminal', data: { channel: 'door', changeCents: tender.changeCents, tenderedCents: input.tender?.tenderedCents ?? null, terminalReference: tender.reference } } });
+    const drawerId = tender?.method === 'cash' ? await bookDrawer(tx, actor, 'cashSalesCents', quote.totalCents) : null;
+    if (tender) await tx.payment.create({ data: { idempotencyKey: `door:${input.idempotencyKey}`, amount: quote.totalCents, currencyCode: level.currencyCode, status: 'succeeded', paymentMethod: tender.method, orderId: order.id, processedAt: new Date(), notes: tender.method === 'cash' ? 'Door cash' : 'Door card terminal', data: { channel: 'door', drawerId, changeCents: tender.changeCents, tenderedCents: input.tender?.tenderedCents ?? null, terminalReference: tender.reference } } });
     await appendAuditEvent(tx, actor, { action: kind === 'comp' ? 'order.comp_issued' : 'order.door_sale', targetList: 'TicketOrder', targetId: order.id, after: { qty, totalCents: quote.totalCents, tender: tender?.method ?? 'comp' }, reason });
     return { orderId: order.id, orderNumber: order.orderNumber, status: order.status, totalCents: quote.totalCents, changeCents: tender?.changeCents ?? 0, tickets };
   });

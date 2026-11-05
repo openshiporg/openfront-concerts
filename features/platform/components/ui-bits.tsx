@@ -9,7 +9,7 @@ const DOT: Record<string, string> = {
   cancelled: 'bg-red-500', postponed: 'bg-orange-500', paid: 'bg-emerald-500', pending_payment: 'bg-amber-500', refunded: 'bg-red-500',
   partially_refunded: 'bg-orange-500', draft: 'bg-zinc-400', sent: 'bg-sky-500', accepted: 'bg-emerald-500', contracted: 'bg-emerald-500',
   declined: 'bg-red-500', reviewed: 'bg-sky-500', signed_promoter: 'bg-amber-500', signed_artist: 'bg-amber-500', final: 'bg-emerald-500',
-  void: 'bg-red-500', superseded: 'bg-zinc-400', closed: 'bg-zinc-400', held: 'bg-amber-500', challenged: 'bg-orange-500', confirmed: 'bg-emerald-500', released: 'bg-zinc-400',
+  void: 'bg-red-500', superseded: 'bg-zinc-400', balanced: 'bg-emerald-500', over: 'bg-amber-500', short: 'bg-red-500', closed: 'bg-zinc-400', held: 'bg-amber-500', challenged: 'bg-orange-500', confirmed: 'bg-emerald-500', released: 'bg-zinc-400',
   valid: 'bg-emerald-500', checked_in: 'bg-sky-500', active: 'bg-emerald-500', paused: 'bg-amber-500', expired: 'bg-zinc-400',
 };
 

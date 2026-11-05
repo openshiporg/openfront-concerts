@@ -5091,6 +5091,123 @@ input ManagerApprovalCreateInput {
   updatedAt: DateTime
 }
 
+type CashDrawer {
+  id: ID!
+  label: String
+  status: String
+  openKey: String
+  openingFloatCents: Int
+  cashSalesCents: Int
+  cashRefundsCents: Int
+  expectedCents: Int
+  countedCents: Int
+  varianceCents: Int
+  varianceReason: String
+  count: JSON
+  openedAt: DateTime
+  closedAt: DateTime
+  openedBy: User
+  closedBy: User
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input CashDrawerWhereUniqueInput {
+  id: ID
+  openKey: String
+}
+
+input CashDrawerWhereInput {
+  AND: [CashDrawerWhereInput!]
+  OR: [CashDrawerWhereInput!]
+  NOT: [CashDrawerWhereInput!]
+  id: IDFilter
+  label: StringFilter
+  status: StringFilter
+  openKey: StringNullableFilter
+  openingFloatCents: IntFilter
+  cashSalesCents: IntNullableFilter
+  cashRefundsCents: IntNullableFilter
+  expectedCents: IntNullableFilter
+  countedCents: IntNullableFilter
+  varianceCents: IntNullableFilter
+  varianceReason: StringFilter
+  openedAt: DateTimeFilter
+  closedAt: DateTimeNullableFilter
+  openedBy: UserWhereInput
+  closedBy: UserWhereInput
+  currencyCode: StringFilter
+  createdAt: DateTimeFilter
+  updatedAt: DateTimeFilter
+}
+
+input CashDrawerOrderByInput {
+  id: OrderDirection
+  label: OrderDirection
+  status: OrderDirection
+  openKey: OrderDirection
+  openingFloatCents: OrderDirection
+  cashSalesCents: OrderDirection
+  cashRefundsCents: OrderDirection
+  expectedCents: OrderDirection
+  countedCents: OrderDirection
+  varianceCents: OrderDirection
+  varianceReason: OrderDirection
+  openedAt: OrderDirection
+  closedAt: OrderDirection
+  currencyCode: OrderDirection
+  createdAt: OrderDirection
+  updatedAt: OrderDirection
+}
+
+input CashDrawerUpdateInput {
+  label: String
+  status: String
+  openKey: String
+  openingFloatCents: Int
+  cashSalesCents: Int
+  cashRefundsCents: Int
+  expectedCents: Int
+  countedCents: Int
+  varianceCents: Int
+  varianceReason: String
+  count: JSON
+  openedAt: DateTime
+  closedAt: DateTime
+  openedBy: UserRelateToOneForUpdateInput
+  closedBy: UserRelateToOneForUpdateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+input CashDrawerUpdateArgs {
+  where: CashDrawerWhereUniqueInput!
+  data: CashDrawerUpdateInput!
+}
+
+input CashDrawerCreateInput {
+  label: String
+  status: String
+  openKey: String
+  openingFloatCents: Int
+  cashSalesCents: Int
+  cashRefundsCents: Int
+  expectedCents: Int
+  countedCents: Int
+  varianceCents: Int
+  varianceReason: String
+  count: JSON
+  openedAt: DateTime
+  closedAt: DateTime
+  openedBy: UserRelateToOneForCreateInput
+  closedBy: UserRelateToOneForCreateInput
+  currencyCode: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -5349,6 +5466,12 @@ type Mutation {
   updateManagerApprovals(data: [ManagerApprovalUpdateArgs!]!): [ManagerApproval]
   deleteManagerApproval(where: ManagerApprovalWhereUniqueInput!): ManagerApproval
   deleteManagerApprovals(where: [ManagerApprovalWhereUniqueInput!]!): [ManagerApproval]
+  createCashDrawer(data: CashDrawerCreateInput!): CashDrawer
+  createCashDrawers(data: [CashDrawerCreateInput!]!): [CashDrawer]
+  updateCashDrawer(where: CashDrawerWhereUniqueInput!, data: CashDrawerUpdateInput!): CashDrawer
+  updateCashDrawers(data: [CashDrawerUpdateArgs!]!): [CashDrawer]
+  deleteCashDrawer(where: CashDrawerWhereUniqueInput!): CashDrawer
+  deleteCashDrawers(where: [CashDrawerWhereUniqueInput!]!): [CashDrawer]
   endSession: Boolean!
   authenticateUserWithPassword(email: String!, password: String!): UserAuthenticationWithPasswordResult
   createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
@@ -5369,6 +5492,8 @@ type Mutation {
   previewDoorSale(input: DoorPreviewInput!): JSON
   refundDoorSale(input: RefundTicketOrderInput!): JSON
   decideRefundApproval(input: RefundApprovalDecisionInput!): JSON
+  openCashDrawer(input: OpenCashDrawerInput!): JSON
+  closeCashDrawer(input: CloseCashDrawerInput!): JSON
   savePriceLevel(input: OperatorCommandInput!): JSON
   setPriceLevelStatus(input: OperatorCommandInput!): JSON
   savePricePhase(input: OperatorCommandInput!): JSON
@@ -5554,6 +5679,9 @@ type Query {
   managerApproval(where: ManagerApprovalWhereUniqueInput!): ManagerApproval
   managerApprovals(where: ManagerApprovalWhereInput! = {}, orderBy: [ManagerApprovalOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ManagerApprovalWhereUniqueInput): [ManagerApproval!]
   managerApprovalsCount(where: ManagerApprovalWhereInput! = {}): Int
+  cashDrawer(where: CashDrawerWhereUniqueInput!): CashDrawer
+  cashDrawers(where: CashDrawerWhereInput! = {}, orderBy: [CashDrawerOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: CashDrawerWhereUniqueInput): [CashDrawer!]
+  cashDrawersCount(where: CashDrawerWhereInput! = {}): Int
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
   validateUserPasswordResetToken(email: String!, token: String!): ValidateUserPasswordResetTokenResult
@@ -5818,6 +5946,19 @@ input RefundApprovalRequestInput {
   amountCents: Int!
   reason: String!
   cash: Boolean
+}
+
+input OpenCashDrawerInput {
+  label: String!
+  openingFloatCents: Int!
+  idempotencyKey: String!
+}
+
+input CloseCashDrawerInput {
+  drawerId: ID!
+  count: JSON!
+  reason: String
+  idempotencyKey: String!
 }
 
 input RefundApprovalDecisionInput {

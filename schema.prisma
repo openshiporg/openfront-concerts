@@ -37,6 +37,8 @@ model User {
   from_Refund_approvedBy           Refund[]          @relation("Refund_approvedBy")
   from_ManagerApproval_requestedBy ManagerApproval[] @relation("ManagerApproval_requestedBy")
   from_ManagerApproval_approvedBy  ManagerApproval[] @relation("ManagerApproval_approvedBy")
+  from_CashDrawer_openedBy         CashDrawer[]      @relation("CashDrawer_openedBy")
+  from_CashDrawer_closedBy         CashDrawer[]      @relation("CashDrawer_closedBy")
 
   @@index([roleId])
 }
@@ -981,6 +983,34 @@ model ManagerApproval {
   @@index([expiresAt])
   @@index([requestedById])
   @@index([approvedById])
+}
+
+model CashDrawer {
+  id                String    @id @default(cuid())
+  label             String    @default("")
+  status            String    @default("open")
+  openKey           String?   @unique
+  openingFloatCents Int
+  cashSalesCents    Int?      @default(0)
+  cashRefundsCents  Int?      @default(0)
+  expectedCents     Int?
+  countedCents      Int?
+  varianceCents     Int?
+  varianceReason    String    @default("")
+  count             Json?
+  openedAt          DateTime
+  closedAt          DateTime?
+  openedBy          User?     @relation("CashDrawer_openedBy", fields: [openedById], references: [id])
+  openedById        String?   @map("openedBy")
+  closedBy          User?     @relation("CashDrawer_closedBy", fields: [closedById], references: [id])
+  closedById        String?   @map("closedBy")
+  currencyCode      String    @default("USD")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now()) @updatedAt
+
+  @@index([status])
+  @@index([openedById])
+  @@index([closedById])
 }
 
 enum PaymentCollectionDescriptionType {
