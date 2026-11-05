@@ -22,7 +22,7 @@ export const Offer = list({
   depositCents: integer({ defaultValue: 0 }),
   acceptedTerms: json(),
   depositDueAt: timestamp(),
-  status: select({ type: 'string', options: ['draft', 'sent', 'accepted', 'declined', 'contracted', 'settled'], defaultValue: 'draft', access: { update: () => false } }),
+  status: select({ type: 'string', options: ['draft', 'sent', 'accepted', 'declined', 'contracted', 'settled', 'superseded'], defaultValue: 'draft', access: { update: () => false } }),
   dealType: select({ type: 'string', options: ['flat_guarantee', 'versus', 'plus', 'door_deal'], defaultValue: 'flat_guarantee', access: { update: () => false } }),
   event: relationship({ ref: 'Event.offer_event', many: false }),
   artist: relationship({ ref: 'Artist.offer_artist', many: false }),

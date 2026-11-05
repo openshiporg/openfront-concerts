@@ -7,6 +7,7 @@ import { publishSeatingChart } from './charts';
 import { requestRefundApproval, decideRefundApproval } from './approvals';
 import { issueDoorSale, issueComp, previewDoorSale } from './doorSales';
 import { refundDoorSale } from './doorRefunds';
+import { editorMutations } from './editors';
 import updateActiveUser from './updateActiveUser';
 import seedConcerts from './seedConcerts';
 import { startTicketCheckout, completeTicketCheckout, lookupTicketOrder, transferTicket, refundTicketOrder } from './checkout';
@@ -27,7 +28,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
   return mergeSchemas({
     schemas: [baseSchema],
     typeDefs: graphql`
-      input OperatorCommandInput { idempotencyKey: String! eventId: ID venueId: ID date: String rank: Int artistId: ID agencyId: ID expiresAt: String holdId: ID offerId: ID settlementId: ID productionHoldId: ID seatingChartId: ID title: String showAt: String doorsAt: String showTime: String doorsTime: String ageRestriction: String levelId: ID quantity: Int seatInventoryIds: [ID!] holdType: String releaseAt: String token: String ticketCode: String gate: String softGrossCents: Int hardGrossCents: Int sellerFeeCents: Int countIn: JSON countOut: JSON amountCents: Int reason: String approvedById: ID kind: String method: String reference: String status: String }
+      input OperatorCommandInput { idempotencyKey: String! eventId: ID venueId: ID date: String rank: Int artistId: ID agencyId: ID expiresAt: String holdId: ID phaseId: ID expenseId: ID data: JSON offerId: ID settlementId: ID productionHoldId: ID seatingChartId: ID title: String showAt: String doorsAt: String showTime: String doorsTime: String ageRestriction: String levelId: ID quantity: Int seatInventoryIds: [ID!] holdType: String releaseAt: String token: String ticketCode: String gate: String softGrossCents: Int hardGrossCents: Int sellerFeeCents: Int countIn: JSON countOut: JSON amountCents: Int reason: String approvedById: ID kind: String method: String reference: String status: String }
       input UserUpdateProfileInput { email: String name: String password: String onboardingStatus: String }
       input CreateHoldInput { idempotencyKey: String! }
       input StartTicketCheckoutInput { holdId: ID! proof: String! email: String! name: String! ageAttested: Boolean idempotencyKey: String! }
@@ -61,6 +62,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         previewDoorSale(input: DoorPreviewInput!): JSON
         refundDoorSale(input: RefundTicketOrderInput!): JSON
         decideRefundApproval(input: RefundApprovalDecisionInput!): JSON
+        ${Object.keys(editorMutations).map(name => `${name}(input: OperatorCommandInput!): JSON`).join('\n        ')}
         ${operatorCommands.map(name => `${name}(input: OperatorCommandInput!): JSON`).join('\n        ')}
       }
     `,
@@ -78,6 +80,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         publishSeatingChart, requestRefundApproval, decideRefundApproval, issueDoorSale, issueComp, previewDoorSale, refundDoorSale,
         updateActiveUser,
         startTicketCheckout, completeTicketCheckout, transferTicket, refundTicketOrder,
+        ...editorMutations,
         ...Object.fromEntries(operatorCommands.map(name => [name, operator(name)])),
       }),
     },

@@ -6,6 +6,7 @@ import { computeSettlement as calculate, percentage } from '../lib/settlement';
 import { expireHolds, releaseBlock } from './inventory';
 import { assertEventTransition } from '../lib/event-lifecycle';
 import { zonedDateTime, holdDay } from '../lib/venue-time';
+import { validateCountMaps } from '../lib/editors';
 
 export function authorize(context: any, permission: Permission) {
   if (!permissions[permission]({ session: context.session })) throw new Error(`Permission required: ${permission}`);
@@ -160,8 +161,9 @@ export function operator(operation: string) {
         if (!terms || canonicalDigest((terms)) !== deal.acceptedTermsHash) throw new Error('Accepted terms hash mismatch');
         for (const k of ['softGrossCents','hardGrossCents','sellerFeeCents']) if (!Number.isSafeInteger(input[k] || 0) || (input[k] || 0) < 0) throw new Error('Invalid merch amount');
         if (await tx.settlement.count({ where: { eventId, status: { in: ['signed_promoter','signed_artist','final'] } } })) throw new Error('Settlement is frozen');
+        const sheet = validateCountMaps(input.countIn, input.countOut);
         const existing = await tx.merchSales.findFirst({ where: { eventId } });
-        const data = { eventId, softGrossCents: input.softGrossCents, hardGrossCents: input.hardGrossCents, sellerFeeCents: input.sellerFeeCents || 0, venueSoftSplitBps: terms.merchSplitBps, venueHardSplitBps: terms.hardMerchSplitBps, venueShareCents: percentage(input.softGrossCents, terms.merchSplitBps).cents + percentage(input.hardGrossCents, terms.hardMerchSplitBps).cents, countIn: input.countIn, countOut: input.countOut };
+        const data = { eventId, softGrossCents: input.softGrossCents, hardGrossCents: input.hardGrossCents, sellerFeeCents: input.sellerFeeCents || 0, venueSoftSplitBps: terms.merchSplitBps, venueHardSplitBps: terms.hardMerchSplitBps, venueShareCents: percentage(input.softGrossCents, terms.merchSplitBps).cents + percentage(input.hardGrossCents, terms.hardMerchSplitBps).cents, countIn: sheet ? input.countIn : undefined, countOut: sheet ? input.countOut : undefined };
         const row = existing ? await tx.merchSales.update({ where: { id: existing.id }, data }) : await tx.merchSales.create({ data });
         await audit('MerchSales', row.id, data); return { id: row.id, venueShareCents: row.venueShareCents };
       }

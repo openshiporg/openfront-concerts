@@ -5369,6 +5369,14 @@ type Mutation {
   previewDoorSale(input: DoorPreviewInput!): JSON
   refundDoorSale(input: RefundTicketOrderInput!): JSON
   decideRefundApproval(input: RefundApprovalDecisionInput!): JSON
+  savePriceLevel(input: OperatorCommandInput!): JSON
+  setPriceLevelStatus(input: OperatorCommandInput!): JSON
+  savePricePhase(input: OperatorCommandInput!): JSON
+  saveExpense(input: OperatorCommandInput!): JSON
+  draftOffer(input: OperatorCommandInput!): JSON
+  updateDraftOffer(input: OperatorCommandInput!): JSON
+  reviseOffer(input: OperatorCommandInput!): JSON
+  recordArtistDeposit(input: OperatorCommandInput!): JSON
   releaseDateHold(input: OperatorCommandInput!): JSON
   advanceEvent(input: OperatorCommandInput!): JSON
   placeDateHold(input: OperatorCommandInput!): JSON
@@ -5703,6 +5711,9 @@ input OperatorCommandInput {
   agencyId: ID
   expiresAt: String
   holdId: ID
+  phaseId: ID
+  expenseId: ID
+  data: JSON
   offerId: ID
   settlementId: ID
   productionHoldId: ID
