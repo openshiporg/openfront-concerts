@@ -1,5 +1,5 @@
 import { mergeSchemas } from "@graphql-tools/schema";
-import type { GraphQLSchema } from 'graphql';
+import { GraphQLError, type GraphQLSchema } from 'graphql';
 import redirectToInit from "./redirectToInit";
 import { availability, createHold } from './inventory';
 import { operator } from './operators';
@@ -13,6 +13,15 @@ import { startTicketCheckout, completeTicketCheckout, lookupTicketOrder, transfe
 
 const graphql = String.raw;
 const operatorCommands = ['releaseDateHold', 'advanceEvent', 'placeDateHold', 'challengeHold', 'confirmHold', 'sendOffer', 'acceptOffer', 'publishEvent', 'setProductionHold', 'releaseProductionHold', 'scanTicket', 'recordMerchSales', 'computeSettlement', 'adjustSettlement', 'signSettlement', 'recordArtistPayment', 'postponeEvent', 'cancelEvent'];
+
+/** Command refusals are plain Errors with operator-facing text; surface them. Prisma and other internal errors stay masked. */
+export function surfaceRefusals<T extends (...args: any[]) => any>(resolver: T): T {
+  return (async (...args: any[]) => {
+    try { return await resolver(...args); }
+    catch (e: any) { if (e && Object.getPrototypeOf(e) === Error.prototype) throw new GraphQLError(e.message); throw e; }
+  }) as T;
+}
+const surfaced = (map: Record<string, any>) => Object.fromEntries(Object.entries(map).map(([k, f]) => [k, surfaceRefusals(f)]));
 
 export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
   return mergeSchemas({
@@ -59,10 +68,10 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
       Query: {
         redirectToInit,
         eventsOnSale: async (_: any, __: any, context: any) => context.prisma.event.findMany({ where: { status: { in: ['announced', 'presale', 'on_sale', 'sold_out', 'postponed'] } }, orderBy: { showAt: 'asc' }, take: 100, select: { id: true, title: true, status: true, showAt: true, doorsAt: true, ageRestriction: true, venue: { select: { name: true, city: true, timezone: true } } } }),
-        eventAvailability: availability,
-        lookupTicketOrder,
+        eventAvailability: surfaceRefusals(availability),
+        lookupTicketOrder: surfaceRefusals(lookupTicketOrder),
       },
-      Mutation: {
+      Mutation: surfaced({
         createGaHold: createHold,
         createSeatHold: createHold,
         seedConcerts,
@@ -70,7 +79,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         updateActiveUser,
         startTicketCheckout, completeTicketCheckout, transferTicket, refundTicketOrder,
         ...Object.fromEntries(operatorCommands.map(name => [name, operator(name)])),
-      },
+      }),
     },
   });
 }
