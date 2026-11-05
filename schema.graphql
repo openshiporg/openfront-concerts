@@ -5376,6 +5376,8 @@ type Mutation {
   confirmHold(input: OperatorCommandInput!): JSON
   sendOffer(input: OperatorCommandInput!): JSON
   acceptOffer(input: OperatorCommandInput!): JSON
+  declineOffer(input: OperatorCommandInput!): JSON
+  contractOffer(input: OperatorCommandInput!): JSON
   publishEvent(input: OperatorCommandInput!): JSON
   setProductionHold(input: OperatorCommandInput!): JSON
   releaseProductionHold(input: OperatorCommandInput!): JSON

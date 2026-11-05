@@ -1,7 +1,9 @@
 import { gql } from '../../lib/gql';
 import { computeSettlement } from '@/features/keystone/lib/settlement';
 import { money, label } from '../../lib/format';
+import Link from 'next/link';
 import { FilterTabs, Page, Row, Rows } from '../../components/ui-bits';
+import { OfferActions } from '../components/OfferActions';
 
 /** Calculator preview: the pure settlement function over projected sales. */
 export async function DealListPage({ searchParams }: { searchParams: Promise<{ status?: string; gross?: string }> }) {
@@ -13,10 +15,10 @@ export async function DealListPage({ searchParams }: { searchParams: Promise<{ s
   };
   return (
     <Page title="Deals">
-      <FilterTabs base="/dashboard/platform/deals" current={status} options={[['', 'All'], ['draft', 'Draft'], ['sent', 'Sent'], ['accepted', 'Accepted'], ['contracted', 'Contracted'], ['settled', 'Settled']].map(([value, label]) => ({ value, label }))} />
+      <FilterTabs base="/dashboard/platform/deals" current={status} options={[['', 'All'], ['draft', 'Draft'], ['sent', 'Sent'], ['accepted', 'Accepted'], ['contracted', 'Contracted'], ['declined', 'Declined'], ['settled', 'Settled']].map(([value, label]) => ({ value, label }))} />
       <p className="text-sm text-muted-foreground">Projected net gross {money(projected)}. Add ?gross=cents to change the projection.</p>
       <Rows empty="No deals.">
-        {data.offers.map((o: any) => { const p = preview(o); return <Row key={o.id} href={`/dashboard/platform/events/${o.event.id}?tab=billing`} title={`${o.artist.name}: ${o.event.title}`} status={o.status} meta={`${label(o.dealType)} · guarantee ${money(o.guaranteeCents)} · ${o.percentageBps / 100}%`} right={p ? <>Artist {money(p.artistTotalCents)} · promoter {money(p.promoterNetCents)}</> : null} />; })}
+        {data.offers.map((o: any) => { const p = preview(o); return <Row key={o.id} title={<Link href={`/dashboard/platform/events/${o.event.id}?tab=billing`} className="hover:underline">{o.artist.name}: {o.event.title}</Link>} status={o.status} meta={<div className="space-y-2"><div>{`${label(o.dealType)} · guarantee ${money(o.guaranteeCents)} · ${o.percentageBps / 100}%`}</div><OfferActions offerId={o.id} status={o.status} /></div>} right={p ? <>Artist {money(p.artistTotalCents)} · promoter {money(p.promoterNetCents)}</> : null} />; })}
       </Rows>
     </Page>
   );

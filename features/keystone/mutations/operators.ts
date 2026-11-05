@@ -10,7 +10,7 @@ import { zonedDateTime, holdDay } from '../lib/venue-time';
 export function authorize(context: any, permission: Permission) {
   if (!permissions[permission]({ session: context.session })) throw new Error(`Permission required: ${permission}`);
 }
-const required: Record<string, Permission> = { releaseDateHold: 'canManageEvents', advanceEvent: 'canManageEvents', placeDateHold: 'canManageEvents', challengeHold: 'canManageEvents', confirmHold: 'canManageEvents', sendOffer: 'canManageDeals', acceptOffer: 'canManageDeals', publishEvent: 'canManageEvents', setProductionHold: 'canManageInventory', releaseProductionHold: 'canManageInventory', scanTicket: 'canScanTickets', recordMerchSales: 'canManageSettlements', computeSettlement: 'canManageSettlements', adjustSettlement: 'canManageSettlements', signSettlement: 'canManageSettlements', recordArtistPayment: 'canManageSettlements', postponeEvent: 'canManageEvents', cancelEvent: 'canManageEvents' };
+const required: Record<string, Permission> = { releaseDateHold: 'canManageEvents', advanceEvent: 'canManageEvents', placeDateHold: 'canManageEvents', challengeHold: 'canManageEvents', confirmHold: 'canManageEvents', sendOffer: 'canManageDeals', acceptOffer: 'canManageDeals', declineOffer: 'canManageDeals', contractOffer: 'canManageDeals', publishEvent: 'canManageEvents', setProductionHold: 'canManageInventory', releaseProductionHold: 'canManageInventory', scanTicket: 'canScanTickets', recordMerchSales: 'canManageSettlements', computeSettlement: 'canManageSettlements', adjustSettlement: 'canManageSettlements', signSettlement: 'canManageSettlements', recordArtistPayment: 'canManageSettlements', postponeEvent: 'canManageEvents', cancelEvent: 'canManageEvents' };
 export function operator(operation: string) {
   return async (_: any, { input }: any, context: any) => {
     authorize(context, required[operation]);
@@ -73,6 +73,23 @@ export function operator(operation: string) {
         await transition(tx, 'dateHold', row.id, row.status, 'confirmed', actor, '', { eventId: event.id });
         if (row.artistId) await tx.eventArtist.create({ data: { eventId: event.id, artistId: row.artistId, billing: 'headliner', position: 1 } });
         await audit('Event', event.id, { status: 'hold' }); return { id: row.id, eventId: event.id, status: 'confirmed' };
+      }
+      if (operation === 'declineOffer') {
+        const offer = await tx.offer.findUnique({ where: { id: input.offerId } });
+        if (!offer) throw new Error('Offer not found');
+        if (!String(input.reason || '').trim()) throw new Error('Decline reason required');
+        await transition(tx, 'offer', offer.id, 'sent', 'declined', actor, String(input.reason).trim());
+        return { id: offer.id, status: 'declined' };
+      }
+      if (operation === 'contractOffer') {
+        const offer = await tx.offer.findUnique({ where: { id: input.offerId } });
+        if (!offer) throw new Error('Offer not found');
+        // The contract is the accepted terms; any later edit to the offer row must not slip into it.
+        if (!offer.acceptedTerms || canonicalDigest(offer.acceptedTerms) !== offer.acceptedTermsHash) throw new Error('Accepted terms hash mismatch');
+        if (canonicalDigest(termsOf(offer)) !== offer.acceptedTermsHash) throw new Error('Offer changed after acceptance; send a new offer version');
+        if (!String(input.reference || '').trim()) throw new Error('Contract reference required');
+        await transition(tx, 'offer', offer.id, 'accepted', 'contracted', actor, '', { notes: [offer.notes, `Contract ${String(input.reference).trim()}`].filter(Boolean).join('\n') });
+        return { id: offer.id, status: 'contracted' };
       }
       if (operation === 'sendOffer' || operation === 'acceptOffer') {
         const offer = await tx.offer.findUnique({ where: { id: input.offerId } });

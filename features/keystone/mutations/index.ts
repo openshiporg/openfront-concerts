@@ -12,7 +12,7 @@ import seedConcerts from './seedConcerts';
 import { startTicketCheckout, completeTicketCheckout, lookupTicketOrder, transferTicket, refundTicketOrder } from './checkout';
 
 const graphql = String.raw;
-const operatorCommands = ['releaseDateHold', 'advanceEvent', 'placeDateHold', 'challengeHold', 'confirmHold', 'sendOffer', 'acceptOffer', 'publishEvent', 'setProductionHold', 'releaseProductionHold', 'scanTicket', 'recordMerchSales', 'computeSettlement', 'adjustSettlement', 'signSettlement', 'recordArtistPayment', 'postponeEvent', 'cancelEvent'];
+const operatorCommands = ['releaseDateHold', 'advanceEvent', 'placeDateHold', 'challengeHold', 'confirmHold', 'sendOffer', 'acceptOffer', 'declineOffer', 'contractOffer', 'publishEvent', 'setProductionHold', 'releaseProductionHold', 'scanTicket', 'recordMerchSales', 'computeSettlement', 'adjustSettlement', 'signSettlement', 'recordArtistPayment', 'postponeEvent', 'cancelEvent'];
 
 /** Command refusals are plain Errors with operator-facing text; surface them. Prisma and other internal errors stay masked. */
 export function surfaceRefusals<T extends (...args: any[]) => any>(resolver: T): T {
