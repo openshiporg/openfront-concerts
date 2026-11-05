@@ -39,7 +39,10 @@ export async function refundDoorSale(_: any, { input }: any, context: any) {
     await tx.ticketOrder.update({ where: { id: orderId }, data: { refundedCents: total, status: full ? 'refunded' : 'partially_refunded' } });
     if (full) {
       const tickets = await tx.ticket.findMany({ where: { orderId, status: { in: ['valid', 'checked_in'] } } });
-      for (const t of tickets) await tx.ticket.update({ where: { id: t.id }, data: { status: 'refunded', tokenHash: '' } });
+      for (const t of tickets) {
+        await tx.ticket.update({ where: { id: t.id }, data: { status: 'refunded', tokenHash: '' } });
+        if (t.seatInventoryId) await tx.seatInventory.updateMany({ where: { id: t.seatInventoryId, status: 'sold' }, data: { status: 'open', occupancyKey: null } });
+      }
       const lines = await tx.ticketOrderLine.findMany({ where: { orderId } });
       for (const l of lines) {
         await tx.priceLevel.update({ where: { id: l.priceLevelId }, data: { sold: { decrement: l.quantity } } });

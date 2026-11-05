@@ -3,14 +3,15 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { runTyped } from '../../lib/commands';
+import { runTyped, readQuery } from '../../lib/commands';
 import { money } from '../../lib/format';
 
 type Quote = { unitPriceCents: number; phaseName: string; subtotalCents: number; facilityFeesCents: number; serviceFeesCents: number; taxCents: number; totalCents: number };
 
-type Level = { id: string; name: string; priceCents: number; room: number; eventId: string; eventTitle: string };
+type Level = { id: string; name: string; priceCents: number; room: number; eventId: string; eventTitle: string; reserved: boolean };
+type Seat = { id: string; label: string };
 
-/** General-admission door sales (cash or external card terminal) and comps. Reserved seating stays online. */
+/** Door sales (cash or external card terminal) and comps. Reserved levels pick exact open seats. */
 export function DoorSalePanel({ levels }: { levels: Level[] }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -30,8 +31,20 @@ export function DoorSalePanel({ levels }: { levels: Level[] }) {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [key, setKey] = useState(() => crypto.randomUUID());
+  const [seats, setSeats] = useState<Seat[]>([]);
+  const [picked, setPicked] = useState<string[]>([]);
+  const [seatFilter, setSeatFilter] = useState('');
   const selected = levels.find((l) => l.id === levelId) || levels[0];
-  const count = Number(qty);
+  const count = selected?.reserved ? picked.length : Number(qty);
+  useEffect(() => {
+    setPicked([]); setSeats([]);
+    if (!open || !selected?.reserved) return;
+    let live = true;
+    readQuery(`query($id: ID!) { seatInventories(where: { priceLevel: { id: { equals: $id } }, status: { equals: "open" } }, take: 2000) { id seat { label } } }`, { id: selected.id })
+      .then((d) => { if (live) setSeats(d.seatInventories.map((s: any) => ({ id: s.id, label: s.seat?.label || '' })).sort((a: Seat, b: Seat) => a.label.localeCompare(b.label, undefined, { numeric: true }))); })
+      .catch((e) => live && setQuoteError(e.message));
+    return () => { live = false; };
+  }, [open, selected?.id, selected?.reserved, key]);
   useEffect(() => {
     if (!open || !selected || !Number.isInteger(count) || count < 1) { setQuote(null); return; }
     let live = true;
@@ -49,7 +62,7 @@ export function DoorSalePanel({ levels }: { levels: Level[] }) {
   const run = async () => {
     setPending(true); setError(''); setMessage('');
     try {
-      const input: Record<string, unknown> = { eventId: level.eventId, levelId: level.id, qty: n, name: name.trim(), email: email.trim(), ageAttested: age, idempotencyKey: key };
+      const input: Record<string, unknown> = { eventId: level.eventId, levelId: level.id, qty: n, ...(level.reserved ? { seatInventoryIds: picked } : {}), name: name.trim(), email: email.trim(), ageAttested: age, idempotencyKey: key };
       if (mode === 'comp') input.reason = reason.trim();
       else input.tender = tender === 'cash' ? { kind: 'cash', tenderedCents: Math.round(Number(cash) * 100) } : { kind: 'card_external', reference: ref.trim() };
       const r = await runTyped(mode === 'comp' ? 'issueComp' : 'issueDoorSale', 'DoorSaleInput', input);
@@ -70,7 +83,19 @@ export function DoorSalePanel({ levels }: { levels: Level[] }) {
       <select className={sel} value={level.id} onChange={(e) => setLevelId(e.target.value)} aria-label="Event and level">
         {levels.map((l) => <option key={l.id} value={l.id}>{l.eventTitle} · {l.name} · {l.room} left</option>)}
       </select>
-      <Input value={qty} onChange={(e) => setQty(e.target.value)} inputMode="numeric" aria-label="Quantity" />
+      {selected?.reserved ? (
+        <div className="space-y-2">
+          <Input value={seatFilter} onChange={(e) => setSeatFilter(e.target.value)} placeholder="Find seat (e.g. A-1)" aria-label="Find seat" />
+          <div className="flex max-h-40 flex-wrap gap-1.5 overflow-y-auto" role="group" aria-label="Open seats">
+            {seats.filter((s) => !seatFilter || s.label.toLowerCase().includes(seatFilter.toLowerCase())).slice(0, 120).map((s) => {
+              const on = picked.includes(s.id);
+              return <button key={s.id} type="button" aria-pressed={on} onClick={() => setPicked((p) => on ? p.filter((x) => x !== s.id) : [...p, s.id])} className={`rounded-md border px-2 py-1 font-mono text-xs ${on ? 'border-foreground bg-foreground text-background' : ''}`}>{s.label}</button>;
+            })}
+            {!seats.length ? <p className="text-sm text-muted-foreground">No open seats in this level.</p> : null}
+          </div>
+          <p className="text-sm text-muted-foreground">{picked.length ? `Seats: ${seats.filter((s) => picked.includes(s.id)).map((s) => s.label).join(', ')}` : 'Pick one seat per ticket.'}</p>
+        </div>
+      ) : <Input value={qty} onChange={(e) => setQty(e.target.value)} inputMode="numeric" aria-label="Quantity" />}
       <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Guest name" aria-label="Guest name" />
       <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email (optional)" aria-label="Guest email" />
       {mode === 'comp' ? <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason (required)" aria-label="Comp reason" /> : (

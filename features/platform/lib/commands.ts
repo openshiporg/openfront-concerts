@@ -16,3 +16,11 @@ export async function runCommand(name: string, input: Record<string, unknown>): 
 export async function runTyped(name: string, inputType: string, input: Record<string, unknown>): Promise<any> {
   return post(`mutation Run($input: ${inputType}!) { result: ${name}(input: $input) }`, { input });
 }
+
+/** Browser-side read (small dashboard lookups such as open seats). */
+export async function readQuery(query: string, variables: Record<string, unknown> = {}): Promise<any> {
+  const response = await fetch('/api/graphql', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query, variables }) });
+  const body = await response.json();
+  if (body.errors?.length) throw new Error(body.errors[0].message);
+  return body.data;
+}

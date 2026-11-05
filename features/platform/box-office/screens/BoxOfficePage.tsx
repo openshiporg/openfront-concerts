@@ -23,7 +23,7 @@ export async function BoxOfficePage({ searchParams }: { searchParams: Promise<{ 
   if (!data) return <Page title="Box office"><p className="rounded-lg border p-6 text-sm text-muted-foreground">Box office could not load.</p></Page>;
   const threshold = data.storeSettingsRecords?.[0]?.refundApprovalThresholdCents ?? 0;
   const approvals = data.managerApprovals;
-  const levels = (data.events || []).flatMap((e: any) => (e.priceLevel_event || []).filter((l: any) => l.sections?.length && l.sections.every((s: any) => s.kind === 'ga')).map((l: any) => ({ id: l.id, name: l.name, priceCents: l.priceCents, room: l.capacity - l.sold - l.held - l.productionHeld, eventId: e.id, eventTitle: e.title }))).filter((l: any) => l.room > 0);
+  const levels = (data.events || []).flatMap((e: any) => (e.priceLevel_event || []).filter((l: any) => l.sections?.length).map((l: any) => ({ id: l.id, name: l.name, priceCents: l.priceCents, room: l.capacity - l.sold - l.held - l.productionHeld, eventId: e.id, eventTitle: e.title, reserved: l.sections.some((s: any) => s.kind !== 'ga') }))).filter((l: any) => l.room > 0);
   const hasMore = data.ticketOrders.length > take;
   const orders = data.ticketOrders.slice(0, take);
   const pending = approvals.filter((a: any) => a.status === 'pending');

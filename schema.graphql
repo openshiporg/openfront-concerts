@@ -5933,6 +5933,7 @@ input DoorSaleInput {
   eventId: ID!
   levelId: ID!
   qty: Int!
+  seatInventoryIds: [ID!]
   name: String!
   email: String
   ageAttested: Boolean

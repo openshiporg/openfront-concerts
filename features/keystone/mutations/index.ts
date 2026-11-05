@@ -38,7 +38,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
       input RefundTicketOrderInput { orderId: ID! amountCents: Int reason: String! idempotencyKey: String! approvalId: ID }
       input DoorTenderInput { kind: String! tenderedCents: Int reference: String }
       input DoorPreviewInput { eventId: ID! levelId: ID! qty: Int! comp: Boolean }
-      input DoorSaleInput { eventId: ID! levelId: ID! qty: Int! name: String! email: String ageAttested: Boolean reason: String tender: DoorTenderInput idempotencyKey: String! }
+      input DoorSaleInput { eventId: ID! levelId: ID! qty: Int! seatInventoryIds: [ID!] name: String! email: String ageAttested: Boolean reason: String tender: DoorTenderInput idempotencyKey: String! }
       input RefundApprovalRequestInput { orderId: ID! amountCents: Int! reason: String! cash: Boolean }
       input OpenCashDrawerInput { label: String! openingFloatCents: Int! idempotencyKey: String! }
       input CloseCashDrawerInput { drawerId: ID! count: JSON! reason: String idempotencyKey: String! }
