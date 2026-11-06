@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { DEFAULT_STORE_LOGO_COLOR, DEFAULT_STORE_LOGO_ICON } from '../../platform/store-settings/lib/store-logo';
 import { permissions, permissionNames } from '../access';
 import { checkedClient, lockTransactionKey } from '../lib/transaction';
 import { appendAuditEvent } from '../lib/audit';
@@ -28,7 +29,8 @@ export default async function seedConcerts(_: any, { section, data }: { section:
     await lockTransactionKey(tx, 'onboarding:concerts');
     const one = async (model: string, where: any, create: any) => (await tx[model].findFirst({ where })) || tx[model].create({ data: create });
     if (section === 'settings') {
-      const row = await one('storeSettings', {}, { name: data.name, currencyCode: data.currencyCode, refundApprovalThresholdCents: data.refundApprovalThresholdCents });
+      // As in E-commerce onboarding: the store always gets a registry logo and hue; seed values win when present.
+      const row = await one('storeSettings', {}, { name: data.name, currencyCode: data.currencyCode, refundApprovalThresholdCents: data.refundApprovalThresholdCents, logoIcon: data.logoIcon || DEFAULT_STORE_LOGO_ICON, logoColor: data.logoColor || DEFAULT_STORE_LOGO_COLOR });
       return { id: row.id };
     }
     if (section === 'role') {

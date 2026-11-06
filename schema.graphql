@@ -4202,6 +4202,8 @@ type StoreSettings {
   refundApprovalThresholdCents: Int
   manager: User
   currencyCode: String
+  logoIcon: String
+  logoColor: String
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -4219,6 +4221,8 @@ input StoreSettingsWhereInput {
   refundApprovalThresholdCents: IntNullableFilter
   manager: UserWhereInput
   currencyCode: StringFilter
+  logoIcon: StringFilter
+  logoColor: StringFilter
   createdAt: DateTimeFilter
   updatedAt: DateTimeFilter
 }
@@ -4228,6 +4232,8 @@ input StoreSettingsOrderByInput {
   name: OrderDirection
   refundApprovalThresholdCents: OrderDirection
   currencyCode: OrderDirection
+  logoIcon: OrderDirection
+  logoColor: OrderDirection
   createdAt: OrderDirection
   updatedAt: OrderDirection
 }
@@ -4237,6 +4243,8 @@ input StoreSettingsUpdateInput {
   refundApprovalThresholdCents: Int
   manager: UserRelateToOneForUpdateInput
   currencyCode: String
+  logoIcon: String
+  logoColor: String
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -4251,6 +4259,8 @@ input StoreSettingsCreateInput {
   refundApprovalThresholdCents: Int
   manager: UserRelateToOneForCreateInput
   currencyCode: String
+  logoIcon: String
+  logoColor: String
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -5689,6 +5699,7 @@ type Query {
   eventsOnSale: JSON
   eventAvailability(eventId: ID!): JSON
   lookupTicketOrder(email: String!, orderNumber: String!): JSON
+  storeLogo: StoreLogo!
 }
 
 union AuthenticatedItem = User
@@ -5966,4 +5977,9 @@ input RefundApprovalDecisionInput {
   approvalId: ID!
   decision: String!
   note: String
+}
+
+type StoreLogo {
+  logoIcon: String!
+  logoColor: String!
 }

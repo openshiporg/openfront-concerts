@@ -1,6 +1,7 @@
 import { mergeSchemas } from "@graphql-tools/schema";
 import { GraphQLError, type GraphQLSchema } from 'graphql';
 import redirectToInit from "./redirectToInit";
+import { storeLogoTypeDefs, storeLogo } from "./storeLogo";
 import { availability, createHold } from './inventory';
 import { operator } from './operators';
 import { publishSeatingChart } from './charts';
@@ -70,9 +71,10 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         ${Object.keys(editorMutations).map(name => `${name}(input: OperatorCommandInput!): JSON`).join('\n        ')}
         ${operatorCommands.map(name => `${name}(input: OperatorCommandInput!): JSON`).join('\n        ')}
       }
-    `,
+    ` + storeLogoTypeDefs,
     resolvers: {
       Query: {
+        storeLogo,
         redirectToInit,
         eventsOnSale: async (_: any, __: any, context: any) => context.prisma.event.findMany({ where: { status: { in: ['announced', 'presale', 'on_sale', 'sold_out', 'postponed'] } }, orderBy: { showAt: 'asc' }, take: 100, select: { id: true, title: true, status: true, showAt: true, doorsAt: true, ageRestriction: true, venue: { select: { name: true, city: true, timezone: true } } } }),
         eventAvailability: surfaceRefusals(availability),
