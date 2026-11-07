@@ -71,17 +71,19 @@ export async function finalizePaidOrder(context: any, orderId: string, provider:
   if (!intentId) throw new Error('Payment has not been initiated');
   const status = observed || await getPaymentStatus({ provider, paymentId: intentId });
   assertCheckoutProviderObservation(status, order0.totalCents, order0.currencyCode);
-  return prisma.$transaction(async (raw: any) => {
+  const finalized: any = await prisma.$transaction(async (raw: any) => {
     const tx = checkedClient(raw);
     await lockTransactionKey(tx, `event:${order0.eventId}`);
     const order = await tx.ticketOrder.findUnique({ where: { id: orderId } });
-    if (order.status !== 'pending_payment') return tx.ticketOrder.findUnique({ where: { id: orderId } }).then(() => ({ orderId, status: order.status, tickets: [] as any[], replay: true }));
+    // An order cancelled when its unpaid hold lapsed can still receive a late payment; that must be recorded once.
+    const lateAfterExpiry = order.status === 'cancelled' && !(await tx.payment.findUnique({ where: { idempotencyKey: `pi:${intentId}` } }));
+    if (order.status !== 'pending_payment' && !lateAfterExpiry) return tx.ticketOrder.findUnique({ where: { id: orderId } }).then(() => ({ orderId, status: order.status, tickets: [] as any[], replay: true }));
     const hold = await tx.inventoryHold.findFirst({ where: { orderId }, include: { seats: { include: { seat: true } }, priceLevel: true } });
     if (!hold || hold.status !== 'active') {
       await appendAuditEvent(tx, null, { action: 'checkout.paid_without_hold', targetList: 'TicketOrder', targetId: orderId, reason: 'Provider payment succeeded after the hold was released; refund required' });
       await tx.ticketOrder.update({ where: { id: orderId }, data: { status: 'cancelled' } });
-      await tx.payment.create({ data: { idempotencyKey: `pi:${intentId}`, amount: order.totalCents, currencyCode: order.currencyCode, status: 'succeeded', paymentProviderId: provider.id, providerPaymentId: intentId, orderId, paymentCollectionId: order.paymentCollectionId, processedAt: new Date(), notes: 'Paid after hold release; refund required' } });
-      throw new Error('Payment succeeded after the hold was released; contact the box office for a refund');
+      const latePayment = await tx.payment.create({ data: { idempotencyKey: `pi:${intentId}`, amount: order.totalCents, currencyCode: order.currencyCode, status: 'succeeded', paymentProviderId: provider.id, providerPaymentId: intentId, orderId, paymentCollectionId: order.paymentCollectionId, processedAt: new Date(), notes: 'Paid after hold release; refunded automatically' } });
+      return { orderId, status: 'cancelled', tickets: [] as any[], replay: false, late: { paymentId: latePayment.id, amount: order.totalCents, currency: order.currencyCode } } as any;
     }
     const q = hold.quoteSnapshot;
     const line = await tx.ticketOrderLine.create({ data: { orderId, title: q.eventTitle, levelName: q.levelName, phaseName: q.phaseName, seatLabel: (q.seats || []).map((s: any) => s.label).join(', '), unitPriceCents: q.unitPriceCents, serviceFeeCents: q.feeCents, facilityFeeCents: q.facilityFeeCents, taxCents: q.taxCents, quantity: hold.quantity, discountCents: q.discountCents, totalCents: q.totalCents, currencyCode: q.currencyCode, priceLevelId: hold.priceLevelId, phaseId: hold.phaseId } });
@@ -106,6 +108,24 @@ export async function finalizePaidOrder(context: any, orderId: string, provider:
     await appendAuditEvent(tx, null, { action: 'order.paid', targetList: 'TicketOrder', targetId: orderId, after: { totalCents: order.totalCents } });
     return { orderId, status: 'paid', orderNumber: order.orderNumber, tickets: tokens, replay: false };
   }, { timeout: 30000, isolationLevel: 'Serializable' });
+  if (finalized.late) await refundLatePayment(context, provider, orderId, intentId, finalized.late);
+  return finalized;
+}
+
+/** Money arrived for an order whose hold had already lapsed: give it back. The provider key is stable, so a retry or a webhook replay cannot refund twice. */
+async function refundLatePayment(context: any, provider: any, orderId: string, intentId: string, late: { paymentId: string; amount: number; currency: string }) {
+  const prisma = context.prisma; const key = `late:${intentId}`;
+  const refund = await prisma.refund.upsert({ where: { idempotencyKey: key }, update: {}, create: { idempotencyKey: key, amount: late.amount, currencyCode: late.currency, status: 'processing', reason: 'Payment arrived after the hold expired', paymentId: late.paymentId, orderId } });
+  if (refund.status === 'succeeded') return;
+  let result: any;
+  try { result = await providerRefund({ provider, paymentId: intentId, amount: late.amount, currency: late.currency, idempotencyKey: key }); }
+  catch { await prisma.refund.update({ where: { id: refund.id }, data: { status: 'unknown' } }); return; }
+  const ok = result.status === 'succeeded';
+  await prisma.refund.update({ where: { id: refund.id }, data: { status: ok ? 'succeeded' : result.status === 'failed' ? 'failed' : 'unknown', providerRefundId: result.id || '', processedAt: ok ? new Date() : null } });
+  if (ok) {
+    await prisma.payment.update({ where: { id: late.paymentId }, data: { refundedAmount: late.amount, status: 'refunded' } });
+    await prisma.ticketOrder.update({ where: { id: orderId }, data: { refundedCents: late.amount } });
+  }
 }
 
 export async function completeTicketCheckout(_: any, { input }: any, context: any) {

@@ -10,3 +10,19 @@ test('skips and terminal transitions refused; postponed resumption needs reason'
   assert.throws(() => assertEventTransition('postponed','announced'));
   assert.doesNotThrow(() => assertEventTransition('postponed','announced','New date confirmed'));
 });
+
+import { readFileSync } from 'node:fs';
+test('cancelling an event releases every active hold; expiry releases unpaid checkouts and cancels their orders', () => {
+  const inv = readFileSync(new URL('../mutations/inventory.ts', import.meta.url), 'utf8');
+  assert.match(inv, /opts\.all \? \{\} : \{ expiresAt/);
+  assert.match(inv, /id: hold\.orderId, status: 'pending_payment' \}, data: \{ status: 'cancelled' \}/);
+  assert.doesNotMatch(inv, /order: null/);
+  const ops = readFileSync(new URL('../mutations/operators.ts', import.meta.url), 'utf8');
+  assert.match(ops, /expireHolds\(tx, eventId, \{ all: true \}\)/);
+  assert.match(ops, /Hold expired', \{ rankKey: null \}/);
+});
+test('a payment landing after the hold lapsed is refunded under a stable provider key', () => {
+  const co = readFileSync(new URL('../mutations/checkout.ts', import.meta.url), 'utf8');
+  assert.match(co, /key = `late:\$\{intentId\}`/);
+  assert.match(co, /lateAfterExpiry/);
+});

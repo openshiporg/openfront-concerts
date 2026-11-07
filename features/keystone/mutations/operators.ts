@@ -39,6 +39,9 @@ export function operator(operation: string) {
         if (input.artistId && !(await tx.artist.findUnique({ where: { id: input.artistId } }))) throw new Error('Artist not found');
         if (input.expiresAt && !(new Date(input.expiresAt) > new Date())) throw new Error('Expiry must be in the future');
         if (await tx.dateHold.count({ where: { venueId: input.venueId, date, status: 'confirmed' } })) throw new Error('Date is already confirmed');
+        // A lapsed hold keeps its rank key forever unless it is released; the rank is free again once it has expired.
+        const lapsed = await tx.dateHold.findMany({ where: { venueId: input.venueId, date, status: { in: ['held', 'challenged'] }, expiresAt: { lte: new Date() } } });
+        for (const l of lapsed) await transition(tx, 'dateHold', l.id, l.status, 'released', actor, 'Hold expired', { rankKey: null });
         const rankKey = `${input.venueId}:${date.toISOString().slice(0, 10)}:${input.rank}`;
         if (await tx.dateHold.findUnique({ where: { rankKey } })) throw new Error(`Rank ${input.rank} is already held for this date`);
         const row = await tx.dateHold.create({ data: { venueId: input.venueId, date, artistId: input.artistId, agencyId: input.agencyId, rank: input.rank, rankKey, status: 'held', expiresAt: input.expiresAt ? new Date(input.expiresAt) : new Date(Date.now() + 604800000) } });
@@ -201,6 +204,7 @@ export function operator(operation: string) {
         const next = operation === 'postponeEvent' ? 'postponed' : 'cancelled';
         // Cancellation must complete provider refunds via refundTicketOrder; never attest money locally.
         if (next === 'cancelled' && await tx.ticketOrder.count({ where: { eventId, status: { in: ['paid','partially_refunded'] } } })) throw new Error('Refund all paid orders before cancelling');
+        if (next === 'cancelled') await expireHolds(tx, eventId, { all: true });
         await transition(tx, 'event', eventId, event.status, next, actor, input.reason || '', next === 'postponed' ? { refundWindowEndsAt: new Date(Date.now()+30*86400000) } : {});
         return { id: eventId, status: next };
       }

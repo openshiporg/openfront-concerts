@@ -3,15 +3,21 @@ import { createProof, opaqueToken, digest } from '../lib/guest-proof';
 import { ticketQuote } from '../lib/settlement';
 import { appendAuditEvent } from '../lib/audit';
 
-export async function expireHolds(tx: any, eventId: string) {
-  const holds = await tx.inventoryHold.findMany({ where: { eventId, status: 'active', expiresAt: { lte: new Date() }, order: null }, include: { seats: true } });
+/** Releases lapsed holds, including holds whose checkout was started but never paid (their order is cancelled).
+ *  `all` releases every active hold, used when the event is cancelled. A payment that lands afterwards is recorded
+ *  and refunded by finalizePaidOrder, never silently dropped. */
+export async function expireHolds(tx: any, eventId: string, opts: { all?: boolean } = {}) {
+  const holds = await tx.inventoryHold.findMany({ where: { eventId, status: 'active', ...(opts.all ? {} : { expiresAt: { lte: new Date() } }) }, include: { seats: true } });
   for (const hold of holds) {
-    await tx.inventoryHold.update({ where: { id: hold.id }, data: { status: 'expired', seats: { set: [] } } });
+    const flipped = await tx.inventoryHold.updateMany({ where: { id: hold.id, status: 'active' }, data: { status: 'expired' } });
+    if (flipped.count !== 1) continue;
+    await tx.inventoryHold.update({ where: { id: hold.id }, data: { seats: { set: [] } } });
+    if (hold.orderId) await tx.ticketOrder.updateMany({ where: { id: hold.orderId, status: 'pending_payment' }, data: { status: 'cancelled' } });
     await tx.priceLevel.update({ where: { id: hold.priceLevelId }, data: { held: { decrement: hold.quantity } } });
     for (const seat of hold.seats) await tx.seatInventory.updateMany({ where: { id: seat.id, status: 'held', holdKey: hold.holdKey }, data: { status: 'open', occupancyKey: null, holdKey: '' } });
     await tx.promoRedemption.updateMany({ where: { holdId: hold.id, status: 'reserved' }, data: { status: 'released' } });
   }
-  const blocks = await tx.productionHold.findMany({ where: { eventId, status: 'active', releaseAt: { lte: new Date() } }, include: { seats: true } });
+  const blocks = await tx.productionHold.findMany({ where: { eventId, status: 'active', ...(opts.all ? {} : { releaseAt: { lte: new Date() } }) }, include: { seats: true } });
   for (const block of blocks) await releaseBlock(tx, block);
 }
 export async function releaseBlock(tx: any, block: any) {
