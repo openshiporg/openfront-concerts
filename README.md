@@ -1,6 +1,23 @@
-# Openfront Concerts
+![openfront-concerts](.github/logo.svg)
 
-Ticketing, artist deals and post-show settlement for an independent promoter that runs its own venues and promotes at partner venues. Built on Next.js 16 and Keystone 6.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fopenshiporg%2Fopenfront-concerts&env=DATABASE_URL%2CSESSION_SECRET)
+
+Openfront Concerts is a self-hostable ticketing, artist-deal and settlement application for an independent promoter that runs its own venues and promotes at partner venues. Built on Next.js 16 and Keystone 6.
+
+**Documentation:** [docs.openship.org/docs/openfront/concerts](https://docs.openship.org/docs/openfront/concerts)
+
+## Live
+
+Lantern Live
+
+| | |
+|---|---|
+| **Storefront** | [concerts.openship.org](https://concerts.openship.org) |
+| **Dashboard** | [concerts.openship.org/dashboard](https://concerts.openship.org/dashboard) |
+
+[Learn more →](https://openship.org/products/openfront-concerts)
+
+[Documentation →](https://docs.openship.org/docs/openfront/concerts/)
 
 ## What is built
 
@@ -46,9 +63,10 @@ Open `/dashboard/init` to create the first admin, then run setup from the sideba
 
 ## The Openfront Ecosystem
 
-| Product | For | Repository | Demo | Docs |
+Every Openfront is open source and self-hostable. Try any of them live.
+
+| Product | For | Repository | Live | Docs |
 |---|---|---|---|---|
-| **Openfront Concerts** (this repository) | Ticketing, artist deals and post-show settlement for promoters | [openfront-concerts](https://github.com/openshiporg/openfront-concerts) | | |
 | Openfront E-commerce | Online store: catalog, checkout, orders, fulfillment | [openfront](https://github.com/openshiporg/openfront) | [e-commerce.openship.org](https://e-commerce.openship.org) | [Docs](https://docs.openship.org/docs/openfront/ecommerce) |
 | Openfront Restaurant | Online ordering, POS and kitchen display | [openfront-restaurant](https://github.com/openshiporg/openfront-restaurant) | [restaurant.openship.org](https://restaurant.openship.org) | [Docs](https://docs.openship.org/docs/openfront/restaurant) |
 | Openfront Grocery | Grocery ordering, lots, expiry and pickup | [openfront-grocery](https://github.com/openshiporg/openfront-grocery) | [grocery.openship.org](https://grocery.openship.org) | [Docs](https://docs.openship.org/docs/openfront/grocery) |
@@ -68,12 +86,10 @@ Open `/dashboard/init` to create the first admin, then run setup from the sideba
 | Openfront Med Spa | Treatments, consents and memberships | [openfront-medspa](https://github.com/openshiporg/openfront-medspa) | [medspa.openship.org](https://medspa.openship.org) | [Docs](https://docs.openship.org/docs/openfront/medspa) |
 | Openfront Construction | Projects, bids, change orders and crews | [openfront-construction](https://github.com/openshiporg/openfront-construction) | [construction.openship.org](https://construction.openship.org) | [Docs](https://docs.openship.org/docs/openfront/construction) |
 | Openfront Law Firm | Matters, intake, time and billing | [openfront-law-firm](https://github.com/openshiporg/openfront-law-firm) | [law-firm.openship.org](https://law-firm.openship.org) | [Docs](https://docs.openship.org/docs/openfront/law-firm) |
-| Openfront Scheduling | Booking pages for appointment businesses | [openfront-scheduling](https://github.com/openshiporg/openfront-scheduling) | [scheduling.openship.org](https://scheduling.openship.org) | [Docs](https://docs.openship.org/docs/openfront/scheduling) |
-| Openfront Social | Creator community and posts | [openfront-social](https://github.com/openshiporg/openfront-social) | [social.openship.org](https://social.openship.org) | [Docs](https://docs.openship.org/docs/openfront/social) |
+| **Openfront Concerts** (this repository) | Ticketing, artist deals and post-show settlement for promoters | [openfront-concerts](https://github.com/openshiporg/openfront-concerts) | [concerts.openship.org](https://concerts.openship.org) | [Docs](https://docs.openship.org/docs/openfront/concerts) |
 | Openfront Rideshare | Rides, drivers and dispatch | [openfront-rideshare](https://github.com/openshiporg/openfront-rideshare) | [rideshare.openship.org](https://rideshare.openship.org) | [Docs](https://docs.openship.org/docs/openfront/rideshare) |
 | Openfront Airline | Flights, booking and passenger operations | [openfront-airline](https://github.com/openshiporg/openfront-airline) | [airline.openship.org](https://airline.openship.org) | [Docs](https://docs.openship.org/docs/openfront/airline) |
 | Openfront Hospital | Appointments, patients and care teams | [openfront-hospital](https://github.com/openshiporg/openfront-hospital) | [hospital.openship.org](https://hospital.openship.org) | [Docs](https://docs.openship.org/docs/openfront/hospital) |
 | Openfront Sportsbook | Markets, bets and results | [openfront-sportsbook](https://github.com/openshiporg/openfront-sportsbook) | [sportsbook.openship.org](https://sportsbook.openship.org) | [Docs](https://docs.openship.org/docs/openfront/sportsbook) |
-| Openfront Financial | Accounts, portfolios and advisory | [openfront-financial](https://github.com/openshiporg/openfront-financial) | [financial.openship.org](https://financial.openship.org) | [Docs](https://docs.openship.org/docs/openfront/financial) |
-| Openfront Analytics | Privacy-friendly website analytics | [analytics](https://github.com/openshiporg/analytics) | [analytics.openship.org](https://analytics.openship.org) | [Docs](https://docs.openship.org/docs/openfront/analytics) |
+| Openship | Order routing from sales channels to fulfillment | [openship](https://github.com/openshiporg/openship) | [os.openship.org](https://os.openship.org) | [Docs](https://docs.openship.org/docs/openship/ecommerce) |
 | Marketplace | Shop across Openfront stores | [marketplace](https://github.com/openshiporg/marketplace) | [marketplace.openship.org](https://marketplace.openship.org) | [Docs](https://docs.openship.org/docs/openfront/marketplace) |
