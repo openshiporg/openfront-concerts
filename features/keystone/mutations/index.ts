@@ -12,6 +12,7 @@ import { editorMutations } from './editors';
 import { openCashDrawer, closeCashDrawer } from './cashDrawers';
 import updateActiveUser from './updateActiveUser';
 import seedConcerts from './seedConcerts';
+import { constraintRefusal, constraintGraphQLError } from '../lib/constraint-errors';
 import { startTicketCheckout, completeTicketCheckout, lookupTicketOrder, transferTicket, refundTicketOrder } from './checkout';
 
 const graphql = String.raw;
@@ -21,7 +22,12 @@ const operatorCommands = ['releaseDateHold', 'advanceEvent', 'placeDateHold', 'c
 export function surfaceRefusals<T extends (...args: any[]) => any>(resolver: T): T {
   return (async (...args: any[]) => {
     try { return await resolver(...args); }
-    catch (e: any) { if (e && Object.getPrototypeOf(e) === Error.prototype) throw new GraphQLError(e.message); throw e; }
+    catch (e: any) {
+      // A database rule refused the write: say which rule in words, with a stable code.
+      const refusal = constraintRefusal(e);
+      if (refusal) throw e instanceof GraphQLError ? constraintGraphQLError(e, refusal) : new GraphQLError(refusal.message, { extensions: { code: refusal.code } });
+      if (e && Object.getPrototypeOf(e) === Error.prototype) throw new GraphQLError(e.message); throw e;
+    }
   }) as T;
 }
 const surfaced = (map: Record<string, any>) => Object.fromEntries(Object.entries(map).map(([k, f]) => [k, surfaceRefusals(f)]));

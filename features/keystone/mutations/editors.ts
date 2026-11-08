@@ -135,9 +135,12 @@ export const draftOffer = editor('draftOffer', 'canManageDeals', async (tx, { in
   if (await tx.offer.count({ where: { eventId, artistId: artist.id, status: { in: LIVE_OFFER } } })) throw new Error(`${artist.name} already has a live offer for this event; revise it instead`);
   const terms = validateTerms(data);
   const billing = await ensureBilling(tx, eventId, artist.id, data.billing || 'support');
-  const row = await tx.offer.create({ data: { ...terms, eventId, artistId: artist.id, eventArtistId: billing.id, version: 1, status: 'draft', currencyCode: 'USD' } });
-  await audit('Offer', row.id, null, { ...terms, version: 1 });
-  return { id: row.id, status: 'draft', version: 1 };
+  // A declined offer keeps its version number; the next draft continues the sequence (unique per event and artist).
+  const latest = await tx.offer.findFirst({ where: { eventId, artistId: artist.id }, orderBy: { version: 'desc' } });
+  const version = (latest?.version || 0) + 1;
+  const row = await tx.offer.create({ data: { ...terms, eventId, artistId: artist.id, eventArtistId: billing.id, version, status: 'draft', currencyCode: 'USD' } });
+  await audit('Offer', row.id, null, { ...terms, version });
+  return { id: row.id, status: 'draft', version };
 });
 
 export const updateDraftOffer = editor('updateDraftOffer', 'canManageDeals', async (tx, { input, data, audit }) => {
