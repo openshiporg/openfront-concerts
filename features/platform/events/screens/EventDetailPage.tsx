@@ -46,7 +46,7 @@ export async function EventDetailPage({ params, searchParams }: { params: Promis
   return (
     <Page title={e.title} action={<EventActions eventId={e.id} status={e.status} />}>
       <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"><StatusLabel status={e.status} /><span>{e.venue?.name}, {e.venue?.city}</span><span>{when(e.showAt, e.venue?.timezone)}</span></div>
-      <div className="max-w-full overflow-x-auto"><div className="inline-flex gap-1 rounded-lg bg-muted p-1">
+      <div className="w-full max-w-full overflow-x-auto"><div className="inline-flex gap-1 rounded-lg bg-muted p-1">
         {TABS.map((t) => <Link key={t} href={`${base}?tab=${t}`} className={cn('whitespace-nowrap rounded-md px-3 py-1.5 text-sm capitalize', tab === t ? 'bg-background font-medium shadow-sm' : 'text-muted-foreground')}>{t}</Link>)}
       </div></div>
       {tab === 'overview' && <div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><Stat name="Sold" value={e.sold} /><Stat name="Held" value={e.held} /><Stat name="Open" value={e.open} /><Stat name="Gross" value={money(e.gross)} />
