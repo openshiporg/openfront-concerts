@@ -9,7 +9,7 @@ import { requestRefundApproval, decideRefundApproval } from './approvals';
 import { issueDoorSale, issueComp, previewDoorSale } from './doorSales';
 import { refundDoorSale } from './doorRefunds';
 import { editorMutations } from './editors';
-import { openCashDrawer, closeCashDrawer } from './cashDrawers';
+import { openCashDrawer, closeCashDrawer, forceCloseCashDrawer } from './cashDrawers';
 import updateActiveUser from './updateActiveUser';
 import seedConcerts from './seedConcerts';
 import { constraintRefusal, constraintGraphQLError } from '../lib/constraint-errors';
@@ -49,6 +49,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
       input RefundApprovalRequestInput { orderId: ID! amountCents: Int! reason: String! cash: Boolean }
       input OpenCashDrawerInput { label: String! openingFloatCents: Int! idempotencyKey: String! }
       input CloseCashDrawerInput { drawerId: ID! count: JSON! reason: String idempotencyKey: String! }
+      input ForceCloseCashDrawerInput { drawerId: ID! count: JSON! reason: String! idempotencyKey: String! }
       input RefundApprovalDecisionInput { approvalId: ID! decision: String! note: String }
       type Query {
         redirectToInit: Boolean
@@ -74,6 +75,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         decideRefundApproval(input: RefundApprovalDecisionInput!): JSON
         openCashDrawer(input: OpenCashDrawerInput!): JSON
         closeCashDrawer(input: CloseCashDrawerInput!): JSON
+        forceCloseCashDrawer(input: ForceCloseCashDrawerInput!): JSON
         ${Object.keys(editorMutations).map(name => `${name}(input: OperatorCommandInput!): JSON`).join('\n        ')}
         ${operatorCommands.map(name => `${name}(input: OperatorCommandInput!): JSON`).join('\n        ')}
       }
@@ -90,7 +92,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         createGaHold: createHold,
         createSeatHold: createHold,
         seedConcerts,
-        publishSeatingChart, requestRefundApproval, decideRefundApproval, issueDoorSale, issueComp, previewDoorSale, refundDoorSale, openCashDrawer, closeCashDrawer,
+        publishSeatingChart, requestRefundApproval, decideRefundApproval, issueDoorSale, issueComp, previewDoorSale, refundDoorSale, openCashDrawer, closeCashDrawer, forceCloseCashDrawer,
         updateActiveUser,
         startTicketCheckout, completeTicketCheckout, transferTicket, refundTicketOrder,
         ...editorMutations,

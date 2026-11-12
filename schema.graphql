@@ -5504,6 +5504,7 @@ type Mutation {
   decideRefundApproval(input: RefundApprovalDecisionInput!): JSON
   openCashDrawer(input: OpenCashDrawerInput!): JSON
   closeCashDrawer(input: CloseCashDrawerInput!): JSON
+  forceCloseCashDrawer(input: ForceCloseCashDrawerInput!): JSON
   savePriceLevel(input: OperatorCommandInput!): JSON
   setPriceLevelStatus(input: OperatorCommandInput!): JSON
   savePricePhase(input: OperatorCommandInput!): JSON
@@ -5970,6 +5971,13 @@ input CloseCashDrawerInput {
   drawerId: ID!
   count: JSON!
   reason: String
+  idempotencyKey: String!
+}
+
+input ForceCloseCashDrawerInput {
+  drawerId: ID!
+  count: JSON!
+  reason: String!
   idempotencyKey: String!
 }
 

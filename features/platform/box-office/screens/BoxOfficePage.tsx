@@ -16,7 +16,7 @@ export async function BoxOfficePage({ searchParams }: { searchParams: Promise<{ 
     ticketOrders(where: $where, orderBy: [{ createdAt: desc }], take: $take) { id orderNumber status totalCents refundedCents guestName guestEmail createdAt event { title } ticket_order { id ticketCode status } payments(where: { status: { in: ["succeeded", "partially_refunded"] } }) { id providerPaymentId } }
     events(where: { status: { in: ["presale", "on_sale", "doors", "in_progress"] } }, orderBy: [{ showAt: asc }], take: 20) { id title priceLevel_event(where: { status: { equals: "active" } }) { id name priceCents capacity sold held productionHeld sections { kind } } }
     storeSettingsRecords(take: 1) { refundApprovalThresholdCents }
-    authenticatedItem { ... on User { id } }
+    authenticatedItem { ... on User { id role { canManageOrders canReadPayments } } }
     cashDrawers(orderBy: [{ openedAt: desc }], take: 10) { id label status openingFloatCents cashSalesCents cashRefundsCents expectedCents countedCents varianceCents varianceReason openedAt closedAt openedBy { id name } }
     managerApprovals(where: { status: { in: ["pending", "approved"] }, expiresAt: { gt: "${new Date().toISOString()}" } }, orderBy: [{ createdAt: desc }], take: 50) { id actionType targetId amount reason status expiresAt requestedBy { id name } }
   }`, { where, take: take + 1 }).catch(() => null);
@@ -29,15 +29,17 @@ export async function BoxOfficePage({ searchParams }: { searchParams: Promise<{ 
   const pending = approvals.filter((a: any) => a.status === 'pending');
   const me = data.authenticatedItem?.id;
   const myDrawer = (data.cashDrawers || []).find((d: any) => d.status === 'open' && d.openedBy?.id === me) || null;
+  const canSeeReport = Boolean(data.authenticatedItem?.role?.canManageOrders || data.authenticatedItem?.role?.canReadPayments);
   const closedDrawers = (data.cashDrawers || []).filter((d: any) => d.status === 'closed').slice(0, 5);
   return (
     <Page title="Box office">
       <div className="grid gap-4 md:grid-cols-2 md:items-start"><CashDrawerPanel drawer={myDrawer ? { id: myDrawer.id, label: myDrawer.label, openingFloatCents: myDrawer.openingFloatCents, openedAt: myDrawer.openedAt } : null} /><DoorSalePanel levels={levels} /></div>
       {closedDrawers.length ? (
-        <section className="space-y-2"><h2 className="text-sm font-medium">Recent drawer close-outs</h2>
+        <section className="space-y-2"><div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-medium">Recent drawer close-outs</h2>{canSeeReport ? <Link className="inline-flex min-h-11 items-center text-sm underline" href="/dashboard/platform/box-office/drawers">Drawer report by date</Link> : null}</div>
           <Rows>{closedDrawers.map((d: any) => <Row key={d.id} title={`${d.label} · ${d.openedBy?.name || ''}`} status={d.varianceCents === 0 ? 'balanced' : d.varianceCents > 0 ? 'over' : 'short'} meta={`Float ${money(d.openingFloatCents)} + cash sales ${money(d.cashSalesCents)} − cash refunds ${money(d.cashRefundsCents)}${d.varianceReason ? ` · ${d.varianceReason}` : ''} · closed ${when(d.closedAt)}`} right={<>Counted {money(d.countedCents)} of {money(d.expectedCents)}{d.varianceCents ? ` · ${d.varianceCents > 0 ? '+' : '−'}${money(Math.abs(d.varianceCents))}` : ''}</>} />)}</Rows>
         </section>
       ) : null}
+      {closedDrawers.length || !canSeeReport ? null : <Link className="inline-flex min-h-11 items-center text-sm underline" href="/dashboard/platform/box-office/drawers">Drawer report by date</Link>}
       <OrderSearch initial={q} />
       {pending.length ? (
         <section className="space-y-2"><h2 className="text-sm font-medium">Refund approvals waiting</h2>

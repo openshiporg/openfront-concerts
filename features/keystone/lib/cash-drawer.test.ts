@@ -20,3 +20,25 @@ test('expected = float + cash sales − cash refunds; variance needs a reason', 
   assert.throws(() => closeOut(d, 31100, ''), /over by \$1\.00/);
   assert.equal(closeOut(d, 30500, 'Change error').varianceCents, -500);
 });
+
+import { overrideReason, drawerTotals, reportRange } from './cash-drawer';
+test('manager override needs a reason', () => {
+  assert.throws(() => overrideReason('  '), /why/);
+  assert.equal(overrideReason(' left early '), 'left early');
+  assert.throws(() => overrideReason('x'.repeat(301)), /long/);
+});
+test('report totals skip open drawers for count and variance', () => {
+  const t = drawerTotals([
+    { status: 'closed', openingFloatCents: 20000, cashSalesCents: 5000, cashRefundsCents: 1000, expectedCents: 24000, countedCents: 23500, varianceCents: -500 },
+    { status: 'closed', openingFloatCents: 10000, cashSalesCents: 0, cashRefundsCents: 0, expectedCents: 10000, countedCents: 10200, varianceCents: 200 },
+    { status: 'open', openingFloatCents: 5000, cashSalesCents: 700, cashRefundsCents: 0 },
+  ]);
+  assert.deepEqual(t, { drawers: 3, open: 1, floatCents: 35000, salesCents: 5700, refundsCents: 1000, expectedCents: 34000, countedCents: 33700, varianceCents: -300, over: 1, short: 1 });
+});
+test('report range: defaults to a day, inclusive end, bounded', () => {
+  assert.deepEqual(reportRange(undefined, undefined, '2026-11-12'), { from: '2026-11-12', to: '2026-11-12', endExclusive: '2026-11-13' });
+  assert.deepEqual(reportRange('2026-12-30', '2026-12-31', 'x'), { from: '2026-12-30', to: '2026-12-31', endExclusive: '2027-01-01' });
+  assert.throws(() => reportRange('2026-11-05', '2026-11-01', 'x'), /before/);
+  assert.throws(() => reportRange('2026-01-01', '2026-06-01', 'x'), /93/);
+  assert.equal(reportRange('2026-02-30', 'junk', '2026-11-12').from, '2026-11-12');
+});
