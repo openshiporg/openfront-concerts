@@ -12,3 +12,13 @@ test('venue/talent catalogs require their own permission, not event management',
   assert.equal(access.delete(),false);
  }
 });
+
+test('readAccess lists are visible only to roles holding one of the named permissions', async () => {
+ const { readAccess } = await import('../access');
+ const q=readAccess('canManageSettlements').operation;
+ const as=(role:any)=>({session:{data:{role}}} as any);
+ assert.equal(q.query({session:undefined}),false);
+ assert.equal(q.query(as({canAccessDashboard:true,canScanTickets:true})),false);
+ assert.equal(q.query(as({canAccessDashboard:true,canManageSettlements:true})),true);
+ assert.equal(q.create(),false);
+});

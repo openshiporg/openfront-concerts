@@ -1,7 +1,9 @@
+import { requireAnyPermission } from '../../lib/guard';
 import { gql } from '../../lib/gql';
 import { Page, Row, Rows } from '../../components/ui-bits';
 
 export async function CustomerListPage() {
+  await requireAnyPermission('canSeeOtherPeople', 'canManagePeople', 'canManageRoles');
   const data = await gql(`{ users(orderBy: [{ name: asc }], take: 200) { id name email role { name } } roles(orderBy: [{ name: asc }]) { id name assignedTo { id } } }`);
   return (
     <Page title="Customers and staff">

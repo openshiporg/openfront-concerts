@@ -1,8 +1,10 @@
+import { requireAnyPermission } from '../../lib/guard';
 import { gql } from '../../lib/gql';
 import { money, when } from '../../lib/format';
 import { FilterTabs, Page, Row, Rows } from '../../components/ui-bits';
 
 export async function OrderListPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+  await requireAnyPermission('canManageOrders', 'canIssueRefunds');
   const { status } = await searchParams;
   const data = await gql(`query($where: TicketOrderWhereInput!) { ticketOrders(where: $where, orderBy: [{ createdAt: desc }], take: 100) { id orderNumber status totalCents guestName createdAt event { title } } }`, { where: status ? { status: { equals: status } } : {} });
   return (

@@ -1,10 +1,10 @@
 import { list } from '@keystone-6/core';
 import { integer, select, relationship } from '@keystone-6/core/fields';
 import { trackingFields } from './trackingFields';
-import { commandAccess } from '../access';
+import { readAccess, commandAccess } from '../access';
 
 export const PromoRedemption = list({
-  access: commandAccess,
+  access: readAccess('canManageOrders', 'canIssueRefunds'),
   graphql: { plural: 'PromoRedemptionRecords' },
   fields: {
     promoCode: relationship({ ref: 'PromoCode.redemptions' }),

@@ -1,3 +1,4 @@
+import { requireAnyPermission } from '../../lib/guard';
 import Link from 'next/link';
 import { gql } from '../../lib/gql';
 import { money, when } from '../../lib/format';
@@ -9,6 +10,7 @@ import { CashDrawerPanel } from '../components/CashDrawerPanel';
 import { Page, Row, Rows } from '../../components/ui-bits';
 
 export async function BoxOfficePage({ searchParams }: { searchParams: Promise<{ q?: string; take?: string }> }) {
+  await requireAnyPermission('canManageOrders', 'canIssueRefunds');
   const { q, take: takeParam } = await searchParams;
   const take = Math.min(200, Math.max(20, Math.floor(Number(takeParam)) || 20));
   const where = q ? { OR: [{ orderNumber: { contains: q.toUpperCase() } }, { guestEmail: { contains: q.toLowerCase() } }, { guestName: { contains: q, mode: 'insensitive' } }] } : {};

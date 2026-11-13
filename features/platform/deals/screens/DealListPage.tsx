@@ -1,3 +1,4 @@
+import { requireAnyPermission } from '../../lib/guard';
 import { gql } from '../../lib/gql';
 import { computeSettlement } from '@/features/keystone/lib/settlement';
 import { money, label } from '../../lib/format';
@@ -7,6 +8,7 @@ import { OfferActions } from '../components/OfferActions';
 
 /** Calculator preview: the pure settlement function over projected sales. */
 export async function DealListPage({ searchParams }: { searchParams: Promise<{ status?: string; gross?: string }> }) {
+  await requireAnyPermission('canManageDeals', 'canManageSettlements');
   const { status, gross } = await searchParams;
   const projected = Math.max(0, Math.round(Number(gross || 2000000)));
   const data = await gql(`query($where: OfferWhereInput!) { offers(where: $where, orderBy: [{ createdAt: desc }], take: 100) { id status dealType guaranteeCents percentageBps promoterProfitBps expenseCapCents depositCents event { id title } artist { name } } }`, { where: status ? { status: { equals: status } } : {} });

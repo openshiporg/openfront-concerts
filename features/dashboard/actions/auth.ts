@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { removeAuthToken } from '@/features/dashboard/lib/cookies';
 import { revalidatePath } from 'next/cache';
 import { PUBLIC_REQUEST_ERROR, safeErrorSummary, sanitizeDashboardRedirect } from '../lib/security';
+import { permissionNames } from '@/features/keystone/access';
 import { passwordResetEmailAvailable, RESET_EMAIL_UNAVAILABLE } from '../lib/authFlow';
 
 // Legacy storefront callers may pass a password in previous state; never return it.
@@ -154,7 +155,7 @@ export async function getAuthenticatedUser() {
       authenticatedItem {
         ... on User {
           id email name onboardingStatus
-          role { canAccessDashboard canManageOnboarding }
+          role { ${permissionNames.join(' ')} }
         }
       }
       eventsCount: eventsCount

@@ -40,7 +40,7 @@ import { Home, ChevronRight, Package } from 'lucide-react'
 import { Logo, LogoIcon } from '@/features/dashboard/components/Logo'
 import { UserProfileClient } from './UserProfileClient'
 import { useDashboard } from '../context/DashboardProvider'
-import { visiblePlatformItems, visibleSidebarLists } from '../lib/sidebarAccess'
+import { visibleByPermission, visiblePlatformItems, visibleSidebarLists } from '../lib/sidebarAccess'
 import { OnboardingCards } from '@/features/platform/onboarding/components/OnboardingCards'
 import { dismissOnboarding } from '@/features/platform/onboarding/actions/onboarding'
 import {
@@ -107,11 +107,11 @@ export function Sidebar({ adminMeta, user, onOpenDialog }: SidebarProps) {
     href: `/dashboard/${list.path}`
   }))
 
-  const platformItemsWithBasePath = visiblePlatformItems(
+  const platformItemsWithBasePath = visibleByPermission(visiblePlatformItems(
     getPlatformNavItemsWithBasePath(basePath),
     listsArray as any[],
     user
-  )
+  ), user as any)
   const platformItems = platformNavGroups.map((group) => ({
     title: group.title,
     items: platformItemsWithBasePath
@@ -127,7 +127,7 @@ export function Sidebar({ adminMeta, user, onOpenDialog }: SidebarProps) {
     icon: group.icon,
   })).filter((group) => group.items.length > 0)
 
-  const standaloneItemsWithBasePath = visiblePlatformItems(platformStandaloneItems, listsArray as any[], user).map((item) => ({
+  const standaloneItemsWithBasePath = visibleByPermission(visiblePlatformItems(platformStandaloneItems, listsArray as any[], user), user as any).map((item) => ({
     ...item,
     href: `${basePath}${item.href}`,
   }))

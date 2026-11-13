@@ -1,3 +1,4 @@
+import { requireAnyPermission } from '../../lib/guard';
 /**
  * PaymentProviderListPage - Server Component
  * Uses dedicated PaymentProviders actions for consistent data fetching
@@ -16,6 +17,7 @@ interface PageProps {
 }
 
 export async function PaymentProviderListPage({ searchParams }: PageProps) {
+  await requireAnyPermission('canReadPayments', 'canManagePayments');
   const resolvedSearchParams = await searchParams;
   const searchParamsObj = Object.fromEntries(
     Object.entries(resolvedSearchParams).map(([key, value]) => [
@@ -30,7 +32,7 @@ export async function PaymentProviderListPage({ searchParams }: PageProps) {
   // Get the list by path using our cached function
   const list = await getListByPath(listKeyPath);
 
-  if (!list) {
+  if (!list || list.isHidden) {
     notFound()
   }
 

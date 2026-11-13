@@ -1,3 +1,4 @@
+import { requireAnyPermission } from '../../lib/guard';
 import { notFound } from 'next/navigation';
 import { gql } from '../../lib/gql';
 import { money } from '../../lib/format';
@@ -7,6 +8,7 @@ import { SettlementActions } from '../components/SettlementActions';
 const WORKSHEET: [string, string][] = [['Gross tickets', 'ticketGrossCents'], ['Pass-through fees', 'ticketFeesCents'], ['Tax', 'taxCents'], ['Net box office', 'netBoxOfficeCents'], ['Counted expenses', 'totalExpensesCents'], ['Breakeven', 'breakevenCents'], ['Split base', 'splitPointCents'], ['Artist guarantee', 'artistGuaranteeCents'], ['Artist overage', 'artistOverageCents'], ['Artist total', 'artistTotalCents'], ['Venue merch share', 'merchVenueShareCents'], ['Deposits paid', 'depositsPaidCents'], ['Balance due to artist', 'balanceDueArtistCents'], ['Promoter net', 'promoterNetCents']];
 
 export async function SettlementDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAnyPermission('canManageSettlements');
   const { id } = await params;
   const data = await gql(`query($id: ID!) { settlement(where: { id: $id }) { id version status hash event { id title } ${WORKSHEET.map(([, k]) => k).join(' ')} paidCount compCount settlementLine_settlement(orderBy: [{ createdAt: asc }]) { id kind label amountCents roundingRemainder } artistPayment_settlement { id kind amountCents status reference } } }`, { id });
   const s = data.settlement; if (!s) notFound();

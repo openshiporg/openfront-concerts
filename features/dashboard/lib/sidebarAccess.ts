@@ -33,3 +33,16 @@ export function visiblePlatformItems<T extends { href: string }>(
     return !slug || !hiddenPaths.has(slug)
   })
 }
+
+/**
+ * Items that name the permissions they need (`requires`) are hidden from a role that holds none of them.
+ * A user whose permissions are unknown keeps the item; the page itself still refuses with a 404.
+ */
+export function visibleByPermission<T extends { requires?: string[] }>(
+  items: T[],
+  user: { role?: Record<string, unknown> | null } | null | undefined
+): T[] {
+  const role = user?.role
+  if (!role) return items
+  return items.filter((item) => !item.requires?.length || item.requires.some((p) => role[p] === true))
+}

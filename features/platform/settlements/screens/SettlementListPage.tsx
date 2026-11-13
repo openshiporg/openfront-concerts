@@ -1,8 +1,10 @@
+import { requireAnyPermission } from '../../lib/guard';
 import { gql } from '../../lib/gql';
 import { money } from '../../lib/format';
 import { FilterTabs, Page, Row, Rows } from '../../components/ui-bits';
 
 export async function SettlementListPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+  await requireAnyPermission('canManageSettlements');
   const { status } = await searchParams;
   const data = await gql(`query($where: SettlementWhereInput!) { settlements(where: $where, orderBy: [{ createdAt: desc }], take: 100) { id version status artistTotalCents balanceDueArtistCents promoterNetCents event { title } } }`, { where: { status: status ? { equals: status } : { not: { equals: 'void' } } } });
   return (

@@ -1,11 +1,11 @@
 import { list, graphql } from '@keystone-6/core';
 import { text, integer, checkbox, json, select, relationship, timestamp, virtual } from '@keystone-6/core/fields';
 import { trackingFields } from './trackingFields';
-import { commandAccess, catalogAccess, permissions } from '../access';
+import { readAccess, commandAccess, catalogAccess, permissions } from '../access';
 
 export const MerchSales = list({
  graphql: { plural: 'MerchSalesRecords' },
- access: commandAccess,
+ access: readAccess('canManageSettlements'),
  
  fields: {
   softGrossCents: integer({ defaultValue: 0 }),

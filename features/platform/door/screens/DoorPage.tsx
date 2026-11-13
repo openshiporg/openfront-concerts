@@ -1,9 +1,11 @@
+import { requireAnyPermission } from '../../lib/guard';
 import { gql } from '../../lib/gql';
 import { when } from '../../lib/format';
 import { Page, Row, Rows, Stat } from '../../components/ui-bits';
 import { ScanConsole } from '../components/ScanConsole';
 
 export async function DoorPage({ searchParams }: { searchParams: Promise<{ event?: string }> }) {
+  await requireAnyPermission('canScanTickets');
   const { event: selected } = await searchParams;
   const list = await gql(`{ events(where: { status: { in: ["on_sale", "sold_out", "doors", "in_progress", "completed"] } }, orderBy: [{ showAt: asc }], take: 30) { id title status showAt } }`);
   const current = list.events.find((e: any) => e.id === selected) || list.events.find((e: any) => ['doors', 'in_progress'].includes(e.status)) || list.events[0];

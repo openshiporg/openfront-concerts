@@ -1,8 +1,10 @@
+import { requireAnyPermission } from '../../lib/guard';
 import { StoreSettingsPageClient } from './StoreSettingsPageClient';
 import { getStoreSettings } from '../actions';
 import { PageBreadcrumbs } from '@/features/dashboard/components/PageBreadcrumbs';
 
 export default async function StoreSettingsPage() {
+  await requireAnyPermission('canManageEvents');
   const response = await getStoreSettings();
 
   return (
