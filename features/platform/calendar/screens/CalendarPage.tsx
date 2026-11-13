@@ -1,4 +1,5 @@
 import { gql } from '../../lib/gql';
+import { roleFlags } from '../../lib/guard';
 import { day } from '../../lib/format';
 import { Page, Row, Rows } from '../../components/ui-bits';
 import { HoldActions } from '../components/HoldActions';
@@ -7,6 +8,7 @@ import { PlaceHoldForm } from '../components/PlaceHoldForm';
 const ordinal = (n: number) => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
 
 export async function CalendarPage() {
+  const can = await roleFlags('canManageEvents');
   const data = await gql(`{
     dateHolds(orderBy: [{ date: asc }, { rank: asc }], take: 200) { id date rank status expiresAt venue { id name timezone } artist { name } event { id title } }
     venues(orderBy: [{ name: asc }], take: 100) { id name city }
@@ -19,10 +21,10 @@ export async function CalendarPage() {
   const groups = new Map<string, any[]>();
   for (const h of data.dateHolds) { const key = `${h.venue?.name} · ${day(h.date)}`; groups.set(key, [...(groups.get(key) || []), h]); }
   return (
-    <Page title="Calendar and holds" action={<PlaceHoldForm venues={venues} artists={artists} />}>
+    <Page title="Calendar and holds" action={can.canManageEvents ? <PlaceHoldForm venues={venues} artists={artists} /> : null}>
       {[...groups.entries()].map(([key, holds]) => (
         <section key={key} className="space-y-2"><h2 className="text-sm font-medium">{key}</h2>
-          <Rows>{holds.map((h) => <Row key={h.id} title={`${ordinal(h.rank)} hold: ${h.artist?.name || 'Open'}`} status={h.status} meta={h.event ? h.event.title : `Expires ${day(h.expiresAt)}`} right={h.event ? null : <HoldActions holdId={h.id} status={h.status} charts={chartsFor(h.venue?.id)} artist={h.artist?.name} />} />)}</Rows>
+          <Rows>{holds.map((h) => <Row key={h.id} title={`${ordinal(h.rank)} hold: ${h.artist?.name || 'Open'}`} status={h.status} meta={h.event ? h.event.title : `Expires ${day(h.expiresAt)}`} right={h.event || !can.canManageEvents ? null : <HoldActions holdId={h.id} status={h.status} charts={chartsFor(h.venue?.id)} artist={h.artist?.name} />} />)}</Rows>
         </section>
       ))}
       {!groups.size ? <Rows empty="No holds.">{[]}</Rows> : null}

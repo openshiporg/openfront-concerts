@@ -7,7 +7,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
   return (
     <>
       <div className="mx-auto w-full max-w-3xl px-4 pt-4">
-        <Link href="/" className="flex w-fit items-center gap-2 text-lg font-semibold"><StoreLogoMark />Tickets</Link>
+        <Link href="/" className="flex min-h-11 w-fit items-center gap-2 text-lg font-semibold"><StoreLogoMark withName /></Link>
       </div>
       {children}
     </>

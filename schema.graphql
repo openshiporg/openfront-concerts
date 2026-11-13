@@ -5990,4 +5990,5 @@ input RefundApprovalDecisionInput {
 type StoreLogo {
   logoIcon: String!
   logoColor: String!
+  name: String!
 }

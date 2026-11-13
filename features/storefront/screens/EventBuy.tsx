@@ -28,15 +28,17 @@ export function EventBuy({ eventId }: { eventId: string }) {
   useEffect(() => { load(); }, [eventId]);
   useEffect(() => { if (!hold) return; const t = setInterval(() => setLeft(Math.max(0, Math.floor((new Date(hold.expiresAt).getTime() - Date.now()) / 1000))), 1000); return () => clearInterval(t); }, [hold]);
 
+  // Seed the countdown with the hold so the first paint never reads "Hold expired".
+  const takeHold = (h: any) => { setLeft(Math.max(0, Math.floor((new Date(h.expiresAt).getTime() - Date.now()) / 1000))); setHold(h); };
   const run = async (fn: () => Promise<void>) => { setBusy(true); setError(''); try { await fn(); } catch (e: any) { setError(e.message); } finally { setBusy(false); } };
 
   const holdGa = (levelId: string) => run(async () => {
     const d = await api('mutation($e: ID!, $l: ID!, $q: Int!, $c: String, $k: String!) { createGaHold(eventId: $e, levelId: $l, qty: $q, presaleCode: $c, idempotencyKey: $k) }', { e: eventId, l: levelId, q: qty[levelId] || 1, c: code || null, k: key() });
-    setHold(d.createGaHold);
+    takeHold(d.createGaHold);
   });
   const holdSeats = () => run(async () => {
     const d = await api('mutation($e: ID!, $s: [ID!]!, $c: String, $k: String!) { createSeatHold(eventId: $e, seatInventoryIds: $s, presaleCode: $c, idempotencyKey: $k) }', { e: eventId, s: picked, c: code || null, k: key() });
-    setHold(d.createSeatHold); await load();
+    takeHold(d.createSeatHold); await load();
   });
   const startPayment = () => run(async () => {
     const d = await api('mutation($i: StartTicketCheckoutInput!) { startTicketCheckout(input: $i) }', { i: { holdId: hold.id, proof: hold.proof, email: form.email, name: form.name, ageAttested: form.age, idempotencyKey: key() } });
@@ -88,22 +90,22 @@ export function EventBuy({ eventId }: { eventId: string }) {
           {reservedLevels.map((l: any) => { const rows = new Map<string, any[]>(); for (const s of seats.filter((x: any) => x.priceLevelId === l.id).sort((a: any, b: any) => a.seat.y - b.seat.y || a.seat.x - b.seat.x)) { const k = s.seat.row; rows.set(k, [...(rows.get(k) || []), s]); } return (
             <div key={l.id} className="space-y-1"><div className="text-sm font-medium">{l.name} · {usd(l.priceCents)} + {usd(l.feeCents)} fee</div>
               <div className="max-w-full overflow-x-auto rounded-lg border p-2"><div className="w-max space-y-0.5"><div className="mb-2 rounded bg-black/80 px-3 py-1 text-center font-mono text-xs uppercase tracking-wide text-white">Stage</div>{[...rows.entries()].map(([row, list]) => <div key={row} className="flex items-center gap-0.5"><span className="w-6 shrink-0 text-xs">{row}</span>
-                {list.map((s) => { const on = picked.includes(s.id); const free = s.status === 'open'; return <button key={s.id} type="button" disabled={!free && !on} aria-label={`${s.seat.label} ${s.status}`} title={s.seat.label}
+                {list.map((s) => { const on = picked.includes(s.id); const free = s.status === 'open'; return <button key={s.id} type="button" disabled={!free && !on} aria-pressed={on} aria-label={`${s.seat.label} ${s.status}`} title={s.seat.label}
                   onClick={() => setPicked(on ? picked.filter((x) => x !== s.id) : picked.length < 8 ? [...picked, s.id] : picked)}
-                  className={`size-3.5 shrink-0 rounded-sm border ${on ? 'bg-black' : free ? 'bg-emerald-200' : 'bg-zinc-300 opacity-50'}`} />; })}</div>)}</div></div></div>); })}
+                  className="flex size-11 shrink-0 items-center justify-center disabled:cursor-not-allowed"><span className={`size-5 rounded-sm border ${on ? 'bg-black' : free ? 'bg-emerald-200' : 'bg-zinc-300 opacity-50'}`} /></button>; })}</div>)}</div></div></div>); })}
           <div className="flex flex-wrap items-center gap-3"><span className="text-sm">{pickedSeats.length ? pickedSeats.map((s) => s.seat.label).join(', ') : 'No seats selected'}</span>
             <button disabled={busy || !picked.length} onClick={holdSeats} className="min-h-11 rounded bg-black px-3 py-2 text-sm text-white disabled:opacity-40">Hold seats</button></div>
         </section> : null}
       </> : null}
 
       {hold && !pay ? <section className="space-y-3 rounded-lg border p-4"><h2 className="font-medium">Your hold</h2>
-        <p className="text-sm">{hold.quote.levelName}{hold.quote.seats?.length ? `: ${hold.quote.seats.map((s: any) => s.label).join(', ')}` : ''} × {hold.quote.seats?.length || qty[hold.quote.levelId] || ''}</p>
+        <p className="text-sm">{hold.quote.levelName}{hold.quote.seats?.length ? `: ${hold.quote.seats.map((s: any) => s.label).join(', ')}` : ''} × {hold.quantity || hold.quote.seats?.length || qty[hold.quote.levelId] || 1}</p>
         <dl className="grid grid-cols-2 gap-1 text-sm"><dt>Tickets</dt><dd className="text-right">{usd(hold.quote.subtotalCents)}</dd><dt>Service fees</dt><dd className="text-right">{usd(hold.quote.serviceFeesCents)}</dd><dt>Facility fees</dt><dd className="text-right">{usd(hold.quote.facilityFeesCents)}</dd>
           {hold.quote.discountCents ? <><dt>Discount</dt><dd className="text-right">-{usd(hold.quote.discountCents)}</dd></> : null}<dt>Tax</dt><dd className="text-right">{usd(hold.quote.taxCents)}</dd><dt className="font-medium">Total</dt><dd className="text-right font-medium">{usd(hold.quote.totalCents)}</dd></dl>
         <p className="font-mono text-sm" aria-live="polite">{left > 0 ? `Held for ${m}:${sec}` : 'Hold expired'}</p>
         <div className="grid gap-2 sm:grid-cols-2"><label className="flex flex-col gap-1 text-sm">Name<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="min-h-11 rounded border px-3 py-2" /></label>
           <label className="flex flex-col gap-1 text-sm">Email<input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="min-h-11 rounded border px-3 py-2" /></label></div>
-        {event.ageRestriction !== 'all_ages' ? <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.age} onChange={(e) => setForm({ ...form, age: e.target.checked })} />I confirm I meet the {event.ageRestriction}+ age requirement</label> : null}
+        {event.ageRestriction !== 'all_ages' ? <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" className="size-5" checked={form.age} onChange={(e) => setForm({ ...form, age: e.target.checked })} />I confirm I meet the {event.ageRestriction}+ age requirement</label> : null}
         <button disabled={busy || left < 1 || !form.name || !form.email} onClick={startPayment} className="min-h-11 rounded bg-black px-4 py-2 text-sm text-white disabled:opacity-40">Continue to payment</button>
       </section> : null}
 

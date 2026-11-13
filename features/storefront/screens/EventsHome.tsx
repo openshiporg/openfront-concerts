@@ -9,7 +9,7 @@ export function EventsHome() {
   useEffect(() => { api('{ eventsOnSale }').then((d) => setEvents(d.eventsOnSale)).catch((e) => setError(e.message)); }, []);
   return (
     <main className="mx-auto w-full max-w-3xl space-y-4 p-4">
-      <header className="flex items-center justify-between"><h1 className="text-2xl font-semibold">Upcoming events</h1><Link className="text-sm underline" href="/lookup">Find my order</Link></header>
+      <header className="flex flex-wrap items-center justify-between gap-2"><h1 className="text-2xl font-semibold">Upcoming events</h1><Link className="inline-flex min-h-11 items-center text-sm underline" href="/lookup">Find my order</Link></header>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {events === null && !error ? <p className="text-sm">Loading…</p> : null}
       <ul className="divide-y rounded-lg border">

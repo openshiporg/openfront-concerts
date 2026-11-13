@@ -103,7 +103,7 @@ async function refundPaymentFunction({ paymentId, amount, idempotencyKey, refund
 }
 async function getPaymentStatusFunction({ paymentId }) {
   const stripe = getStripeClient();
-  const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
+  const paymentIntent = await stripe.paymentIntents.retrieve(paymentId, { expand: ["latest_charge"] });
   const refunds = [];
   let refundsComplete = true;
   for await (const refund of stripe.refunds.list({ payment_intent: paymentId, limit: 100 })) {
@@ -119,8 +119,14 @@ async function getPaymentStatusFunction({ paymentId }) {
     currencyCode: paymentIntent.currency.toUpperCase(),
     refunds,
     refundsComplete,
+    card: cardOf(paymentIntent),
     data: paymentIntent
   };
+}
+function cardOf(paymentIntent) {
+  const charge = paymentIntent.latest_charge;
+  const card = charge && typeof charge === "object" ? charge.payment_method_details?.card : null;
+  return card ? { last4: card.last4 || "", brand: card.brand || "" } : null;
 }
 async function generatePaymentLinkFunction({ paymentId }) {
   return `https://dashboard.stripe.com/payments/${paymentId}`;
@@ -607,6 +613,8 @@ var rules = {
   canReadPeople: ({ session }) => !session ? false : session.data.role?.canSeeOtherPeople ? true : { id: { equals: session.itemId } },
   canUpdatePeople: ({ session }) => !session ? false : session.data.role?.canEditOtherPeople ? true : { id: { equals: session.itemId } }
 };
+var grossReaders = ["canManageOrders", "canIssueRefunds", "canManageSettlements", "canManageDeals", "canManageEvents", "canReadPayments"];
+var canReadGross = ({ session }) => grossReaders.some((p2) => session?.data.role?.[p2] === true);
 
 // features/keystone/models/User.ts
 var User = (0, import_core.list)({
@@ -1209,7 +1217,8 @@ var Event = (0, import_core14.list)({
     kills: (0, import_fields14.virtual)({ field: import_core14.graphql.field({ type: import_core14.graphql.Int, async resolve(item, args, context) {
       return context.prisma.seatInventory.count({ where: { eventId: item.id, ...{ status: "killed" } } });
     } }) }),
-    gross: (0, import_fields14.virtual)({ field: import_core14.graphql.field({ type: import_core14.graphql.Int, async resolve(item, args, context) {
+    // Ticket revenue: not for door staff.
+    gross: (0, import_fields14.virtual)({ access: { read: canReadGross }, ui: { listView: { fieldMode: (a) => canReadGross(a) ? "read" : "hidden" }, itemView: { fieldMode: (a) => canReadGross(a) ? "read" : "hidden" } }, field: import_core14.graphql.field({ type: import_core14.graphql.Int, async resolve(item, args, context) {
       const result = await context.prisma.ticketOrder.aggregate({ where: { eventId: item.id, status: "paid" }, _sum: { totalCents: true } });
       return result._sum.totalCents ?? 0;
     } }) }),
@@ -1399,7 +1408,8 @@ var ProductionHold = (0, import_core22.list)({
 var import_core23 = require("@keystone-6/core");
 var import_fields23 = require("@keystone-6/core/fields");
 var InventoryHold = (0, import_core23.list)({
-  access: commandAccess,
+  // A hold carries the buyer's quote; only order staff read it. Holds are written by checkout commands only.
+  access: readAccess("canManageOrders", "canIssueRefunds"),
   fields: {
     holdKey: (0, import_fields23.text)({ isIndexed: "unique", db: { isNullable: true } }),
     secretHash: (0, import_fields23.text)({ access: { read: () => false, create: () => false, update: () => false } }),
@@ -2249,8 +2259,11 @@ var PaymentSession = (0, import_core39.list)({
     amount: (0, import_fields40.integer)({
       validation: { isRequired: true }
     }),
+    // Holds the provider's clientSecret while a payment is pending: only payment managers read it.
     data: (0, import_fields40.json)({
-      defaultValue: {}
+      defaultValue: {},
+      access: { read: permissions.canManagePayments, create: () => false, update: () => false },
+      ui: { listView: { fieldMode: (a) => permissions.canManagePayments(a) ? "read" : "hidden" }, itemView: { fieldMode: (a) => permissions.canManagePayments(a) ? "read" : "hidden" } }
     }),
     idempotencyKey: (0, import_fields40.text)({
       validation: { isRequired: true },
@@ -2595,8 +2608,57 @@ var CashDrawer = (0, import_core45.list)({
   ui: { isHidden: true }
 });
 
+// features/keystone/filter-access.ts
+var operationGate = (access) => typeof access === "function" ? access : access?.operation && typeof access.operation === "function" ? access.operation : access?.operation?.query;
+var fieldReadGate = (access) => typeof access === "function" ? access : access?.read;
+async function passes(gate, args, extra = {}) {
+  if (typeof gate !== "function") return true;
+  try {
+    return await gate({ ...args, operation: "query", ...extra }) === true;
+  } catch {
+    return false;
+  }
+}
+async function canReadWholeList(list44, args) {
+  if (!list44) return false;
+  if (!await passes(operationGate(list44.access), args)) return false;
+  const rowFilter = list44.access?.filter?.query;
+  if (typeof rowFilter !== "function") return true;
+  try {
+    return await rowFilter({ ...args, operation: "query" }) === true;
+  } catch {
+    return false;
+  }
+}
+function filterFollowsRead(lists) {
+  return Object.fromEntries(Object.entries(lists).map(([listKey, list44]) => [listKey, {
+    ...list44,
+    fields: Object.fromEntries(Object.entries(list44.fields).map(([fieldKey, field]) => {
+      if (typeof field !== "function" || fieldKey.startsWith("__group")) return [fieldKey, field];
+      return [fieldKey, (data) => {
+        const f = field(data);
+        const target = f?.dbField?.kind === "relation" ? f.dbField.list : null;
+        const own = f.isFilterable;
+        const ownOrder = f.isOrderable;
+        const allowed = async (args) => {
+          if (!await passes(operationGate(list44.access), args)) return false;
+          if (!await passes(fieldReadGate(f.access), args, { listKey, fieldKey, item: void 0 })) return false;
+          if (target && !await canReadWholeList(lists[target], args)) return false;
+          return true;
+        };
+        const combine = (base) => base === false ? false : async (args) => {
+          if (typeof base === "function" && await base(args) !== true) return false;
+          return allowed(args);
+        };
+        return { ...f, isFilterable: combine(own), isOrderable: combine(ownOrder) };
+      }];
+    }))
+  }]));
+}
+
 // features/keystone/models/index.ts
-var allModels = { User, Role, OAuthApp, OAuthToken, Venue, SeatingChart, ChartSection, Seat, Agency, Artist, Tour, Event, EventArtist, DateHold, Offer, EventExpense, PriceLevel, PriceLevelPhase, SeatInventory, ProductionHold, InventoryHold, PromoCode, PromoRedemption, TicketOrder, TicketOrderLine, Ticket, ScanEvent, MerchSales, BarSales, Settlement, SettlementLine, ArtistPayment, AuditEvent, StoreSettings, PaymentProvider, PaymentCollection, PaymentSession, Payment, Refund, PaymentWebhookEvent, IdempotencyKey, ManagerApproval, CashDrawer };
+var baseModels = { User, Role, OAuthApp, OAuthToken, Venue, SeatingChart, ChartSection, Seat, Agency, Artist, Tour, Event, EventArtist, DateHold, Offer, EventExpense, PriceLevel, PriceLevelPhase, SeatInventory, ProductionHold, InventoryHold, PromoCode, PromoRedemption, TicketOrder, TicketOrderLine, Ticket, ScanEvent, MerchSales, BarSales, Settlement, SettlementLine, ArtistPayment, AuditEvent, StoreSettings, PaymentProvider, PaymentCollection, PaymentSession, Payment, Refund, PaymentWebhookEvent, IdempotencyKey, ManagerApproval, CashDrawer };
+var allModels = filterFollowsRead(baseModels);
 var narrowed = (config2) => {
   const operation = config2.access?.operation ?? {};
   const ui = config2.ui ?? {};
@@ -2631,12 +2693,12 @@ var redirectToInit_default = redirectToInit;
 
 // features/keystone/mutations/storeLogo.ts
 var storeLogoTypeDefs = `
-  type StoreLogo { logoIcon: String! logoColor: String! }
+  type StoreLogo { logoIcon: String! logoColor: String! name: String! }
   extend type Query { storeLogo: StoreLogo! }
 `;
 async function storeLogo(_root, _args, context) {
-  const row = await context.prisma.storeSettings.findFirst({ select: { logoIcon: true, logoColor: true } });
-  return { logoIcon: row?.logoIcon || DEFAULT_STORE_LOGO_ICON, logoColor: row?.logoColor || DEFAULT_STORE_LOGO_COLOR };
+  const row = await context.prisma.storeSettings.findFirst({ select: { logoIcon: true, logoColor: true, name: true } });
+  return { logoIcon: row?.logoIcon || DEFAULT_STORE_LOGO_ICON, logoColor: row?.logoColor || DEFAULT_STORE_LOGO_COLOR, name: row?.name || "Concerts" };
 }
 
 // features/keystone/lib/audit.ts
@@ -2943,7 +3005,7 @@ async function createHold(_, args, context) {
     for (const seat of seats) await tx.seatInventory.update({ where: { id: seat.id }, data: { status: "held", holdKey: key, occupancyKey: `${event.id}:${seat.seatId}` } });
     if (promo) await tx.promoRedemption.create({ data: { promoCodeId: promo.id, holdId: hold.id, amountCents: quote.discountCents, status: "reserved" } });
     await appendAuditEvent(tx, context.session?.itemId, { action: "hold.created", targetList: "InventoryHold", targetId: hold.id, after: { quantity: qty, eventId: event.id } });
-    return { id: hold.id, proof: createProof(hold.id), expiresAt: hold.expiresAt.toISOString(), quote };
+    return { id: hold.id, proof: createProof(hold.id), expiresAt: hold.expiresAt.toISOString(), quantity: hold.quantity, quote };
   });
 }
 
@@ -4481,7 +4543,8 @@ async function finalizePaidOrder(context, orderId, provider, observed) {
     if (!hold || hold.status !== "active") {
       await appendAuditEvent(tx, null, { action: "checkout.paid_without_hold", targetList: "TicketOrder", targetId: orderId, reason: "Provider payment succeeded after the hold was released; refund required" });
       await tx.ticketOrder.update({ where: { id: orderId }, data: { status: "cancelled" } });
-      const latePayment = await tx.payment.create({ data: { idempotencyKey: `pi:${intentId}`, amount: order.totalCents, currencyCode: order.currencyCode, status: "succeeded", paymentProviderId: provider.id, providerPaymentId: intentId, orderId, paymentCollectionId: order.paymentCollectionId, processedAt: /* @__PURE__ */ new Date(), notes: "Paid after hold release; refunded automatically" } });
+      const latePayment = await tx.payment.create({ data: { idempotencyKey: `pi:${intentId}`, amount: order.totalCents, currencyCode: order.currencyCode, status: "succeeded", paymentProviderId: provider.id, providerPaymentId: intentId, orderId, paymentCollectionId: order.paymentCollectionId, processedAt: /* @__PURE__ */ new Date(), cardLast4: status.card?.last4 || null, cardBrand: status.card?.brand || null, notes: "Paid after hold release; refunded automatically" } });
+      if (order.paymentCollectionId) await tx.paymentCollection.update({ where: { id: order.paymentCollectionId }, data: { authorizedAmount: Number(status.amount), metadata: { capturedAmount: Number(status.amount), providerStatus: status.status } } });
       return { orderId, status: "cancelled", tickets: [], replay: false, late: { paymentId: latePayment.id, amount: order.totalCents, currency: order.currencyCode } };
     }
     const q = hold.quoteSnapshot;
@@ -4505,7 +4568,8 @@ async function finalizePaidOrder(context, orderId, provider, observed) {
     await tx.promoRedemption.updateMany({ where: { holdId: hold.id, status: "reserved" }, data: { status: "committed" } });
     const redeemed = await tx.promoRedemption.findMany({ where: { holdId: hold.id, status: "committed" } });
     for (const r of redeemed) await tx.promoCode.update({ where: { id: r.promoCodeId }, data: { usedCount: { increment: 1 } } });
-    await tx.payment.create({ data: { idempotencyKey: `pi:${intentId}`, amount: order.totalCents, currencyCode: order.currencyCode, status: "succeeded", paymentProviderId: provider.id, providerPaymentId: intentId, orderId, paymentCollectionId: order.paymentCollectionId, processedAt: /* @__PURE__ */ new Date(), data: { paymentIntentId: intentId } } });
+    await tx.payment.create({ data: { idempotencyKey: `pi:${intentId}`, amount: order.totalCents, currencyCode: order.currencyCode, status: "succeeded", paymentProviderId: provider.id, providerPaymentId: intentId, orderId, paymentCollectionId: order.paymentCollectionId, processedAt: /* @__PURE__ */ new Date(), cardLast4: status.card?.last4 || null, cardBrand: status.card?.brand || null, data: { paymentIntentId: intentId } } });
+    if (order.paymentCollectionId) await tx.paymentCollection.update({ where: { id: order.paymentCollectionId }, data: { authorizedAmount: Number(status.amount), metadata: { capturedAmount: Number(status.amount), providerStatus: status.status } } });
     await tx.paymentSession.update({ where: { id: session.id }, data: { paymentAuthorizedAt: /* @__PURE__ */ new Date(), data: { ...session.data, state: "completed", clientSecret: null } } });
     await tx.ticketOrder.update({ where: { id: orderId }, data: { status: "paid" } });
     await appendAuditEvent(tx, null, { action: "order.paid", targetList: "TicketOrder", targetId: orderId, after: { totalCents: order.totalCents } });
@@ -4530,7 +4594,8 @@ async function refundLatePayment(context, provider, orderId, intentId, late) {
   await prisma.refund.update({ where: { id: refund.id }, data: { status: ok ? "succeeded" : result.status === "failed" ? "failed" : "unknown", providerRefundId: result.id || "", processedAt: ok ? /* @__PURE__ */ new Date() : null } });
   if (ok) {
     await prisma.payment.update({ where: { id: late.paymentId }, data: { refundedAmount: late.amount, status: "refunded" } });
-    await prisma.ticketOrder.update({ where: { id: orderId }, data: { refundedCents: late.amount } });
+    const order = await prisma.ticketOrder.update({ where: { id: orderId }, data: { refundedCents: late.amount } });
+    if (order.paymentCollectionId) await prisma.paymentCollection.update({ where: { id: order.paymentCollectionId }, data: { refundedAmount: late.amount } });
   }
 }
 async function completeTicketCheckout(_, { input }, context) {
@@ -4615,6 +4680,7 @@ async function refundTicketOrder(_, { input }, context) {
     await tx.payment.update({ where: { id: reserve.paymentId }, data: { refundedAmount: total, status: total >= order.totalCents ? "refunded" : "partially_refunded" } });
     const full = total >= order.totalCents;
     await tx.ticketOrder.update({ where: { id: orderId }, data: { refundedCents: total, status: full ? "refunded" : "partially_refunded" } });
+    if (order.paymentCollectionId) await tx.paymentCollection.update({ where: { id: order.paymentCollectionId }, data: { refundedAmount: total } });
     if (full) {
       const tickets = await tx.ticket.findMany({ where: { orderId, status: { in: ["valid", "checked_in"] } } });
       for (const t of tickets) {

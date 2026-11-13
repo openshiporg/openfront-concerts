@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation';
 import { requireAnyPermission } from '../../lib/guard';
 import { gql } from '../../lib/gql';
 import { when } from '../../lib/format';
@@ -8,7 +9,14 @@ export async function DoorPage({ searchParams }: { searchParams: Promise<{ event
   await requireAnyPermission('canScanTickets');
   const { event: selected } = await searchParams;
   const list = await gql(`{ events(where: { status: { in: ["on_sale", "sold_out", "doors", "in_progress", "completed"] } }, orderBy: [{ showAt: asc }], take: 30) { id title status showAt } }`);
-  const current = list.events.find((e: any) => e.id === selected) || list.events.find((e: any) => ['doors', 'in_progress'].includes(e.status)) || list.events[0];
+  // A named event that is not open for scanning is a 404, never another event's door.
+  let named = selected === undefined ? null : list.events.find((e: any) => e.id === selected);
+  if (selected !== undefined && !named) {
+    const found = await gql(`query($id: ID!) { events(where: { id: { equals: $id }, status: { in: ["on_sale", "sold_out", "doors", "in_progress", "completed"] } }, take: 1) { id title status showAt } }`, { id: String(selected) }).catch(() => ({ events: [] }));
+    named = found.events[0];
+    if (!named) notFound();
+  }
+  const current = named || list.events.find((e: any) => ['doors', 'in_progress'].includes(e.status)) || list.events[0];
   const detail = current ? await gql(`query($id: ID!) { admitted: ticketsCount(where: { event: { id: { equals: $id } }, status: { equals: "checked_in" } }) total: ticketsCount(where: { event: { id: { equals: $id } } }) scans: scanEvents(where: { event: { id: { equals: $id } } }, orderBy: [{ at: desc }], take: 15) { id gate result at ticket { ticketCode } } event(where: { id: $id }) { venue { capacity } } }`, { id: current.id }) : null;
   return (
     <Page title="Door scan">

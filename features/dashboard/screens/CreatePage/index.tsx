@@ -19,7 +19,8 @@ export async function CreatePage({ params }: CreatePageParams) {
 
   const list = await getListByPath(listKey)
 
-  if (!list || list.isHidden) {
+  // A role that cannot create in this list gets the same 404 as a missing page.
+  if (!list || list.isHidden || list.hideCreate) {
     notFound()
   }
 

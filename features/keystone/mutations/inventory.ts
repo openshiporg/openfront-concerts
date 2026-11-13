@@ -78,6 +78,6 @@ export async function createHold(_: any, args: any, context: any) {
     for (const seat of seats) await tx.seatInventory.update({ where: { id: seat.id }, data: { status: 'held', holdKey: key, occupancyKey: `${event.id}:${seat.seatId}` } });
     if (promo) await tx.promoRedemption.create({ data: { promoCodeId: promo.id, holdId: hold.id, amountCents: quote.discountCents, status: 'reserved' } });
     await appendAuditEvent(tx, context.session?.itemId, { action: 'hold.created', targetList: 'InventoryHold', targetId: hold.id, after: { quantity: qty, eventId: event.id } });
-    return { id: hold.id, proof: createProof(hold.id), expiresAt: hold.expiresAt.toISOString(), quote };
+    return { id: hold.id, proof: createProof(hold.id), expiresAt: hold.expiresAt.toISOString(), quantity: hold.quantity, quote };
   });
 }

@@ -82,7 +82,8 @@ export async function finalizePaidOrder(context: any, orderId: string, provider:
     if (!hold || hold.status !== 'active') {
       await appendAuditEvent(tx, null, { action: 'checkout.paid_without_hold', targetList: 'TicketOrder', targetId: orderId, reason: 'Provider payment succeeded after the hold was released; refund required' });
       await tx.ticketOrder.update({ where: { id: orderId }, data: { status: 'cancelled' } });
-      const latePayment = await tx.payment.create({ data: { idempotencyKey: `pi:${intentId}`, amount: order.totalCents, currencyCode: order.currencyCode, status: 'succeeded', paymentProviderId: provider.id, providerPaymentId: intentId, orderId, paymentCollectionId: order.paymentCollectionId, processedAt: new Date(), notes: 'Paid after hold release; refunded automatically' } });
+      const latePayment = await tx.payment.create({ data: { idempotencyKey: `pi:${intentId}`, amount: order.totalCents, currencyCode: order.currencyCode, status: 'succeeded', paymentProviderId: provider.id, providerPaymentId: intentId, orderId, paymentCollectionId: order.paymentCollectionId, processedAt: new Date(), cardLast4: status.card?.last4 || null, cardBrand: status.card?.brand || null, notes: 'Paid after hold release; refunded automatically' } });
+      if (order.paymentCollectionId) await tx.paymentCollection.update({ where: { id: order.paymentCollectionId }, data: { authorizedAmount: Number(status.amount), metadata: { capturedAmount: Number(status.amount), providerStatus: status.status } } });
       return { orderId, status: 'cancelled', tickets: [] as any[], replay: false, late: { paymentId: latePayment.id, amount: order.totalCents, currency: order.currencyCode } } as any;
     }
     const q = hold.quoteSnapshot;
@@ -102,7 +103,9 @@ export async function finalizePaidOrder(context: any, orderId: string, provider:
     await tx.promoRedemption.updateMany({ where: { holdId: hold.id, status: 'reserved' }, data: { status: 'committed' } });
     const redeemed = await tx.promoRedemption.findMany({ where: { holdId: hold.id, status: 'committed' } });
     for (const r of redeemed) await tx.promoCode.update({ where: { id: r.promoCodeId }, data: { usedCount: { increment: 1 } } });
-    await tx.payment.create({ data: { idempotencyKey: `pi:${intentId}`, amount: order.totalCents, currencyCode: order.currencyCode, status: 'succeeded', paymentProviderId: provider.id, providerPaymentId: intentId, orderId, paymentCollectionId: order.paymentCollectionId, processedAt: new Date(), data: { paymentIntentId: intentId } } });
+    await tx.payment.create({ data: { idempotencyKey: `pi:${intentId}`, amount: order.totalCents, currencyCode: order.currencyCode, status: 'succeeded', paymentProviderId: provider.id, providerPaymentId: intentId, orderId, paymentCollectionId: order.paymentCollectionId, processedAt: new Date(), cardLast4: status.card?.last4 || null, cardBrand: status.card?.brand || null, data: { paymentIntentId: intentId } } });
+    // The collection follows the provider: what it authorized and captured for this order.
+    if (order.paymentCollectionId) await tx.paymentCollection.update({ where: { id: order.paymentCollectionId }, data: { authorizedAmount: Number(status.amount), metadata: { capturedAmount: Number(status.amount), providerStatus: status.status } } });
     await tx.paymentSession.update({ where: { id: session.id }, data: { paymentAuthorizedAt: new Date(), data: { ...session.data, state: 'completed', clientSecret: null } } });
     await tx.ticketOrder.update({ where: { id: orderId }, data: { status: 'paid' } });
     await appendAuditEvent(tx, null, { action: 'order.paid', targetList: 'TicketOrder', targetId: orderId, after: { totalCents: order.totalCents } });
@@ -124,7 +127,8 @@ async function refundLatePayment(context: any, provider: any, orderId: string, i
   await prisma.refund.update({ where: { id: refund.id }, data: { status: ok ? 'succeeded' : result.status === 'failed' ? 'failed' : 'unknown', providerRefundId: result.id || '', processedAt: ok ? new Date() : null } });
   if (ok) {
     await prisma.payment.update({ where: { id: late.paymentId }, data: { refundedAmount: late.amount, status: 'refunded' } });
-    await prisma.ticketOrder.update({ where: { id: orderId }, data: { refundedCents: late.amount } });
+    const order = await prisma.ticketOrder.update({ where: { id: orderId }, data: { refundedCents: late.amount } });
+    if (order.paymentCollectionId) await prisma.paymentCollection.update({ where: { id: order.paymentCollectionId }, data: { refundedAmount: late.amount } });
   }
 }
 
@@ -213,6 +217,7 @@ export async function refundTicketOrder(_: any, { input }: any, context: any) {
     await tx.payment.update({ where: { id: reserve.paymentId }, data: { refundedAmount: total, status: total >= order.totalCents ? 'refunded' : 'partially_refunded' } });
     const full = total >= order.totalCents;
     await tx.ticketOrder.update({ where: { id: orderId }, data: { refundedCents: total, status: full ? 'refunded' : 'partially_refunded' } });
+    if (order.paymentCollectionId) await tx.paymentCollection.update({ where: { id: order.paymentCollectionId }, data: { refundedAmount: total } });
     if (full) {
       const tickets = await tx.ticket.findMany({ where: { orderId, status: { in: ['valid', 'checked_in'] } } });
       for (const t of tickets) {

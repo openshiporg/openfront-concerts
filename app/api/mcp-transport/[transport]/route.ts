@@ -366,7 +366,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ tra
         
         if (name === 'queryData') {
           const { operation, fields } = args;
-          
+          // Plain field names only: no arguments, so no where/orderBy can be smuggled in. The GraphQL call runs with
+          // the caller's own session, so hidden lists and fields stay hidden.
+          if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(String(operation)) || /[()$:@]/.test(String(fields))) {
+            return new Response(JSON.stringify({ jsonrpc: '2.0', id: body.id, error: { code: -32602, message: 'queryData takes an operation name and plain field names, without arguments' } }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+          }
+
           // Build a simple GraphQL query
           const queryString = `
             query ${operation.charAt(0).toUpperCase() + operation.slice(1)} {

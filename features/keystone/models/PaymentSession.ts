@@ -31,8 +31,11 @@ export const PaymentSession = list({
     amount: integer({
       validation: { isRequired: true },
     }),
+    // Holds the provider's clientSecret while a payment is pending: only payment managers read it.
     data: json({
       defaultValue: {},
+      access: { read: permissions.canManagePayments, create: () => false, update: () => false },
+      ui: { listView: { fieldMode: (a: any) => permissions.canManagePayments(a) ? 'read' : 'hidden' }, itemView: { fieldMode: (a: any) => permissions.canManagePayments(a) ? 'read' : 'hidden' } },
     }),
     idempotencyKey: text({
       validation: { isRequired: true },

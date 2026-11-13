@@ -41,7 +41,9 @@ import { PaymentWebhookEvent } from './PaymentWebhookEvent';
 import { IdempotencyKey } from './IdempotencyKey';
 import { ManagerApproval } from './ManagerApproval';
 import { CashDrawer } from './CashDrawer';
-const allModels = { User, Role, OAuthApp, OAuthToken, Venue, SeatingChart, ChartSection, Seat, Agency, Artist, Tour, Event, EventArtist, DateHold, Offer, EventExpense, PriceLevel, PriceLevelPhase, SeatInventory, ProductionHold, InventoryHold, PromoCode, PromoRedemption, TicketOrder, TicketOrderLine, Ticket, ScanEvent, MerchSales, BarSales, Settlement, SettlementLine, ArtistPayment, AuditEvent, StoreSettings, PaymentProvider, PaymentCollection, PaymentSession, Payment, Refund, PaymentWebhookEvent, IdempotencyKey, ManagerApproval, CashDrawer };
+import { filterFollowsRead } from '../filter-access';
+const baseModels = { User, Role, OAuthApp, OAuthToken, Venue, SeatingChart, ChartSection, Seat, Agency, Artist, Tour, Event, EventArtist, DateHold, Offer, EventExpense, PriceLevel, PriceLevelPhase, SeatInventory, ProductionHold, InventoryHold, PromoCode, PromoRedemption, TicketOrder, TicketOrderLine, Ticket, ScanEvent, MerchSales, BarSales, Settlement, SettlementLine, ArtistPayment, AuditEvent, StoreSettings, PaymentProvider, PaymentCollection, PaymentSession, Payment, Refund, PaymentWebhookEvent, IdempotencyKey, ManagerApproval, CashDrawer };
+const allModels = filterFollowsRead(baseModels as any) as typeof baseModels;
 // Narrow the sidebar and create links per role from each list's own operation access.
 type Gate = (args: { session?: unknown }) => unknown;
 const narrowed = (config: any) => {

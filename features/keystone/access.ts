@@ -19,3 +19,6 @@ export const rules = {
   canReadPeople: ({ session }: AccessArgs) => !session ? false : session.data.role?.canSeeOtherPeople ? true : { id: { equals: session.itemId } },
   canUpdatePeople: ({ session }: AccessArgs) => !session ? false : session.data.role?.canEditOtherPeople ? true : { id: { equals: session.itemId } },
 };
+/** Ticket revenue (Event.gross): order, refund, settlement, deal, event and payment staff; not door staff. */
+export const grossReaders: Permission[] = ['canManageOrders', 'canIssueRefunds', 'canManageSettlements', 'canManageDeals', 'canManageEvents', 'canReadPayments'];
+export const canReadGross = ({ session }: AccessArgs) => grossReaders.some(p => session?.data.role?.[p] === true);

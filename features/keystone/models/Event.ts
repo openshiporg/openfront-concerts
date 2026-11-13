@@ -1,7 +1,7 @@
 import { list, graphql } from '@keystone-6/core';
 import { text, integer, checkbox, json, select, relationship, timestamp, virtual } from '@keystone-6/core/fields';
 import { trackingFields } from './trackingFields';
-import { commandAccess, catalogAccess, permissions } from '../access';
+import { commandAccess, catalogAccess, permissions, canReadGross } from '../access';
 
 export const Event = list({
  access: catalogAccess,
@@ -44,7 +44,8 @@ export const Event = list({
   sold: virtual({ field: graphql.field({ type: graphql.Int, async resolve(item, args, context) { const r = await context.prisma.priceLevel.aggregate({ where: { eventId: item.id }, _sum: { sold: true } }); return r._sum.sold ?? 0; } }) }),
   held: virtual({ field: graphql.field({ type: graphql.Int, async resolve(item, args, context) { const r = await context.prisma.priceLevel.aggregate({ where: { eventId: item.id }, _sum: { held: true } }); return r._sum.held ?? 0; } }) }),
   kills: virtual({ field: graphql.field({ type: graphql.Int, async resolve(item, args, context) { return context.prisma.seatInventory.count({ where: { eventId: item.id, ...{status: 'killed'} } }); } }) }),
-  gross: virtual({ field: graphql.field({ type: graphql.Int, async resolve(item, args, context) { const result = await context.prisma.ticketOrder.aggregate({ where: { eventId: item.id, status: 'paid' }, _sum: { totalCents: true } }); return result._sum.totalCents ?? 0; } }) }),
+  // Ticket revenue: not for door staff.
+  gross: virtual({ access: { read: canReadGross }, ui: { listView: { fieldMode: (a: any) => canReadGross(a) ? 'read' : 'hidden' }, itemView: { fieldMode: (a: any) => canReadGross(a) ? 'read' : 'hidden' } }, field: graphql.field({ type: graphql.Int, async resolve(item, args, context) { const result = await context.prisma.ticketOrder.aggregate({ where: { eventId: item.id, status: 'paid' }, _sum: { totalCents: true } }); return result._sum.totalCents ?? 0; } }) }),
   open: virtual({ field: graphql.field({ type: graphql.Int, async resolve(item, args, context) { const levels = await context.prisma.priceLevel.findMany({ where: { eventId: item.id } }); return levels.reduce((n: number, l: { capacity: number; sold: number; held: number; productionHeld: number }) => n + l.capacity - l.sold - l.held - l.productionHeld, 0); } }) }),
   ...trackingFields,
  }
