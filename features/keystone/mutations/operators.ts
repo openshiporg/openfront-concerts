@@ -1,4 +1,4 @@
-import { permissions, type Permission } from '../access';
+import { permissions, permissionRefusal, type Permission } from '../access';
 import { command, transition } from '../lib/transaction';
 import { appendAuditEvent } from '../lib/audit';
 import { digest, canonicalDigest, humanCode, opaqueToken } from '../lib/guest-proof';
@@ -9,7 +9,7 @@ import { zonedDateTime, holdDay } from '../lib/venue-time';
 import { validateCountMaps } from '../lib/editors';
 
 export function authorize(context: any, permission: Permission) {
-  if (!permissions[permission]({ session: context.session })) throw new Error(`Permission required: ${permission}`);
+  if (!permissions[permission]({ session: context.session })) throw new Error(permissionRefusal(permission));
 }
 const required: Record<string, Permission> = { releaseDateHold: 'canManageEvents', advanceEvent: 'canManageEvents', placeDateHold: 'canManageEvents', challengeHold: 'canManageEvents', confirmHold: 'canManageEvents', sendOffer: 'canManageDeals', acceptOffer: 'canManageDeals', declineOffer: 'canManageDeals', contractOffer: 'canManageDeals', publishEvent: 'canManageEvents', setProductionHold: 'canManageInventory', releaseProductionHold: 'canManageInventory', scanTicket: 'canScanTickets', recordMerchSales: 'canManageSettlements', computeSettlement: 'canManageSettlements', adjustSettlement: 'canManageSettlements', signSettlement: 'canManageSettlements', recordArtistPayment: 'canManageSettlements', postponeEvent: 'canManageEvents', cancelEvent: 'canManageEvents' };
 export function operator(operation: string) {

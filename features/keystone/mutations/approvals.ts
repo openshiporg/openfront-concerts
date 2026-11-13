@@ -1,4 +1,4 @@
-import { permissions } from '../access';
+import { permissions, permissionRefusal } from '../access';
 import { appendAuditEvent } from '../lib/audit';
 import { refundApprovalPayload, refundApprovalFingerprint } from '../lib/refund-approval';
 
@@ -6,7 +6,7 @@ const TTL_MS = 15 * 60 * 1000;
 
 /** Requester (canIssueRefunds) asks for approval of an exact order and amount. */
 export async function requestRefundApproval(_: any, { input }: any, context: any) {
-  if (!permissions.canIssueRefunds({ session: context.session })) throw new Error('Permission required: canIssueRefunds');
+  if (!permissions.canIssueRefunds({ session: context.session })) throw new Error(permissionRefusal('canIssueRefunds'));
   const actor = context.session.itemId;
   const reason = String(input.reason || '').trim();
   if (!reason) throw new Error('Reason required');
@@ -29,7 +29,7 @@ export async function requestRefundApproval(_: any, { input }: any, context: any
 
 /** A different user holding canApproveAdjustments approves; compare-and-set on pending. */
 export async function decideRefundApproval(_: any, { input }: any, context: any) {
-  if (!permissions.canApproveAdjustments({ session: context.session })) throw new Error('Permission required: canApproveAdjustments');
+  if (!permissions.canApproveAdjustments({ session: context.session })) throw new Error(permissionRefusal('canApproveAdjustments'));
   const actor = context.session.itemId;
   const approve = input.decision === 'approve';
   if (!approve && input.decision !== 'reject') throw new Error('Decision must be approve or reject');

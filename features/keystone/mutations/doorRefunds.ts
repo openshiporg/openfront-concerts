@@ -1,4 +1,4 @@
-import { permissions } from '../access';
+import { permissions, permissionRefusal } from '../access';
 import { command } from '../lib/transaction';
 import { appendAuditEvent } from '../lib/audit';
 import { refundApprovalPayload, refundApprovalFingerprint, assertApprovalUsable } from '../lib/refund-approval';
@@ -10,7 +10,7 @@ import { bookDrawer } from './cashDrawers';
  * box office, so it is always approval-bound (no threshold), recorded here and audited. One transaction.
  */
 export async function refundDoorSale(_: any, { input }: any, context: any) {
-  if (!permissions.canIssueRefunds({ session: context.session })) throw new Error('Permission required: canIssueRefunds');
+  if (!permissions.canIssueRefunds({ session: context.session })) throw new Error(permissionRefusal('canIssueRefunds'));
   const { orderId, idempotencyKey, approvalId } = input;
   const reason = String(input.reason || '').trim();
   if (!idempotencyKey || !reason) throw new Error('Reason and idempotency key required');

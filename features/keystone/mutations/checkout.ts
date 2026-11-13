@@ -8,7 +8,7 @@ import { createPayment, getPaymentStatus, refundPayment as providerRefund, cance
 import { assertCheckoutProviderObservation } from '../utils/checkoutProviderObservation';
 import { getPublicPaymentProviderConfig } from '../utils/paymentProviderConfig';
 import { nextPaymentStatus, webhookPaymentStatus, successfulRefundTotal } from '../utils/paymentState';
-import { permissions } from '../access';
+import { permissions, permissionRefusal } from '../access';
 import { expireHolds } from './inventory';
 
 const PROVIDER_FIELDS = 'id code isInstalled credentials createPaymentFunction capturePaymentFunction refundPaymentFunction getPaymentStatusFunction generatePaymentLinkFunction handleWebhookFunction';
@@ -164,7 +164,7 @@ export async function transferTicket(_: any, { input }: any, context: any) {
 }
 
 export async function refundTicketOrder(_: any, { input }: any, context: any) {
-  if (!permissions.canIssueRefunds({ session: context.session })) throw new Error('Permission required: canIssueRefunds');
+  if (!permissions.canIssueRefunds({ session: context.session })) throw new Error(permissionRefusal('canIssueRefunds'));
   const { orderId, reason, idempotencyKey, approvalId } = input;
   if (!idempotencyKey || !String(reason || '').trim()) throw new Error('Reason and idempotency key required');
   const actor = context.session.itemId; const prisma = context.prisma;

@@ -1,4 +1,4 @@
-import { permissions } from '../access';
+import { permissions, permissionRefusal } from '../access';
 import { command } from '../lib/transaction';
 import { appendAuditEvent } from '../lib/audit';
 import { digest, humanCode, opaqueToken } from '../lib/guest-proof';
@@ -17,7 +17,7 @@ async function activePhase(tx: any, levelId: string, qty: number) {
 
 /** Read-only quote for the panel: same phase lookup and same priceDoorSale() the charge uses. */
 export async function previewDoorSale(_: any, { input }: any, context: any) {
-  if (!permissions.canManageOrders({ session: context.session })) throw new Error('Permission required: canManageOrders');
+  if (!permissions.canManageOrders({ session: context.session })) throw new Error(permissionRefusal('canManageOrders'));
   const kind: Kind = input.comp ? 'comp' : 'door';
   const qty = assertDoorQuantity(input.qty, kind === 'comp' ? MAX_COMP_QTY : undefined);
   const level = await context.prisma.priceLevel.findUnique({ where: { id: input.levelId }, include: { event: { include: { venue: true } } } });
@@ -29,7 +29,7 @@ export async function previewDoorSale(_: any, { input }: any, context: any) {
 
 /** Door sale and comp share one inventory path: event lock, capacity re-check, order, line, tickets, audit. */
 async function issue(kind: Kind, input: any, context: any) {
-  if (!permissions.canManageOrders({ session: context.session })) throw new Error('Permission required: canManageOrders');
+  if (!permissions.canManageOrders({ session: context.session })) throw new Error(permissionRefusal('canManageOrders'));
   if (!input?.idempotencyKey) throw new Error('Idempotency key required');
   const actor = context.session.itemId;
   const name = String(input.name || '').trim();

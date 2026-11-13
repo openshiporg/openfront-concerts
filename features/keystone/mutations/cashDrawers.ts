@@ -1,11 +1,11 @@
-import { permissions } from '../access';
+import { permissions, permissionRefusal } from '../access';
 import { command } from '../lib/transaction';
 import { appendAuditEvent } from '../lib/audit';
 import { assertFloat, countedFromSheet, closeOut, drawerOpenKey, overrideReason } from '../lib/cash-drawer';
 
 /** Box-office drawer shifts: one open drawer per cashier; door cash in and cash refunds out are booked to it. */
 function guard(context: any, input: any) {
-  if (!permissions.canManageOrders({ session: context.session })) throw new Error('Permission required: canManageOrders');
+  if (!permissions.canManageOrders({ session: context.session })) throw new Error(permissionRefusal('canManageOrders'));
   if (!input?.idempotencyKey) throw new Error('Idempotency key required');
   return context.session.itemId as string;
 }
@@ -42,7 +42,7 @@ export async function closeCashDrawer(_: any, { input }: any, context: any) {
 
 /** A manager (canApproveAdjustments) closes another cashier's open drawer with their own blind count and a stated reason. */
 export async function forceCloseCashDrawer(_: any, { input }: any, context: any) {
-  if (!permissions.canApproveAdjustments({ session: context.session })) throw new Error('Permission required: canApproveAdjustments');
+  if (!permissions.canApproveAdjustments({ session: context.session })) throw new Error(permissionRefusal('canApproveAdjustments'));
   if (!input?.idempotencyKey) throw new Error('Idempotency key required');
   const actor = context.session.itemId as string;
   const counted = countedFromSheet(input.count);

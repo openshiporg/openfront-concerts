@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { DEFAULT_STORE_LOGO_COLOR, DEFAULT_STORE_LOGO_ICON } from '../../platform/store-settings/lib/store-logo';
-import { permissions, permissionNames } from '../access';
+import { permissions, permissionRefusal, permissionNames } from '../access';
 import { checkedClient, lockTransactionKey } from '../lib/transaction';
 import { appendAuditEvent } from '../lib/audit';
 import { canonicalDigest, digest, humanCode, opaqueToken } from '../lib/guest-proof';
@@ -22,7 +22,7 @@ const at = (days: number, hour = 20) => { const d = new Date(Date.now() + days *
 
 /** Onboarding setup. Each call is one ordered, rerunnable phase; records are matched by name. */
 export default async function seedConcerts(_: any, { section, data }: { section: string; data: any }, context: any) {
-  if (!permissions.canManageOnboarding({ session: context.session })) throw new Error('Permission required: canManageOnboarding');
+  if (!permissions.canManageOnboarding({ session: context.session })) throw new Error(permissionRefusal('canManageOnboarding'));
   const actor = context.session.itemId;
   return context.prisma.$transaction(async (raw: any) => {
     const tx = checkedClient(raw);
