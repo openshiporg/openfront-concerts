@@ -1,5 +1,5 @@
 export interface PublicPaymentProviderConfig {
-  provider: 'stripe' | 'paypal';
+  provider: 'stripe';
   publishableKey: string;
 }
 
@@ -10,10 +10,7 @@ export function isPaymentProviderConfigured(code: string): boolean {
       process.env.STRIPE_SECRET_KEY
     );
   }
-  if (code.startsWith('pp_paypal')) {
-    return Boolean(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET);
-  }
-  return code === 'pp_system_default' || code.startsWith('pp_manual');
+  return false;
 }
 
 export function getPublicPaymentProviderConfig(code: string): PublicPaymentProviderConfig | null {
@@ -23,12 +20,6 @@ export function getPublicPaymentProviderConfig(code: string): PublicPaymentProvi
     return {
       provider: 'stripe',
       publishableKey: process.env.NEXT_PUBLIC_STRIPE_KEY || process.env.STRIPE_PUBLISHABLE_KEY || '',
-    };
-  }
-  if (code.startsWith('pp_paypal')) {
-    return {
-      provider: 'paypal',
-      publishableKey: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
     };
   }
   return null;

@@ -28,25 +28,11 @@ interface CreatePaymentProviderDrawerProps {
 // Payment provider presets
 const PAYMENT_PROVIDER_PRESETS = [
   { 
-    id: 'manual', 
-    name: 'Cash on Delivery', 
-    description: 'Cash on Delivery payment method allows customers to pay when they receive their order. Orders are placed immediately and payment is collected upon delivery.',
-    icon: '👋',
-    envVars: []
-  },
-  { 
     id: 'stripe', 
     name: 'Stripe', 
     description: 'For Stripe to work, you need to add these environment variables to your .env file:',
     icon: '💳',
     envVars: ['NEXT_PUBLIC_STRIPE_KEY', 'STRIPE_SECRET_KEY']
-  },
-  { 
-    id: 'paypal', 
-    name: 'PayPal', 
-    description: 'For PayPal to work, you need to add these environment variables to your .env file:',
-    icon: '🟦',
-    envVars: ['NEXT_PUBLIC_PAYPAL_CLIENT_ID', 'PAYPAL_CLIENT_SECRET']
   }
 ]
 
@@ -107,8 +93,6 @@ export function CreatePaymentProviderDrawer({
       // Build provider data with function fields based on selection
       const providerCodes: Record<string, string> = {
         stripe: 'pp_stripe_stripe',
-        paypal: 'pp_paypal_paypal',
-        manual: 'pp_system_default',
       }
       let providerData: any = {
         name: providerName,
@@ -126,26 +110,6 @@ export function CreatePaymentProviderDrawer({
           getPaymentStatusFunction: 'stripe',
           generatePaymentLinkFunction: 'stripe',
           handleWebhookFunction: 'stripe'
-        }
-      } else if (selectedPreset === 'paypal') {
-        providerData = {
-          ...providerData,
-          createPaymentFunction: 'paypal',
-          capturePaymentFunction: 'paypal',
-          refundPaymentFunction: 'paypal',
-          getPaymentStatusFunction: 'paypal',
-          generatePaymentLinkFunction: 'paypal',
-          handleWebhookFunction: 'paypal'
-        }
-      } else if (selectedPreset === 'manual') {
-        providerData = {
-          ...providerData,
-          createPaymentFunction: 'manual',
-          capturePaymentFunction: 'manual',
-          refundPaymentFunction: 'manual',
-          getPaymentStatusFunction: 'manual',
-          generatePaymentLinkFunction: 'manual',
-          handleWebhookFunction: 'manual'
         }
       }
       

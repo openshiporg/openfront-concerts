@@ -38,8 +38,6 @@ interface PaymentProviderListPageClientProps {
 
 const PROVIDER_TYPE_LABELS: Record<string, string> = {
   pp_stripe_stripe: 'Stripe',
-  pp_paypal_paypal: 'PayPal',
-  pp_system_default: 'Manual / Cash',
 }
 
 export function PaymentProviderListPageClient({
