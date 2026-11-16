@@ -3,10 +3,17 @@ import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Concerts Dashboard",
-  description: "Admin interface",
-};
+import { keystoneClient } from "@/features/dashboard/lib/keystoneClient";
+
+async function storeName() {
+  const r = await keystoneClient<{ storeLogo: { name: string } }>("{ storeLogo { name } }");
+  return (r.success && r.data.storeLogo?.name) || "Concerts";
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const name = await storeName();
+  return { title: `${name} staff`, description: `Staff dashboard for ${name}.` };
+}
 
 export default function DashboardLayout({
   children,
