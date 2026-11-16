@@ -38,11 +38,11 @@ export function EventsHome() {
         <ul className="space-y-3">
           {list.map((e, i) => { const p = dayParts(e.showAt, e.venue?.timezone); return (
             <li key={e.id} className="flex items-center gap-3 rounded-2xl bg-white/60 p-1.5 sm:gap-4">
-              <div className={`size-16 shrink-0 rounded-2xl bg-gradient-to-br sm:size-[72px] ${TILES[i % TILES.length]}`} aria-hidden />
-              <div className="w-11 shrink-0 text-center leading-tight"><div className="text-xs font-semibold">{p.m}</div><div className="text-xl font-bold">{p.d}</div></div>
+              <div className={`size-14 shrink-0 rounded-2xl bg-gradient-to-br sm:size-[72px] ${TILES[i % TILES.length]}`} aria-hidden />
+              <div className="w-9 shrink-0 text-center sm:w-11 leading-tight"><div className="text-xs font-semibold">{p.m}</div><div className="text-xl font-bold">{p.d}</div></div>
               <Link href={`/events/${e.id}`} className="min-w-0 flex-1 border-l border-black/10 pl-3">
-                <div className="truncate font-semibold">{e.title}</div>
-                <div className="truncate text-sm opacity-60">{e.venue?.name}{e.venue?.city ? `, ${e.venue.city}` : ''}</div>
+                <div className="font-semibold leading-tight">{e.title}</div>
+                <div className="truncate text-sm leading-tight opacity-60">{e.venue?.name}</div>
                 {['sold_out', 'postponed'].includes(e.status) ? <div className="text-xs font-semibold uppercase opacity-70">{String(e.status).replace(/_/g, ' ')}</div> : null}
               </Link>
               <Link href={`/events/${e.id}`} className="mr-1 inline-flex min-h-11 items-center rounded-full bg-[#141414] px-4 text-sm font-semibold text-white">Tickets</Link>
@@ -52,7 +52,7 @@ export function EventsHome() {
       </section>
 
       {featured ? <section className={`${card} grid items-center gap-5 sm:grid-cols-2`}>
-        <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-amber-400 via-orange-600 to-stone-900 sm:aspect-square" aria-hidden />
+        <div className="aspect-[16/9] rounded-2xl bg-gradient-to-br from-amber-400 via-orange-600 to-stone-900 sm:aspect-square" aria-hidden />
         <div className="space-y-3">
           <div className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-70">Featured show</div>
           <h2 className="text-4xl font-semibold leading-none tracking-tight">{featured.title}</h2>
