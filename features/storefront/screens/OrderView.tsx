@@ -16,20 +16,20 @@ export function OrderView({ orderId }: { orderId: string }) {
       setResult(d.transferTicket); setTransfer(null);
     } catch (e: any) { setError(e.message); }
   }
-  if (!order) return <main className="mx-auto max-w-3xl space-y-3 p-4">{error ? <p className="text-sm">{error}</p> : <p className="text-sm">Loading…</p>}<Link className="inline-flex min-h-11 items-center text-sm underline" href="/lookup">Find my order</Link></main>;
+  if (!order) return <main className="space-y-3 rounded-3xl bg-[#f7f7f7] p-5 shadow-sm">{error ? <p className="text-sm">{error}</p> : <p className="text-sm">Loading…</p>}<Link className="inline-flex min-h-11 items-center text-sm underline" href="/lookup">Find my order</Link></main>;
   return (
-    <main className="mx-auto w-full max-w-3xl space-y-4 p-4">
-      <h1 className="text-2xl font-semibold">Order confirmed</h1>
+    <main className="space-y-4 rounded-3xl bg-[#f7f7f7] p-5 shadow-sm">
+      <h1 className="text-3xl font-semibold tracking-tight">Order confirmed</h1>
       <p className="font-mono text-lg" data-testid="order-code">{order.orderNumber}</p>
       <p className="font-mono text-xs uppercase tracking-wide opacity-70">{String(order.status).replace(/_/g, ' ')}</p>
       <p className="text-sm">Keep your order number and email to look this order up later. Show the ticket code at the door.</p>
-      <ul className="divide-y rounded-lg border">{(order.tickets || []).map((t: any) => (
+      <ul className="divide-y rounded-2xl border border-black/10 bg-white/60">{(order.tickets || []).map((t: any) => (
         <li key={t.ticketCode} className="space-y-1 p-3"><div className="font-mono text-sm">{t.ticketCode}{t.seat ? ` · ${t.seat}` : ''}</div>
           <button className="inline-flex min-h-11 items-center text-sm underline" onClick={() => setTransfer({ code: t.ticketCode, email: '', name: '' })}>Transfer</button></li>))}</ul>
-      {transfer ? <div className="space-y-2 rounded-lg border p-3"><p className="text-sm">Transfer {transfer.code}</p>
+      {transfer ? <div className="space-y-2 rounded-2xl border border-black/10 bg-white/60 p-3"><p className="text-sm">Transfer {transfer.code}</p>
         <input placeholder="Recipient name" value={transfer.name} onChange={(e) => setTransfer({ ...transfer, name: e.target.value })} className="min-h-11 w-full rounded border px-3 py-2 text-sm" />
         <input placeholder="Recipient email" value={transfer.email} onChange={(e) => setTransfer({ ...transfer, email: e.target.value })} className="min-h-11 w-full rounded border px-3 py-2 text-sm" />
-        <button onClick={send} className="min-h-11 rounded bg-black px-3 py-2 text-sm text-white">Send ticket</button></div> : null}
+        <button onClick={send} className="min-h-11 rounded-full bg-[#141414] px-3 py-2 text-sm text-white">Send ticket</button></div> : null}
       {result ? <p className="break-all text-sm">Sent. The new ticket is {result.ticketCode}; your old code no longer admits.</p> : null}
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <Link className="inline-flex min-h-11 items-center text-sm underline" href="/">Back to events</Link>
