@@ -136,7 +136,9 @@ export async function completeTicketCheckout(_: any, { input }: any, context: an
   const order = await ownedOrder(context, input.orderId, input.proof);
   const provider = await stripeProvider(context);
   const result = await finalizePaidOrder(context, order.id, provider);
-  return { orderId: order.id, orderNumber: order.orderNumber, status: result.status, tickets: result.tickets };
+  // the webhook or an earlier call may have finished the order first: show its tickets anyway
+  const tickets = result.tickets.length ? result.tickets : (await context.prisma.ticket.findMany({ where: { orderId: order.id }, select: { ticketCode: true, status: true, seatInventory: { select: { seat: { select: { label: true } } } } } })).map((t: any) => ({ ticketCode: t.ticketCode, status: t.status, seat: t.seatInventory?.seat?.label || '' }));
+  return { orderId: order.id, orderNumber: order.orderNumber, status: result.status, tickets };
 }
 
 export async function lookupTicketOrder(_: any, { email, orderNumber }: any, context: any) {

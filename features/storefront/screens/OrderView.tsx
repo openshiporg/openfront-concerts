@@ -25,7 +25,7 @@ export function OrderView({ orderId }: { orderId: string }) {
       <p className="text-sm">Keep your order number and email to look this order up later. Show the ticket code at the door.</p>
       <ul className="divide-y rounded-2xl border border-black/10 bg-white/60">{(order.tickets || []).map((t: any) => (
         <li key={t.ticketCode} className="space-y-1 p-3"><div className="font-mono text-sm">{t.ticketCode}{t.seat ? ` · ${t.seat}` : ''}</div>
-          <button className="inline-flex min-h-11 items-center text-sm underline" onClick={() => setTransfer({ code: t.ticketCode, email: '', name: '' })}>Transfer</button></li>))}</ul>
+          {!t.status || t.status === 'valid' ? <button className="inline-flex min-h-11 items-center text-sm underline" onClick={() => setTransfer({ code: t.ticketCode, email: '', name: '' })}>Transfer</button> : <div className="font-mono text-xs uppercase opacity-70">{String(t.status).replace(/_/g, ' ')}</div>}</li>))}</ul>
       {transfer ? <div className="space-y-2 rounded-2xl border border-black/10 bg-white/60 p-3"><p className="text-sm">Transfer {transfer.code}</p>
         <input placeholder="Recipient name" value={transfer.name} onChange={(e) => setTransfer({ ...transfer, name: e.target.value })} className="min-h-11 w-full rounded border px-3 py-2 text-sm" />
         <input placeholder="Recipient email" value={transfer.email} onChange={(e) => setTransfer({ ...transfer, email: e.target.value })} className="min-h-11 w-full rounded border px-3 py-2 text-sm" />

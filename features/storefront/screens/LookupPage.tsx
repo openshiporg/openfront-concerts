@@ -24,6 +24,7 @@ export function LookupPage() {
         <p className="font-mono">{order.orderNumber}</p><p className="font-mono text-xs uppercase tracking-wide opacity-70">{String(order.status).replace(/_/g, ' ')}</p>
         <p className="text-sm">{order.event?.title} · {showTime(order.event?.showAt, order.event?.venue?.timezone)}</p><p className="text-sm">Total {usd(order.totalCents, order.currencyCode)}{order.refundedCents ? ` · refunded ${usd(order.refundedCents, order.currencyCode)}` : ''}</p>
         <ul className="text-sm">{order.tickets.map((t: any) => <li key={t.ticketCode} className="font-mono">{t.ticketCode} · {String(t.status).replace(/_/g, ' ')}</li>)}</ul>
+        {order.tickets.some((t: any) => t.status === 'valid') ? <Link className="inline-flex min-h-11 items-center text-sm underline" href={`/orders/${order.orderId}`} onClick={() => sessionStorage.setItem(`order:${order.orderId}`, JSON.stringify(order))}>Open order to transfer tickets</Link> : null}
       </section> : null}
       <Link className="inline-flex min-h-11 items-center text-sm underline" href="/">Back to events</Link>
     </main>
