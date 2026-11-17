@@ -11,6 +11,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
           <Link href="/" className="flex items-center gap-2 text-base font-semibold leading-tight"><StoreLogoMark withName /></Link>
           <nav className="flex items-center gap-4 text-sm font-medium sm:gap-6">
             <Link href="/#events" className="hidden min-h-11 items-center sm:flex">Events</Link>
+            <Link href="/#venues" className="hidden min-h-11 items-center sm:flex">Venues</Link>
             <Link href="/lookup" className="flex min-h-11 items-center">My order</Link>
             <Link href="/#events" className="flex min-h-11 items-center rounded-full bg-[#141414] px-4 text-white">Tickets</Link>
           </nav>
@@ -19,7 +20,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
         <footer className="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-[#f7f7f7] p-6 text-sm">
           <Link href="/" className="flex items-center gap-2 font-semibold"><StoreLogoMark withName /></Link>
           <div className="flex gap-10 text-xs">
-            <div className="space-y-2"><div className="text-sm font-semibold">Events</div><Link className="block opacity-70" href="/#events">Upcoming shows</Link></div>
+            <div className="space-y-2"><div className="text-sm font-semibold">Events</div><Link className="block opacity-70" href="/#events">Upcoming shows</Link><Link className="block opacity-70" href="/#venues">Venues</Link></div>
             <div className="space-y-2"><div className="text-sm font-semibold">Orders</div><Link className="block opacity-70" href="/lookup">Find my order</Link></div>
           </div>
         </footer>
