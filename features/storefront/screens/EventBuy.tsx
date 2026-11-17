@@ -43,6 +43,7 @@ export function EventBuy({ eventId }: { eventId: string }) {
   const startPayment = () => run(async () => {
     const d = await api('mutation($i: StartTicketCheckoutInput!) { startTicketCheckout(input: $i) }', { i: { holdId: hold.id, proof: hold.proof, email: form.email, name: form.name, ageAttested: form.age, idempotencyKey: key() } });
     const s = d.startTicketCheckout; setPay(s);
+    if (s.expiresAt) takeHold({ ...hold, expiresAt: s.expiresAt });
     await loadStripeJs();
     stripeRef.current = window.Stripe(s.publishableKey);
     elementsRef.current = stripeRef.current.elements({ clientSecret: s.clientSecret });
@@ -110,8 +111,9 @@ export function EventBuy({ eventId }: { eventId: string }) {
       </section> : null}
 
       {pay ? <section className="space-y-3 rounded-2xl border border-black/10 bg-white/60 p-4"><h2 className="font-medium">Payment · {usd(pay.totalCents)}</h2><p className="font-mono text-sm">Order {pay.orderNumber}</p>
+        <p className="font-mono text-sm" aria-live="polite">{left > 0 ? `Held for ${m}:${sec}` : 'Hold expired'}</p>
         <div id="payment-element" />
-        <button disabled={busy} onClick={confirm} className="min-h-11 rounded-full bg-[#141414] px-4 py-2 text-sm text-white disabled:opacity-40">{busy ? 'Processing…' : `Pay ${usd(pay.totalCents)}`}</button></section> : null}
+        <button disabled={busy || left < 1} onClick={confirm} className="min-h-11 rounded-full bg-[#141414] px-4 py-2 text-sm text-white disabled:opacity-40">{busy ? 'Processing…' : `Pay ${usd(pay.totalCents)}`}</button></section> : null}
     </main>
   );
 }

@@ -33,23 +33,30 @@ export async function startTicketCheckout(_: any, { input }: any, context: any) 
     await expireHolds(tx, hold0.eventId);
     const hold = await tx.inventoryHold.findUnique({ where: { id: holdId }, include: { event: true } });
     if (!hold || hold.status !== 'active' || hold.expiresAt <= new Date()) throw new Error('Hold expired');
-    if (hold.orderId) throw new Error('Checkout already started for this hold');
+    if (hold.orderId) {
+      // a retry after a failed payment start (new click, new key): the holder of this hold's proof picks up the same order and payment session
+      const started = await tx.ticketOrder.findUnique({ where: { id: hold.orderId } });
+      const open = started?.status === 'pending_payment' ? await tx.paymentSession.findFirst({ where: { paymentCollectionId: started.paymentCollectionId, isSelected: true } }) : null;
+      if (!open) throw new Error('Checkout already started for this hold');
+      return { orderId: started.id, sessionId: open.id, sessionKey: open.idempotencyKey, total: started.totalCents, currency: started.currencyCode, orderNumber: started.orderNumber, expiresAt: hold.expiresAt, replay: true };
+    }
     const q = hold.quoteSnapshot;
     if (q.perOrderLimit && hold.quantity > q.perOrderLimit) throw new Error('Per-order limit exceeded');
     if (hold.event.ageRestriction !== 'all_ages' && !ageAttested) throw new Error('Age confirmation required');
     const secret = opaqueToken();
     const order = await tx.ticketOrder.create({ data: { orderNumber: humanCode('CN'), guestEmail: email.trim().toLowerCase(), guestName: name.trim(), secretKey: digest(secret), subtotalCents: q.subtotalCents, serviceFeesCents: q.serviceFeesCents, facilityFeesCents: q.facilityFeesCents, taxCents: q.taxCents, discountCents: q.discountCents, totalCents: q.totalCents, currencyCode: q.currencyCode, ageAttested: !!ageAttested, status: 'pending_payment', source: hold.presaleCode ? 'presale' : 'online', eventId: hold.eventId, customerId: context.session?.itemId || null, discountSnapshot: { code: hold.presaleCode || null, discountCents: q.discountCents } } });
-    await tx.inventoryHold.update({ where: { id: hold.id }, data: { orderId: order.id, expiresAt: new Date(Date.now() + 20 * 60000) } });
+    const expiresAt = new Date(Date.now() + 20 * 60000);
+    await tx.inventoryHold.update({ where: { id: hold.id }, data: { orderId: order.id, expiresAt } });
     await tx.promoRedemption.updateMany({ where: { holdId: hold.id, status: 'reserved' }, data: { orderId: order.id } });
     const collection = await tx.paymentCollection.create({ data: { amount: q.totalCents } });
     await tx.ticketOrder.update({ where: { id: order.id }, data: { paymentCollectionId: collection.id } });
     const session = await tx.paymentSession.create({ data: { paymentCollectionId: collection.id, paymentProviderId: provider.id, amount: q.totalCents, idempotencyKey: crypto.createHash('sha256').update(`${idempotencyKey}:${order.id}`).digest('hex'), isSelected: true, data: { state: 'initializing', checkoutQuote: q, holdId: hold.id } } });
     await appendAuditEvent(tx, context.session?.itemId, { action: 'checkout.started', targetList: 'TicketOrder', targetId: order.id, after: { totalCents: q.totalCents } });
-    return { orderId: order.id, sessionId: session.id, sessionKey: session.idempotencyKey, total: q.totalCents, currency: q.currencyCode, orderNumber: order.orderNumber, replay: false };
+    return { orderId: order.id, sessionId: session.id, sessionKey: session.idempotencyKey, total: q.totalCents, currency: q.currencyCode, orderNumber: order.orderNumber, expiresAt, replay: false };
   });
   const prisma = context.prisma;
   const session = await prisma.paymentSession.findUnique({ where: { id: local.sessionId } });
-  if (session.isInitiated && session.data?.clientSecret) return { orderId: local.orderId, orderNumber: local.orderNumber, proof: createProof(local.orderId), clientSecret: session.data.clientSecret, publishableKey: getPublicPaymentProviderConfig('pp_stripe_stripe')?.publishableKey, totalCents: local.total };
+  if (session.isInitiated && session.data?.clientSecret) return { orderId: local.orderId, orderNumber: local.orderNumber, proof: createProof(local.orderId), clientSecret: session.data.clientSecret, publishableKey: getPublicPaymentProviderConfig('pp_stripe_stripe')?.publishableKey, totalCents: local.total, expiresAt: local.expiresAt };
   let created;
   try {
     created = await createPayment({ provider, order: { id: local.orderId, orderNumber: local.orderNumber }, amount: local.total, currency: local.currency, idempotencyKey: session.idempotencyKey });
@@ -58,7 +65,7 @@ export async function startTicketCheckout(_: any, { input }: any, context: any) 
     throw error;
   }
   await prisma.paymentSession.update({ where: { id: session.id }, data: { isInitiated: true, data: { ...session.data, state: 'ready', paymentIntentId: created.paymentIntentId, clientSecret: created.clientSecret } } });
-  return { orderId: local.orderId, orderNumber: local.orderNumber, proof: createProof(local.orderId), clientSecret: created.clientSecret, publishableKey: getPublicPaymentProviderConfig('pp_stripe_stripe')?.publishableKey, totalCents: local.total };
+  return { orderId: local.orderId, orderNumber: local.orderNumber, proof: createProof(local.orderId), clientSecret: created.clientSecret, publishableKey: getPublicPaymentProviderConfig('pp_stripe_stripe')?.publishableKey, totalCents: local.total, expiresAt: local.expiresAt };
 }
 
 /** Shared by the browser return path and the signed webhook. Idempotent per order. */

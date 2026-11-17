@@ -19,7 +19,8 @@ export function OrderView({ orderId }: { orderId: string }) {
   if (!order) return <main className="space-y-3 rounded-3xl bg-[#f7f7f7] p-5 shadow-sm">{error ? <p className="text-sm">{error}</p> : <p className="text-sm">Loading…</p>}<Link className="inline-flex min-h-11 items-center text-sm underline" href="/lookup">Find my order</Link></main>;
   return (
     <main className="space-y-4 rounded-3xl bg-[#f7f7f7] p-5 shadow-sm">
-      <h1 className="text-3xl font-semibold tracking-tight">Order confirmed</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">{['paid', 'partially_refunded'].includes(order.status) ? 'Order confirmed' : order.status === 'cancelled' ? 'Order cancelled' : 'Order'}</h1>
+      {order.status === 'cancelled' && !(order.tickets || []).length ? <p className="text-sm">Your hold ran out before the payment finished, so no tickets were issued. The payment is refunded to your card.</p> : null}
       <p className="font-mono text-lg" data-testid="order-code">{order.orderNumber}</p>
       <p className="font-mono text-xs uppercase tracking-wide opacity-70">{String(order.status).replace(/_/g, ' ')}</p>
       <p className="text-sm">Keep your order number and email to look this order up later. Show the ticket code at the door.</p>
