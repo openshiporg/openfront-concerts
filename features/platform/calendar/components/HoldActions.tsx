@@ -8,7 +8,7 @@ import { ActionButton } from '../../components/ActionButton';
 import { runTyped } from '../../lib/commands';
 
 type Option = { value: string; label: string };
-const AGES: Option[] = [{ value: 'all_ages', label: 'All ages' }, { value: '18_plus', label: '18+' }, { value: '21_plus', label: '21+' }];
+const AGES: Option[] = [{ value: 'all_ages', label: 'All ages' }, { value: '16', label: '16+' }, { value: '18', label: '18+' }, { value: '21', label: '21+' }];
 
 /** Challenge, release, or confirm a hold into a draft event on a published chart. */
 export function HoldActions({ holdId, status, charts, artist }: { holdId: string; status: string; charts: Option[]; artist?: string }) {

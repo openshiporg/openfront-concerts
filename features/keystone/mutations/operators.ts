@@ -67,7 +67,7 @@ export function operator(operation: string) {
         if (!title) throw new Error('Event title required');
         const chart = await tx.seatingChart.findUnique({ where: { id: input.seatingChartId } });
         if (!chart || chart.venueId !== row.venueId || chart.status !== 'published') throw new Error('Published venue chart required');
-        if (input.ageRestriction && !['all_ages', '18_plus', '21_plus'].includes(input.ageRestriction)) throw new Error('Unknown age restriction');
+        if (input.ageRestriction && !['all_ages', '16', '18', '21'].includes(input.ageRestriction)) throw new Error('Unknown age restriction');
         const venue = await tx.venue.findUnique({ where: { id: row.venueId } });
         const day = row.date.toISOString().slice(0, 10);
         const showAt = input.showTime ? zonedDateTime(day, input.showTime, venue?.timezone || 'UTC') : new Date(input.showAt || row.date);
