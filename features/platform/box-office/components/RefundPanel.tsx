@@ -54,3 +54,17 @@ export function RefundPanel({ orderId, cash, refundableCents, thresholdCents, ap
     </div>
   );
 }
+
+/** A refund Stripe has not confirmed: ask again with the same key. */
+export function RetryRefund({ refundId, label }: { refundId: string; label: string }) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const [error, setError] = useState('');
+  return (
+    <span className="ml-2 inline-flex flex-wrap items-center gap-2">
+      {label ? <span className="text-sm text-muted-foreground">{label}</span> : null}
+      <Button size="sm" variant="outline" disabled={pending} onClick={() => start(async () => { setError(''); try { await runTyped('retryTicketRefund', 'RetryTicketRefundInput', { refundId }); router.refresh(); } catch (e: any) { setError(e.message); } })}>{pending ? 'Working…' : 'Retry refund'}</Button>
+      {error ? <span className="text-sm text-destructive">{error}</span> : null}
+    </span>
+  );
+}

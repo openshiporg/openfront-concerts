@@ -212,18 +212,24 @@ export async function refundTicketOrder(_: any, { input }: any, context: any) {
     await prisma.refund.update({ where: { id: reserve.refundId }, data: { status: 'unknown' } });
     throw error;
   }
+  return finishTicketRefund(context, { refundId: reserve.refundId, paymentId: reserve.paymentId, orderId, actor, reason }, result);
+}
+
+/** Applies the provider's answer to a reserved refund: once, under the event lock. */
+async function finishTicketRefund(context: any, { refundId, paymentId, orderId, actor, reason }: { refundId: string; paymentId: string; orderId: string; actor: string | null; reason: string }, result: any) {
+  const prisma = context.prisma;
   const ok = result.status === 'succeeded';
   return prisma.$transaction(async (raw: any) => {
     const tx = checkedClient(raw);
     const order = await tx.ticketOrder.findUnique({ where: { id: orderId } });
     await lockTransactionKey(tx, `event:${order.eventId}`);
-    const refund = await tx.refund.findUnique({ where: { id: reserve.refundId } });
+    const refund = await tx.refund.findUnique({ where: { id: refundId } });
     if (refund.status === 'succeeded') return { refundId: refund.id, status: 'succeeded' };
     await tx.refund.update({ where: { id: refund.id }, data: { status: ok ? 'succeeded' : result.status === 'failed' ? 'failed' : 'unknown', providerRefundId: result.id || '', providerData: result.data ? JSON.parse(JSON.stringify(result.data)) : undefined, processedAt: ok ? new Date() : null } });
     if (!ok) return { refundId: refund.id, status: result.status === 'failed' ? 'failed' : 'unknown' };
-    const rows = await tx.refund.findMany({ where: { paymentId: reserve.paymentId } });
+    const rows = await tx.refund.findMany({ where: { paymentId: paymentId } });
     const total = successfulRefundTotal(rows);
-    await tx.payment.update({ where: { id: reserve.paymentId }, data: { refundedAmount: total, status: total >= order.totalCents ? 'refunded' : 'partially_refunded' } });
+    await tx.payment.update({ where: { id: paymentId }, data: { refundedAmount: total, status: total >= order.totalCents ? 'refunded' : 'partially_refunded' } });
     const full = total >= order.totalCents;
     await tx.ticketOrder.update({ where: { id: orderId }, data: { refundedCents: total, status: full ? 'refunded' : 'partially_refunded' } });
     if (order.paymentCollectionId) await tx.paymentCollection.update({ where: { id: order.paymentCollectionId }, data: { refundedAmount: total } });
@@ -242,6 +248,26 @@ export async function refundTicketOrder(_: any, { input }: any, context: any) {
     await appendAuditEvent(tx, actor, { action: 'refund.succeeded', targetList: 'Refund', targetId: refund.id, after: { total }, reason });
     return { refundId: refund.id, status: 'succeeded' };
   }, { timeout: 30000, isolationLevel: 'Serializable' });
+}
+
+/** Staff retry of a refund left processing or unknown: the same Stripe key, so the money moves at most once. */
+export async function retryTicketRefund(_: any, { input }: any, context: any) {
+  if (!permissions.canIssueRefunds({ session: context.session })) throw new Error(permissionRefusal('canIssueRefunds'));
+  const prisma = context.prisma;
+  const refund = await prisma.refund.findUnique({ where: { id: String(input.refundId || '') }, include: { payment: true } });
+  if (!refund || !['processing', 'unknown'].includes(refund.status) || !refund.payment?.providerPaymentId) throw new Error('Only a card refund that is still being confirmed can be retried');
+  const provider = await stripeProvider(context);
+  const intentId = refund.payment.providerPaymentId;
+  if (refund.idempotencyKey.startsWith('late:')) {
+    await refundLatePayment(context, provider, refund.orderId, intentId, { paymentId: refund.paymentId, amount: refund.amount, currency: refund.currencyCode });
+    const after = await prisma.refund.findUnique({ where: { id: refund.id } });
+    return { refundId: refund.id, status: after.status };
+  }
+  // look for the refund at Stripe first: a key older than a day no longer dedupes there
+  const status = await getPaymentStatus({ provider, paymentId: intentId });
+  const sent = (status.refunds || []).find((r: any) => r.metadata?.restaurantRefundKey === refund.idempotencyKey);
+  const result = sent ? { id: sent.id, status: sent.status, data: sent } : await providerRefund({ provider, paymentId: intentId, amount: refund.amount, currency: refund.currencyCode, idempotencyKey: refund.idempotencyKey });
+  return finishTicketRefund(context, { refundId: refund.id, paymentId: refund.paymentId, orderId: refund.orderId, actor: context.session.itemId, reason: refund.reason }, result);
 }
 
 export async function handleProviderWebhook(context: any, providerCode: string, rawBody: string, headers: Record<string, string>) {

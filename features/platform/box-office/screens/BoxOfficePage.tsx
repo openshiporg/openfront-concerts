@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { gql } from '../../lib/gql';
 import { money, when } from '../../lib/format';
 import { OrderSearch } from '../components/BoxOfficeTools';
-import { RefundPanel } from '../components/RefundPanel';
+import { RefundPanel, RetryRefund } from '../components/RefundPanel';
 import { ApprovalActions } from '../components/ApprovalActions';
 import { DoorSalePanel } from '../components/DoorSalePanel';
 import { CashDrawerPanel } from '../components/CashDrawerPanel';
@@ -18,6 +18,7 @@ export async function BoxOfficePage({ searchParams }: { searchParams: Promise<{ 
     ticketOrders(where: $where, orderBy: [{ createdAt: desc }], take: $take) { id orderNumber status totalCents refundedCents guestName guestEmail createdAt event { title } ticket_order { id ticketCode status } payments(where: { status: { in: ["succeeded", "partially_refunded"] } }) { id providerPaymentId } }
     events(where: { status: { in: ["presale", "on_sale", "doors", "in_progress"] } }, orderBy: [{ showAt: asc }], take: 20) { id title priceLevel_event(where: { status: { equals: "active" } }) { id name priceCents capacity sold held productionHeld sections { kind } } }
     storeSettingsRecords(take: 1) { refundApprovalThresholdCents }
+    refunds(where: { status: { in: ["processing", "unknown"] } }, orderBy: [{ createdAt: desc }], take: 50) { id amount status order { id orderNumber } }
     authenticatedItem { ... on User { id role { canManageOrders canReadPayments } } }
     cashDrawers(orderBy: [{ openedAt: desc }], take: 10) { id label status openingFloatCents cashSalesCents cashRefundsCents expectedCents countedCents varianceCents varianceReason openedAt closedAt openedBy { id name } }
     managerApprovals(where: { status: { in: ["pending", "approved"] }, expiresAt: { gt: "${new Date().toISOString()}" } }, orderBy: [{ createdAt: desc }], take: 50) { id actionType targetId amount reason status expiresAt requestedBy { id name } }
@@ -43,6 +44,11 @@ export async function BoxOfficePage({ searchParams }: { searchParams: Promise<{ 
       ) : null}
       {closedDrawers.length || !canSeeReport ? null : <Link className="inline-flex min-h-11 items-center text-sm underline" href="/dashboard/platform/box-office/drawers">Drawer report by date</Link>}
       <OrderSearch initial={q} />
+      {data.refunds?.length ? (
+        <section className="space-y-2"><h2 className="text-sm font-medium">Refunds not confirmed by Stripe</h2>
+          <Rows>{data.refunds.map((r: any) => <Row key={r.id} title={r.order?.orderNumber || 'Refund'} status={r.status} meta={money(r.amount)} right={<RetryRefund refundId={r.id} label="" />} />)}</Rows>
+        </section>
+      ) : null}
       {pending.length ? (
         <section className="space-y-2"><h2 className="text-sm font-medium">Refund approvals waiting</h2>
           <Rows>{pending.map((a: any) => <Row key={a.id} title={money(a.amount)} status="pending" meta={`${a.reason} · requested by ${a.requestedBy?.name || 'unknown'}`} right={<ApprovalActions approvalId={a.id} />} />)}</Rows>

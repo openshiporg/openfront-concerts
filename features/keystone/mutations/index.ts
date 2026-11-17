@@ -13,7 +13,7 @@ import { openCashDrawer, closeCashDrawer, forceCloseCashDrawer } from './cashDra
 import updateActiveUser from './updateActiveUser';
 import seedConcerts from './seedConcerts';
 import { constraintRefusal, constraintGraphQLError } from '../lib/constraint-errors';
-import { startTicketCheckout, completeTicketCheckout, lookupTicketOrder, transferTicket, refundTicketOrder } from './checkout';
+import { startTicketCheckout, completeTicketCheckout, lookupTicketOrder, transferTicket, refundTicketOrder, retryTicketRefund } from './checkout';
 
 const graphql = String.raw;
 const operatorCommands = ['releaseDateHold', 'advanceEvent', 'placeDateHold', 'challengeHold', 'confirmHold', 'sendOffer', 'acceptOffer', 'declineOffer', 'contractOffer', 'publishEvent', 'setProductionHold', 'releaseProductionHold', 'scanTicket', 'recordMerchSales', 'computeSettlement', 'adjustSettlement', 'signSettlement', 'recordArtistPayment', 'postponeEvent', 'cancelEvent'];
@@ -42,6 +42,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
       input StartTicketCheckoutInput { holdId: ID! proof: String! email: String! name: String! ageAttested: Boolean idempotencyKey: String! }
       input CompleteTicketCheckoutInput { orderId: ID! proof: String! }
       input TransferTicketInput { ticketCode: String! orderId: ID! proof: String! toEmail: String! toName: String idempotencyKey: String! }
+      input RetryTicketRefundInput { refundId: ID! }
       input RefundTicketOrderInput { orderId: ID! amountCents: Int reason: String! idempotencyKey: String! approvalId: ID }
       input DoorTenderInput { kind: String! tenderedCents: Int reference: String }
       input DoorPreviewInput { eventId: ID! levelId: ID! qty: Int! comp: Boolean }
@@ -64,6 +65,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         completeTicketCheckout(input: CompleteTicketCheckoutInput!): JSON
         transferTicket(input: TransferTicketInput!): JSON
         refundTicketOrder(input: RefundTicketOrderInput!): JSON
+        retryTicketRefund(input: RetryTicketRefundInput!): JSON
         updateActiveUser(data: UserUpdateProfileInput!): User
         seedConcerts(section: String!, data: JSON!): JSON
         publishSeatingChart(input: OperatorCommandInput!): JSON
@@ -94,7 +96,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         seedConcerts,
         publishSeatingChart, requestRefundApproval, decideRefundApproval, issueDoorSale, issueComp, previewDoorSale, refundDoorSale, openCashDrawer, closeCashDrawer, forceCloseCashDrawer,
         updateActiveUser,
-        startTicketCheckout, completeTicketCheckout, transferTicket, refundTicketOrder,
+        startTicketCheckout, completeTicketCheckout, transferTicket, refundTicketOrder, retryTicketRefund,
         ...editorMutations,
         ...Object.fromEntries(operatorCommands.map(name => [name, operator(name)])),
       }),
