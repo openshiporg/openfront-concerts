@@ -111,7 +111,9 @@ export function operator(operation: string) {
           const levels = await tx.priceLevel.findMany({ where: { eventId, status: 'active' } });
           if (!levels.length) throw new Error('Active pricing required before opening sales');
         }
-        await transition(tx, 'event', eventId, event.status, input.status, actor, input.reason || '');
+        // opening sales now means general sale starts now, not at a later stored on-sale time
+        const opensNow = input.status === 'on_sale' && event.onSaleAt && event.onSaleAt > new Date();
+        await transition(tx, 'event', eventId, event.status, input.status, actor, input.reason || '', opensNow ? { onSaleAt: new Date() } : {});
         return { id: eventId, status: input.status };
       }
       if (operation === 'publishEvent') {
