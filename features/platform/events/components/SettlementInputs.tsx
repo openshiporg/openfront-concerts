@@ -94,3 +94,45 @@ export function DepositEditor({ eventId, leftCents }: { eventId: string; leftCen
     </EditorPanel>
   );
 }
+
+/** Balance payment to the artist against a final settlement. */
+export function ArtistPaymentEditor({ settlementId, dueCents }: { settlementId: string; dueCents: number }) {
+  const [amount, setAmount] = useState(dueCents > 0 ? fromCents(dueCents) : '');
+  const [method, setMethod] = useState('wire');
+  const [reference, setReference] = useState('');
+  const build = () => {
+    const amountCents = toCents(amount);
+    if (Number.isNaN(amountCents) || amountCents < 1) return 'Enter the payment in dollars.';
+    if (amountCents > dueCents) return 'More than the balance due.';
+    if (reference.trim().length < 3) return 'Enter the payment reference.';
+    return { settlementId, kind: 'balance', amountCents, method, reference: reference.trim(), status: 'paid' };
+  };
+  return (
+    <EditorPanel trigger="Record artist payment" title="Artist balance paid" command="recordArtistPayment" build={build} variant="default">
+      <TextField label="Amount ($)" value={amount} onChange={setAmount} inputMode="decimal" />
+      <Field label="Method"><SingleSelect value={method} onChange={setMethod} options={[{ value: 'wire', label: 'Wire' }, { value: 'ach', label: 'ACH' }, { value: 'check', label: 'Check' }, { value: 'cash', label: 'Cash' }]} placeholder="Method" searchPlaceholder="Search" /></Field>
+      <TextField label="Reference" value={reference} onChange={setReference} wide placeholder="Wire confirmation or check number" />
+    </EditorPanel>
+  );
+}
+
+/** Correction to a signed settlement: a new draft version with an adjustment line, approved by another manager. */
+export function AdjustmentEditor({ settlementId, approvers }: { settlementId: string; approvers: { id: string; name: string }[] }) {
+  const [amount, setAmount] = useState('');
+  const [reason, setReason] = useState('');
+  const [approvedById, setApprover] = useState('');
+  const build = () => {
+    const cents = Math.round(Number(amount) * 100);
+    if (!amount.trim() || !Number.isSafeInteger(cents) || cents === 0) return 'Enter the adjustment in dollars (negative lowers the artist total).';
+    if (reason.trim().length < 3) return 'Enter the reason.';
+    if (!approvedById) return 'Choose the approving manager.';
+    return { settlementId, amountCents: cents, reason: reason.trim(), approvedById };
+  };
+  return (
+    <EditorPanel trigger="Adjust settlement" title="Settlement adjustment" command="adjustSettlement" build={build}>
+      <TextField label="Amount ($)" value={amount} onChange={setAmount} inputMode="decimal" />
+      <Field label="Approved by"><SingleSelect value={approvedById} onChange={setApprover} options={approvers.map((a) => ({ value: a.id, label: a.name }))} placeholder="Manager" searchPlaceholder="Search" /></Field>
+      <TextField label="Reason" value={reason} onChange={setReason} wide />
+    </EditorPanel>
+  );
+}

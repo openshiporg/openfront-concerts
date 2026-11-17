@@ -12,8 +12,11 @@ export async function SettlementDetailPage({ params }: { params: Promise<{ id: s
   const { id } = await params;
   const data = await gql(`query($id: ID!) { settlement(where: { id: $id }) { id version status hash event { id title } ${WORKSHEET.map(([, k]) => k).join(' ')} paidCount compCount settlementLine_settlement(orderBy: [{ createdAt: asc }]) { id kind label amountCents roundingRemainder } artistPayment_settlement { id kind amountCents status reference } } }`, { id });
   const s = data.settlement; if (!s) notFound();
+  const peers = await gql(`query($eventId: ID!) { settlements(where: { event: { id: { equals: $eventId } } }, orderBy: [{ version: desc }], take: 1) { id } users(where: { role: { canApproveAdjustments: { equals: true } } }, take: 50) { id name } authenticatedItem { ... on User { id } } }`, { eventId: s.event.id }).catch(() => null);
+  const latest = !peers || peers.settlements?.[0]?.id === s.id;
+  const approvers = (peers?.users || []).filter((u: any) => u.id !== peers?.authenticatedItem?.id);
   return (
-    <Page title={`${s.event?.title} · version ${s.version}`} action={<SettlementActions settlementId={s.id} eventId={s.event.id} status={s.status} />}>
+    <Page title={`${s.event?.title} · version ${s.version}`} action={<SettlementActions settlementId={s.id} eventId={s.event.id} status={s.status} dueCents={s.balanceDueArtistCents} latest={latest} approvers={approvers} />}>
       <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"><StatusLabel status={s.status} /><span className="font-mono text-xs">Hash {String(s.hash).slice(0, 12)}</span><span>{s.paidCount} paid · {s.compCount} comp</span></div>
       <div className="divide-y rounded-lg border">
         {WORKSHEET.map(([name, key]) => <div key={key} className="flex items-center justify-between gap-4 p-3 text-sm"><span>{name}</span><span className="font-medium tabular-nums">{money(s[key])}</span></div>)}

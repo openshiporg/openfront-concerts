@@ -7,6 +7,7 @@ import { money, when, label } from '../../lib/format';
 import { EventActions } from '../components/EventActions';
 import { PriceLevelEditor, PhaseEditor, LevelStatusActions } from '../components/PricingEditors';
 import { ExpenseEditor, MerchEditor, DepositEditor } from '../components/SettlementInputs';
+import { ActionButton } from '../../components/ActionButton';
 import { OfferEditor } from '../../deals/components/OfferEditor';
 import { OfferActions } from '../../deals/components/OfferActions';
 import { Page, Row, Rows, Stat, StatusLabel } from '../../components/ui-bits';
@@ -86,6 +87,7 @@ export async function EventDetailPage({ params, searchParams }: { params: Promis
         <p className="text-sm text-muted-foreground">{money(depositPaid)} paid of {money(depositAgreed)} agreed.</p>
         <Rows empty="No deposits recorded.">{deposits.map((p: any) => <Row key={p.id} title={`${({ wire: 'Wire', ach: 'ACH', check: 'Check', cash: 'Cash' } as Record<string, string>)[p.method] || label(p.method)} ${p.reference}`} status={p.status} right={money(p.amountCents)} />)}</Rows>
       </div>}
+      {tab === 'settlement' && can.canManageSettlements && ['completed', 'settling'].includes(e.status) && !frozen ? <ActionButton command="computeSettlement" variant="default" input={{ eventId: e.id }}>{e.settlement_event.length ? 'Recompute settlement' : 'Compute settlement'}</ActionButton> : null}
       {tab === 'settlement' && <Rows empty={can.canManageSettlements ? 'No settlement yet.' : 'Settlements are visible to settlement managers.'}>{e.settlement_event.map((s: any) => <Row key={s.id} href={`/dashboard/platform/settlements/${s.id}`} title={`Version ${s.version}`} status={s.status} right={<>{money(s.artistTotalCents)} artist · {money(s.balanceDueArtistCents)} due</>} />)}</Rows>}
     </Page>
   );
