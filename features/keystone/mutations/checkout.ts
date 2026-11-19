@@ -143,16 +143,23 @@ export async function completeTicketCheckout(_: any, { input }: any, context: an
   const order = await ownedOrder(context, input.orderId, input.proof);
   const provider = await stripeProvider(context);
   const result = await finalizePaidOrder(context, order.id, provider);
-  // the webhook or an earlier call may have finished the order first: show its tickets anyway
-  const tickets = result.tickets.length ? result.tickets : (await context.prisma.ticket.findMany({ where: { orderId: order.id }, select: { ticketCode: true, status: true, seatInventory: { select: { seat: { select: { label: true } } } } } })).map((t: any) => ({ ticketCode: t.ticketCode, status: t.status, seat: t.seatInventory?.seat?.label || '' }));
-  return { orderId: order.id, orderNumber: order.orderNumber, status: result.status, tickets };
+  // the webhook or an earlier call may have finished the order first: read the order as it now stands
+  const saved = await guestOrder(context, { id: order.id });
+  return { ...saved!.view, status: result.status };
+}
+
+// What a guest sees of their own order: the show, the money and each ticket with its seat.
+async function guestOrder(context: any, where: any) {
+  const o = await context.prisma.ticketOrder.findUnique({ where, include: { event: { select: { id: true, title: true, showAt: true, doorsAt: true, ageRestriction: true, venue: { select: { name: true, address: true, city: true, timezone: true } } } }, ticket_order: { select: { ticketCode: true, status: true, holderName: true, seatInventory: { select: { seat: { select: { label: true } } } } }, orderBy: { ticketCode: 'asc' } }, ticketOrderLine_order: true } });
+  if (!o) return null;
+  return { guestEmail: o.guestEmail, view: { orderId: o.id, orderNumber: o.orderNumber, status: o.status, guestName: o.guestName, subtotalCents: o.subtotalCents, serviceFeesCents: o.serviceFeesCents, facilityFeesCents: o.facilityFeesCents, taxCents: o.taxCents, discountCents: o.discountCents, totalCents: o.totalCents, refundedCents: o.refundedCents, currencyCode: o.currencyCode, event: o.event, tickets: o.ticket_order.map((t: any) => ({ ticketCode: t.ticketCode, status: t.status, holderName: t.holderName, seat: t.seatInventory?.seat?.label || '' })), lines: o.ticketOrderLine_order } };
 }
 
 export async function lookupTicketOrder(_: any, { email, orderNumber }: any, context: any) {
-  const o = await context.prisma.ticketOrder.findUnique({ where: { orderNumber: String(orderNumber || '').trim().toUpperCase() }, include: { event: { select: { title: true, showAt: true, doorsAt: true, venue: { select: { timezone: true } } } }, ticket_order: { select: { ticketCode: true, status: true, holderName: true } }, ticketOrderLine_order: true } });
+  const o = await guestOrder(context, { orderNumber: String(orderNumber || '').trim().toUpperCase() });
   // Same response shape for unknown order and wrong email.
   if (!o || o.guestEmail !== String(email || '').trim().toLowerCase()) throw new Error('Order not found');
-  return { orderId: o.id, orderNumber: o.orderNumber, status: o.status, totalCents: o.totalCents, refundedCents: o.refundedCents, currencyCode: o.currencyCode, event: o.event, tickets: o.ticket_order, lines: o.ticketOrderLine_order, proof: createProof(o.id, Math.floor(Date.now() / 1000) + 900) };
+  return { ...o.view, proof: createProof(o.view.orderId, Math.floor(Date.now() / 1000) + 900) };
 }
 
 export async function transferTicket(_: any, { input }: any, context: any) {

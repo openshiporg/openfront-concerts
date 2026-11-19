@@ -1,5 +1,5 @@
 import { list, graphql } from '@keystone-6/core';
-import { text, integer, checkbox, json, select, relationship, timestamp, virtual } from '@keystone-6/core/fields';
+import { image, text, integer, checkbox, json, select, relationship, timestamp, virtual } from '@keystone-6/core/fields';
 import { trackingFields } from './trackingFields';
 import { commandAccess, catalogAccess, permissions, canReadGross } from '../access';
 
@@ -10,6 +10,7 @@ export const Event = list({
   title: text({}),
   presaleCode: text({ access: { read: () => false, create: () => false, update: () => false } }),
   image: text({}),
+  photo: image({ storage: 'my_images' }),
   description: text({}),
   isCoPro: checkbox({ defaultValue: false }),
   allowReentry: checkbox({ defaultValue: false }),

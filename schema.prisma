@@ -123,6 +123,11 @@ model Venue {
   city                    String         @default("")
   timezone                String         @default("")
   address                 String         @default("")
+  photo_id                String?
+  photo_filesize          Int?
+  photo_width             Int?
+  photo_height            Int?
+  photo_extension         String?
   contact                 String         @default("")
   capacity                Int?           @default(0)
   defaultFacilityFeeCents Int?           @default(0)
@@ -241,6 +246,11 @@ model Event {
   title                String           @default("")
   presaleCode          String           @default("")
   image                String           @default("")
+  photo_id             String?
+  photo_filesize       Int?
+  photo_width          Int?
+  photo_height         Int?
+  photo_extension      String?
   description          String           @default("")
   isCoPro              Boolean          @default(false)
   allowReentry         Boolean          @default(false)

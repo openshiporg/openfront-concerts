@@ -1,29 +1,32 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { StoreLogoMark } from '@/features/storefront/components/StoreLogoMark';
+import { keystoneClient } from '@/features/dashboard/lib/keystoneClient';
 
 export const dynamic = 'force-dynamic';
 
+export async function generateMetadata(): Promise<Metadata> {
+  const r = await keystoneClient<{ storeLogo: { name: string } }>('{ storeLogo { name } }');
+  const name = (r.success && r.data.storeLogo?.name) || 'Shows';
+  return { title: { default: name, template: `%s · ${name}` } };
+}
+
+const nav = 'inline-flex min-h-11 items-center hover:underline underline-offset-4';
+
 export default function StorefrontLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#f2f2f2] text-[#141414]">
-      <div className="mx-auto w-full max-w-3xl space-y-4 px-3 py-3 sm:px-4">
-        <header className="flex items-center justify-between rounded-3xl bg-[#f7f7f7] px-4 py-2.5 shadow-sm">
-          <Link href="/" className="flex items-center gap-2 text-base font-semibold leading-tight"><StoreLogoMark withName /></Link>
-          <nav className="flex items-center gap-4 text-sm font-medium sm:gap-6">
-            <Link href="/#events" className="hidden min-h-11 items-center sm:flex">Events</Link>
-            <Link href="/#venues" className="hidden min-h-11 items-center sm:flex">Venues</Link>
-            <Link href="/lookup" className="flex min-h-11 items-center">My order</Link>
-            <Link href="/#events" className="flex min-h-11 items-center rounded-full bg-[#141414] px-4 text-white">Tickets</Link>
+    <div className="min-h-screen bg-[#f2f2f2] text-[#141414] [font-variant-numeric:tabular-nums]">
+      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-5 md:px-8">
+        <header className="flex flex-wrap items-center justify-between gap-x-6 py-4">
+          <Link href="/" className="flex min-h-11 items-center gap-2 text-lg font-semibold tracking-tight"><StoreLogoMark withName /></Link>
+          <nav aria-label="Main" className="flex items-center gap-x-6 text-sm font-medium">
+            <Link href="/" className={nav}>Shows</Link>
+            <Link href="/#venues" className={nav}>Venues</Link>
+            <Link href="/lookup" className={nav}>Find my order</Link>
           </nav>
         </header>
-        {children}
-        <footer className="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-[#f7f7f7] p-6 text-sm">
-          <Link href="/" className="flex items-center gap-2 font-semibold"><StoreLogoMark withName /></Link>
-          <div className="flex gap-10 text-xs">
-            <div className="space-y-2"><div className="text-sm font-semibold">Events</div><Link className="block opacity-70" href="/#events">Upcoming shows</Link><Link className="block opacity-70" href="/#venues">Venues</Link></div>
-            <div className="space-y-2"><div className="text-sm font-semibold">Orders</div><Link className="block opacity-70" href="/lookup">Find my order</Link></div>
-          </div>
-        </footer>
+        <div className="flex-1 pb-16 pt-6 md:pt-10">{children}</div>
+        <footer className="flex items-center gap-2 border-t border-black/10 py-6 text-sm text-black/70"><StoreLogoMark withName /></footer>
       </div>
     </div>
   );

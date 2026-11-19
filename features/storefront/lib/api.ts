@@ -7,5 +7,3 @@ export async function api<T = any>(query: string, variables: Record<string, unkn
   if (body.errors?.length) throw new Error(body.errors[0].message);
   return body.data;
 }
-export const usd = (cents: number, currency = 'USD') => new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(cents / 100);
-export const showTime = (iso: string, timeZone = 'America/Los_Angeles') => new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone }).format(new Date(iso));

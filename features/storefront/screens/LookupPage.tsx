@@ -1,32 +1,32 @@
 'use client';
-import Link from 'next/link';
 import { useState } from 'react';
-import { api, usd, showTime } from '../lib/api';
+import { useRouter } from 'next/navigation';
+import { api } from '../lib/api';
+import { btn, input, label } from '../lib/ui';
 
 export function LookupPage() {
+  const router = useRouter();
   const [email, setEmail] = useState(''); const [number, setNumber] = useState('');
-  const [order, setOrder] = useState<any>(null); const [error, setError] = useState('');
+  const [error, setError] = useState(''); const [busy, setBusy] = useState(false);
   async function find(e: React.FormEvent) {
-    e.preventDefault(); setError(''); setOrder(null);
-    try { const d = await api('query($e: String!, $n: String!) { lookupTicketOrder(email: $e, orderNumber: $n) }', { e: email, n: number }); setOrder(d.lookupTicketOrder); }
-    catch (err: any) { setError(err.message); }
+    e.preventDefault(); setError(''); setBusy(true);
+    try {
+      const d = await api('query($e: String!, $n: String!) { lookupTicketOrder(email: $e, orderNumber: $n) }', { e: email, n: number });
+      const order = d.lookupTicketOrder;
+      sessionStorage.setItem(`order:${order.orderId}`, JSON.stringify(order));
+      router.push(`/orders/${order.orderId}`);
+    } catch (err: any) { setError(err.message === 'Order not found' ? 'No order matches that number and email. Check both and try again.' : err.message); setBusy(false); }
   }
   return (
-    <main className="space-y-4 rounded-3xl bg-[#f7f7f7] p-5 shadow-sm">
-      <h1 className="text-3xl font-semibold tracking-tight">Find my order</h1>
-      <form onSubmit={find} className="grid gap-2 sm:grid-cols-3">
-        <label className="flex flex-col gap-1 text-sm">Email<input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="min-h-11 rounded border px-3 py-2" /></label>
-        <label className="flex flex-col gap-1 text-sm">Order number<input required value={number} onChange={(e) => setNumber(e.target.value)} className="min-h-11 rounded border px-3 py-2" /></label>
-        <button className="min-h-11 self-end rounded-full bg-[#141414] px-3 py-2 text-sm text-white">Find</button>
+    <main>
+      <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">Find my order</h1>
+      <p className="mb-6 mt-2 max-w-md text-black/70">Enter the order number from your confirmation and the email you bought with. You can see your tickets and send one to someone else.</p>
+      <form onSubmit={find} className="max-w-sm space-y-4">
+        <div><label htmlFor="l-number" className={label}>Order number</label><input id="l-number" required autoCapitalize="characters" value={number} onChange={(e) => setNumber(e.target.value)} className={input} /></div>
+        <div><label htmlFor="l-email" className={label}>Email</label><input id="l-email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={input} /></div>
+        {error ? <p role="alert" className="text-sm text-red-700">{error}</p> : null}
+        <button disabled={busy} className={btn}>{busy ? 'Looking…' : 'Find order'}</button>
       </form>
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      {order ? <section className="space-y-2 rounded-2xl border border-black/10 bg-white/60 p-4">
-        <p className="font-mono">{order.orderNumber}</p><p className="font-mono text-xs uppercase tracking-wide opacity-70">{String(order.status).replace(/_/g, ' ')}</p>
-        <p className="text-sm">{order.event?.title} · {showTime(order.event?.showAt, order.event?.venue?.timezone)}</p><p className="text-sm">Total {usd(order.totalCents, order.currencyCode)}{order.refundedCents ? ` · refunded ${usd(order.refundedCents, order.currencyCode)}` : ''}</p>
-        <ul className="text-sm">{order.tickets.map((t: any) => <li key={t.ticketCode} className="font-mono">{t.ticketCode} · {String(t.status).replace(/_/g, ' ')}</li>)}</ul>
-        {order.tickets.some((t: any) => t.status === 'valid') ? <Link className="inline-flex min-h-11 items-center text-sm underline" href={`/orders/${order.orderId}`} onClick={() => sessionStorage.setItem(`order:${order.orderId}`, JSON.stringify(order))}>Open order to transfer tickets</Link> : null}
-      </section> : null}
-      <Link className="inline-flex min-h-11 items-center text-sm underline" href="/">Back to events</Link>
     </main>
   );
 }
