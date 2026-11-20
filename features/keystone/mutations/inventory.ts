@@ -42,6 +42,7 @@ export async function createHold(_: any, args: any, context: any) {
     await expireHolds(tx, args.eventId);
     const event = await tx.event.findUnique({ where: { id: args.eventId }, include: { venue: true } });
     if (!event || !['presale', 'on_sale'].includes(event.status)) throw new Error('Event is not on sale');
+    if (event.showAt && event.showAt <= new Date()) throw new Error('This show has already started, so tickets are no longer sold');
     const ids = args.seatInventoryIds;
     if (ids && (!ids.length || ids.length > 8 || new Set(ids).size !== ids.length)) throw new Error('Select 1–8 distinct seats');
     const seats = ids ? await tx.seatInventory.findMany({ where: { id: { in: ids }, eventId: event.id }, include: { seat: true } }) : [];

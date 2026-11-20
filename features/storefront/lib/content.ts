@@ -10,6 +10,8 @@ export type Show = {
 export type PublicVenue = { id: string; name: string; city: string; address: string; capacity: number; photo: string | null; shows: number };
 
 const LISTED = ['announced', 'presale', 'on_sale', 'sold_out', 'postponed'];
+/** A show whose start time has passed is no longer listed or sold, whatever its status. */
+const upcoming = () => ({ OR: [{ showAt: { gt: new Date().toISOString() } }, { showAt: { equals: null } }] });
 // Photos are uploaded by staff on the event and the venue (an event may instead carry an image link); their URLs are signed by the image field, so they are read through the list API.
 const QUERY = `id title status showAt doorsAt ageRestriction description image photo { url }
   venue { id name city address timezone capacity photo { url } }
@@ -35,7 +37,7 @@ const toShow = (r: any): Show => {
 /** Every listed show, soonest first, and the venues they are in. Server only, fixed fields. */
 export async function listedShows(): Promise<{ shows: Show[]; venues: PublicVenue[] }> {
   try {
-    const rows = (await keystoneContext.sudo().query.Event.findMany({ where: { status: { in: LISTED } }, orderBy: [{ showAt: 'asc' }], take: 100, query: QUERY })) as readonly any[];
+    const rows = (await keystoneContext.sudo().query.Event.findMany({ where: { status: { in: LISTED }, ...upcoming() }, orderBy: [{ showAt: 'asc' }], take: 100, query: QUERY })) as readonly any[];
     const venues = new Map<string, PublicVenue>();
     for (const r of rows) {
       if (!r.venue) continue;

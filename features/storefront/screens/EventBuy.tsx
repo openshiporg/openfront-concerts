@@ -11,7 +11,7 @@ const loadStripeJs = () => new Promise<void>((resolve, reject) => {
   const s = document.createElement('script'); s.src = 'https://js.stripe.com/v3/'; s.onload = () => resolve(); s.onerror = () => reject(new Error('The card form did not load. Check your connection and try again.')); document.head.appendChild(s);
 });
 const key = () => crypto.randomUUID();
-const CLOSED: Record<string, string> = { announced: 'Tickets are not on sale yet.', sold_out: 'This show is sold out.', postponed: 'This show is postponed, so tickets are not on sale.' };
+const CLOSED: Record<string, string> = { announced: 'Tickets are not on sale yet.', sold_out: 'This show is sold out.', postponed: 'This show is postponed, so tickets are not on sale.', ended: 'This show has already happened, so tickets are no longer sold.' };
 
 export function EventBuy({ eventId, status }: { eventId: string; status: string }) {
   const router = useRouter();
@@ -66,7 +66,7 @@ export function EventBuy({ eventId, status }: { eventId: string; status: string 
   const wrap = 'mt-10 border-t border-black/10 pt-8';
   if (!data) return <section className={wrap}>{error ? <p role="alert" className="text-red-700">{error}</p> : <p className="text-black/60">Loading tickets…</p>}</section>;
   const { event, levels, seats } = data;
-  const live = event.status || status;
+  const live = event.showAt && new Date(event.showAt) <= new Date() ? 'ended' : event.status || status;
   const seatById = new Map<string, any>(seats.map((s: any) => [s.id, s]));
   const pickedSeats = picked.map((id) => seatById.get(id)).filter(Boolean);
   const pickedLevel = pickedSeats[0] ? levels.find((l: any) => l.id === pickedSeats[0].priceLevelId) : null;

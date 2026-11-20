@@ -33,6 +33,7 @@ export async function startTicketCheckout(_: any, { input }: any, context: any) 
     await expireHolds(tx, hold0.eventId);
     const hold = await tx.inventoryHold.findUnique({ where: { id: holdId }, include: { event: true } });
     if (!hold || hold.status !== 'active' || hold.expiresAt <= new Date()) throw new Error('Hold expired');
+    if (hold.event.showAt && hold.event.showAt <= new Date()) throw new Error('This show has already started, so tickets are no longer sold');
     if (hold.orderId) {
       // a retry after a failed payment start (new click, new key): the holder of this hold's proof picks up the same order and payment session
       const started = await tx.ticketOrder.findUnique({ where: { id: hold.orderId } });

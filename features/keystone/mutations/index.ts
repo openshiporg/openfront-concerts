@@ -86,7 +86,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
       Query: {
         storeLogo,
         redirectToInit,
-        eventsOnSale: async (_: any, __: any, context: any) => context.prisma.event.findMany({ where: { status: { in: ['announced', 'presale', 'on_sale', 'sold_out', 'postponed'] } }, orderBy: { showAt: 'asc' }, take: 100, select: { id: true, title: true, status: true, showAt: true, doorsAt: true, ageRestriction: true, venue: { select: { name: true, city: true, timezone: true } } } }),
+        eventsOnSale: async (_: any, __: any, context: any) => context.prisma.event.findMany({ where: { status: { in: ['announced', 'presale', 'on_sale', 'sold_out', 'postponed'] }, OR: [{ showAt: { gt: new Date() } }, { showAt: null }] }, orderBy: { showAt: 'asc' }, take: 100, select: { id: true, title: true, status: true, showAt: true, doorsAt: true, ageRestriction: true, venue: { select: { name: true, city: true, timezone: true } } } }),
         eventAvailability: surfaceRefusals(availability),
         lookupTicketOrder: surfaceRefusals(lookupTicketOrder),
       },
