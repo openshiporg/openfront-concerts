@@ -1,8 +1,7 @@
 import crypto from 'node:crypto';
 import { command, checkedClient, lockTransactionKey } from '../lib/transaction';
 import { appendAuditEvent } from '../lib/audit';
-import { createProof, verifyProof, ownedHold, ownedOrder, opaqueToken, digest, humanCode, ticketToken, ticketScanValue } from '../lib/guest-proof';
-import { deliverOrderConfirmation, sendTransferEmail, sendRefundEmail } from '../lib/order-mail';
+import { createProof, verifyProof, ownedHold, ownedOrder, opaqueToken, digest, humanCode } from '../lib/guest-proof';
 import { refundableCents } from '../lib/settlement';
 import { refundApprovalPayload, refundApprovalFingerprint, assertApprovalUsable } from '../lib/refund-approval';
 import { createPayment, getPaymentStatus, refundPayment as providerRefund, cancelPayment, handleWebhook } from '../utils/paymentProviderAdapter';
@@ -99,7 +98,7 @@ export async function finalizePaidOrder(context: any, orderId: string, provider:
     const line = await tx.ticketOrderLine.create({ data: { orderId, title: q.eventTitle, levelName: q.levelName, phaseName: q.phaseName, seatLabel: (q.seats || []).map((s: any) => s.label).join(', '), unitPriceCents: q.unitPriceCents, serviceFeeCents: q.feeCents, facilityFeeCents: q.facilityFeeCents, taxCents: q.taxCents, quantity: hold.quantity, discountCents: q.discountCents, totalCents: q.totalCents, currencyCode: q.currencyCode, priceLevelId: hold.priceLevelId, phaseId: hold.phaseId } });
     const tokens: { ticketCode: string; token: string; seat: string }[] = [];
     for (let i = 0; i < hold.quantity; i++) {
-      const ticketCode = humanCode('TK'); const token = ticketToken(ticketCode);
+      const token = opaqueToken(); const ticketCode = humanCode('TK');
       const seat = hold.seats[i];
       await tx.ticket.create({ data: { orderId, eventId: hold.eventId, lineId: line.id, seatInventoryId: seat?.id, ticketCode, tokenHash: digest(token), holderName: order.guestName, holderEmail: order.guestEmail, status: 'valid' } });
       tokens.push({ ticketCode, token, seat: seat?.seat?.label || '' });
@@ -121,8 +120,6 @@ export async function finalizePaidOrder(context: any, orderId: string, provider:
     return { orderId, status: 'paid', orderNumber: order.orderNumber, tickets: tokens, replay: false };
   }, { timeout: 30000, isolationLevel: 'Serializable' });
   if (finalized.late) await refundLatePayment(context, provider, orderId, intentId, finalized.late);
-  // The tickets go out by email when the order is first paid, whichever of the browser or the webhook gets there first.
-  if (finalized.status === 'paid' && !finalized.replay) await deliverOrderConfirmation(context, orderId);
   return finalized;
 }
 
@@ -149,53 +146,21 @@ export async function completeTicketCheckout(_: any, { input }: any, context: an
   const result = await finalizePaidOrder(context, order.id, provider);
   // the webhook or an earlier call may have finished the order first: read the order as it now stands
   const saved = await guestOrder(context, { id: order.id });
-  return { ...saved!.view, status: result.status, proof: createProof(order.id) };
+  return { ...saved!.view, status: result.status };
 }
 
 // What a guest sees of their own order: the show, the money and each ticket with its seat.
 async function guestOrder(context: any, where: any) {
-  const o = await context.prisma.ticketOrder.findUnique({ where, include: { event: { select: { id: true, title: true, showAt: true, doorsAt: true, ageRestriction: true, venue: { select: { name: true, address: true, city: true, timezone: true } } } }, ticket_order: { select: { ticketCode: true, tokenHash: true, status: true, holderName: true, seatInventory: { select: { seat: { select: { label: true } } } } }, orderBy: { ticketCode: 'asc' } }, ticketOrderLine_order: true } });
+  const o = await context.prisma.ticketOrder.findUnique({ where, include: { event: { select: { id: true, title: true, showAt: true, doorsAt: true, ageRestriction: true, venue: { select: { name: true, address: true, city: true, timezone: true } } } }, ticket_order: { select: { ticketCode: true, status: true, holderName: true, seatInventory: { select: { seat: { select: { label: true } } } } }, orderBy: { ticketCode: 'asc' } }, ticketOrderLine_order: true } });
   if (!o) return null;
-  return { guestEmail: o.guestEmail, view: { orderId: o.id, orderNumber: o.orderNumber, status: o.status, guestName: o.guestName, subtotalCents: o.subtotalCents, serviceFeesCents: o.serviceFeesCents, facilityFeesCents: o.facilityFeesCents, taxCents: o.taxCents, discountCents: o.discountCents, totalCents: o.totalCents, refundedCents: o.refundedCents, currencyCode: o.currencyCode, event: o.event, createdAt: o.createdAt, source: o.source, tickets: o.ticket_order.map((t: any) => ({ ticketCode: t.ticketCode, status: t.status, holderName: t.holderName, seat: t.seatInventory?.seat?.label || '', scan: t.status === 'valid' || t.status === 'checked_in' ? ticketScanValue(t) : '' })), lines: o.ticketOrderLine_order } };
+  return { guestEmail: o.guestEmail, view: { orderId: o.id, orderNumber: o.orderNumber, status: o.status, guestName: o.guestName, subtotalCents: o.subtotalCents, serviceFeesCents: o.serviceFeesCents, facilityFeesCents: o.facilityFeesCents, taxCents: o.taxCents, discountCents: o.discountCents, totalCents: o.totalCents, refundedCents: o.refundedCents, currencyCode: o.currencyCode, event: o.event, tickets: o.ticket_order.map((t: any) => ({ ticketCode: t.ticketCode, status: t.status, holderName: t.holderName, seat: t.seatInventory?.seat?.label || '' })), lines: o.ticketOrderLine_order } };
 }
 
 export async function lookupTicketOrder(_: any, { email, orderNumber }: any, context: any) {
   const o = await guestOrder(context, { orderNumber: String(orderNumber || '').trim().toUpperCase() });
   // Same response shape for unknown order and wrong email.
   if (!o || o.guestEmail !== String(email || '').trim().toLowerCase()) throw new Error('Order not found');
-  return { ...o.view, proof: createProof(o.view.orderId, Math.floor(Date.now() / 1000) + 86400) };
-}
-
-/** The order page: opened with the signed link from the email, checkout or lookup on any device, or by its signed-in buyer. */
-export async function ticketOrderView(_: any, { orderId, proof }: any, context: any) {
-  const order = await ownedOrder(context, String(orderId || ''), proof);
-  const o = await guestOrder(context, { id: order.id });
-  // A signed-in buyer without a link still gets a short proof, so sending a ticket on works from the account.
-  return { ...o!.view, proof: proof && verifyProof(proof, order.id) ? proof : createProof(order.id, Math.floor(Date.now() / 1000) + 3600) };
-}
-
-/** Order history for the signed-in customer: orders bought while signed in, and guest orders bought with their confirmed email. */
-export async function myTicketOrders(_: any, __: any, context: any) {
-  const id = context.session?.itemId;
-  if (!id) throw new Error('Sign in to see your orders');
-  const user = await context.prisma.user.findUnique({ where: { id }, select: { email: true, emailVerifiedAt: true } });
-  if (!user) throw new Error('Sign in to see your orders');
-  const mine: any[] = [{ customerId: id }];
-  if (user.emailVerifiedAt) mine.push({ guestEmail: user.email.toLowerCase() });
-  const rows = await context.prisma.ticketOrder.findMany({ where: { OR: mine, status: { in: ['paid', 'partially_refunded', 'refunded', 'comp'] } }, orderBy: { createdAt: 'desc' }, take: 100, select: { id: true, orderNumber: true, status: true, totalCents: true, refundedCents: true, currencyCode: true, createdAt: true, event: { select: { id: true, title: true, showAt: true, venue: { select: { name: true, city: true, timezone: true } } } }, _count: { select: { ticket_order: { where: { status: { in: ['valid', 'checked_in'] } } } } } } });
-  return rows.map((o: any) => ({ id: o.id, orderNumber: o.orderNumber, status: o.status, totalCents: o.totalCents, refundedCents: o.refundedCents, currencyCode: o.currencyCode, createdAt: o.createdAt, event: o.event, ticketCount: o._count.ticket_order }));
-}
-
-/** Staff send the confirmation email again, for a buyer who cannot find theirs. */
-export async function resendOrderConfirmation(_: any, { orderId }: any, context: any) {
-  if (!permissions.canManageOrders({ session: context.session }) && !permissions.canIssueRefunds({ session: context.session })) throw new Error(permissionRefusal('canManageOrders'));
-  const order = await context.prisma.ticketOrder.findUnique({ where: { id: String(orderId || '') } });
-  if (!order) throw new Error('Order not found');
-  if (!order.guestEmail) throw new Error('This order has no email address');
-  const result = await deliverOrderConfirmation(context, order.id, { force: true });
-  if (!result.sent) throw new Error(result.error || 'The email could not be sent');
-  await appendAuditEvent(context.prisma, context.session.itemId, { action: 'order.confirmation_resent', targetList: 'TicketOrder', targetId: order.id, after: { to: order.guestEmail, messageId: result.messageId || null } });
-  return { sent: true, to: order.guestEmail, messageId: result.messageId || null };
+  return { ...o.view, proof: createProof(o.view.orderId, Math.floor(Date.now() / 1000) + 900) };
 }
 
 export async function transferTicket(_: any, { input }: any, context: any) {
@@ -203,19 +168,16 @@ export async function transferTicket(_: any, { input }: any, context: any) {
   if (!idempotencyKey) throw new Error('Idempotency key required');
   const order = await ownedOrder(context, orderId, proof);
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(toEmail || '')) throw new Error('Valid recipient email required');
-  const moved = await command(context, { operation: 'transferTicket', idempotencyKey, lock: `event:${order.eventId}`, params: { ticketCode, orderId, toEmail, toName } }, async tx => {
+  return command(context, { operation: 'transferTicket', idempotencyKey, lock: `event:${order.eventId}`, params: { ticketCode, orderId, toEmail, toName } }, async tx => {
     const old = await tx.ticket.findUnique({ where: { ticketCode } });
     if (!old || old.orderId !== order.id || old.status !== 'valid') throw new Error('Ticket cannot be transferred');
     const moved = await tx.ticket.updateMany({ where: { id: old.id, status: 'valid' }, data: { status: 'transferred', tokenHash: '' } });
     if (moved.count !== 1) throw new Error('Ticket cannot be transferred');
-    const code = humanCode('TK'); const token = ticketToken(code);
+    const token = opaqueToken(); const code = humanCode('TK');
     const fresh = await tx.ticket.create({ data: { orderId: old.orderId, eventId: old.eventId, lineId: old.lineId, seatInventoryId: old.seatInventoryId, ticketCode: code, tokenHash: digest(token), holderName: toName || '', holderEmail: toEmail.toLowerCase(), status: 'valid', transferredFromId: old.id } });
     await appendAuditEvent(tx, context.session?.itemId, { action: 'ticket.transferred', targetList: 'Ticket', targetId: fresh.id, before: { ticketCode }, after: { ticketCode: code } });
     return { ticketCode: code, token, status: 'valid' };
   });
-  // The new holder gets the ticket by email; the page says whether that email went out.
-  const mail = await sendTransferEmail(context, { orderId: order.id, ticketCode: moved.ticketCode, fromCode: ticketCode });
-  return { ...moved, emailed: mail.sent };
 }
 
 export async function refundTicketOrder(_: any, { input }: any, context: any) {
@@ -292,12 +254,8 @@ async function finishTicketRefund(context: any, { refundId, paymentId, orderId, 
       }
     }
     await appendAuditEvent(tx, actor, { action: 'refund.succeeded', targetList: 'Refund', targetId: refund.id, after: { total }, reason });
-    return { refundId: refund.id, status: 'succeeded', notify: { amount: refund.amount, full } };
-  }, { timeout: 30000, isolationLevel: 'Serializable' }).then(async (done: any) => {
-    const { notify, ...answer } = done;
-    if (notify) await sendRefundEmail(context, { orderId, amountCents: notify.amount, full: notify.full });
-    return answer;
-  });
+    return { refundId: refund.id, status: 'succeeded' };
+  }, { timeout: 30000, isolationLevel: 'Serializable' });
 }
 
 /** Staff retry of a refund left processing or unknown: the same Stripe key, so the money moves at most once. */

@@ -31,9 +31,6 @@ export const TicketOrder = list({
   payments: relationship({ ref: 'Payment.order', many: true }),
   promoRedemptions: relationship({ ref: 'PromoRedemption.order', many: true }),
   discountSnapshot: json(),
-  // Set when the confirmation email with the tickets was handed to the mail server.
-  confirmationSentAt: timestamp({ access: { create: () => false, update: () => false } }),
-  confirmationMessageId: text({ access: { create: () => false, update: () => false } }),
   ...trackingFields,
  }
 });

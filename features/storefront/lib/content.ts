@@ -57,6 +57,5 @@ export async function listedShow(id: string): Promise<Show | null> {
   return rows[0] ? toShow(rows[0]) : null;
 }
 
-// Support acts already named in the title ("Tin Lantern + Cobalt Static") are not repeated.
-export const billLine = (s: Show) => { const t = s.title.toLowerCase(); const support = s.artists.slice(1).map((a) => a.name).filter((n) => !t.includes(n.toLowerCase())); return support.length ? `With ${support.join(', ')}` : ''; };
+export const billLine = (s: Show) => { const support = s.artists.slice(1).map((a) => a.name); return support.length ? `With ${support.join(', ')}` : ''; };
 export const genreOf = (s: Show) => s.artists[0]?.genre || '';

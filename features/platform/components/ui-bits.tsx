@@ -2,7 +2,6 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { label } from '../lib/format';
-import { PageBreadcrumbs } from '@/features/dashboard/components/PageBreadcrumbs';
 
 const DOT: Record<string, string> = {
   on_sale: 'bg-emerald-500', presale: 'bg-sky-500', announced: 'bg-sky-500', hold: 'bg-amber-500', sold_out: 'bg-violet-500',
@@ -24,12 +23,8 @@ export function StatusLabel({ status }: { status?: string | null }) {
   );
 }
 
-/** Every platform page: the standard dashboard header (menu button, breadcrumbs, assistant), then the title. */
-export function Page({ title, action, children, crumbs }: { title: string; action?: ReactNode; children: ReactNode; crumbs?: { label: string; href?: string }[] }) {
-  const trail = [{ type: 'link' as const, label: 'Dashboard', href: '' }, ...(crumbs || []).map((c) => ({ type: 'link' as const, label: c.label, href: c.href })), { type: 'page' as const, label: title }];
+export function Page({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <>
-    <PageBreadcrumbs items={trail} />
     <div className="mx-auto w-full max-w-6xl space-y-4 px-4 pb-10 pt-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-semibold">{title}</h1>
@@ -37,17 +32,16 @@ export function Page({ title, action, children, crumbs }: { title: string; actio
       </div>
       {children}
     </div>
-    </>
   );
 }
 
 /** Recessed track with raised active pill, as the in-page tab convention. */
 export function FilterTabs({ base, param = 'status', current, options }: { base: string; param?: string; current?: string; options: { value: string; label: string; count?: number }[] }) {
   return (
-    <div className="-mx-4 max-w-[100vw] overflow-x-auto px-4 [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] sm:mx-0 sm:px-0 sm:[mask-image:none]">
-      <div className="inline-flex gap-1 rounded-lg bg-muted p-1 pr-6 sm:pr-1">
+    <div className="max-w-full overflow-x-auto">
+      <div className="inline-flex gap-1 rounded-lg bg-muted p-1">
         {options.map((o) => (
-          <Link key={o.value} href={o.value ? `${base}?${param}=${o.value}` : base} className={cn('inline-flex min-h-9 items-center whitespace-nowrap rounded-md px-3 text-sm', (current || '') === o.value ? 'bg-background font-medium shadow-sm' : 'text-muted-foreground')}>
+          <Link key={o.value} href={o.value ? `${base}?${param}=${o.value}` : base} className={cn('whitespace-nowrap rounded-md px-3 py-1.5 text-sm', (current || '') === o.value ? 'bg-background font-medium shadow-sm' : 'text-muted-foreground')}>
             {o.label}{typeof o.count === 'number' ? ` ${o.count}` : ''}
           </Link>
         ))}

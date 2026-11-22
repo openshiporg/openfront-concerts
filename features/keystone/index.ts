@@ -43,11 +43,8 @@ const { withAuth } = createAuth({
   },
   passwordResetLink: {
     async sendToken(args) {
-      // Staff reset on the dashboard, customers on the storefront; the email carries the store's name.
-      const sudo = args.context.sudo();
-      const user = await sudo.prisma.user.findUnique({ where: { id: String(args.itemId) }, select: { role: { select: { canAccessDashboard: true } } } });
-      const settings = await sudo.prisma.storeSettings.findFirst({ select: { name: true } });
-      await sendPasswordResetEmail(args.token, args.identity, { customer: !user?.role?.canAccessDashboard, storeName: settings?.name || undefined });
+      // send the email
+      await sendPasswordResetEmail(args.token, args.identity);
     },
   },
   sessionData: `

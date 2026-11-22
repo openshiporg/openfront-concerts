@@ -13,8 +13,7 @@ import { openCashDrawer, closeCashDrawer, forceCloseCashDrawer } from './cashDra
 import updateActiveUser from './updateActiveUser';
 import seedConcerts from './seedConcerts';
 import { constraintRefusal, constraintGraphQLError } from '../lib/constraint-errors';
-import { startTicketCheckout, completeTicketCheckout, lookupTicketOrder, transferTicket, refundTicketOrder, retryTicketRefund, ticketOrderView, myTicketOrders, resendOrderConfirmation } from './checkout';
-import { sendEmailConfirmation, confirmCustomerEmail } from './customers';
+import { startTicketCheckout, completeTicketCheckout, lookupTicketOrder, transferTicket, refundTicketOrder, retryTicketRefund } from './checkout';
 
 const graphql = String.raw;
 const operatorCommands = ['releaseDateHold', 'advanceEvent', 'placeDateHold', 'challengeHold', 'confirmHold', 'sendOffer', 'acceptOffer', 'declineOffer', 'contractOffer', 'publishEvent', 'setProductionHold', 'releaseProductionHold', 'scanTicket', 'recordMerchSales', 'computeSettlement', 'adjustSettlement', 'signSettlement', 'recordArtistPayment', 'postponeEvent', 'cancelEvent'];
@@ -42,7 +41,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
       input CreateHoldInput { idempotencyKey: String! }
       input StartTicketCheckoutInput { holdId: ID! proof: String! email: String! name: String! ageAttested: Boolean idempotencyKey: String! }
       input CompleteTicketCheckoutInput { orderId: ID! proof: String! }
-      input TransferTicketInput { ticketCode: String! orderId: ID! proof: String toEmail: String! toName: String idempotencyKey: String! }
+      input TransferTicketInput { ticketCode: String! orderId: ID! proof: String! toEmail: String! toName: String idempotencyKey: String! }
       input RetryTicketRefundInput { refundId: ID! }
       input RefundTicketOrderInput { orderId: ID! amountCents: Int reason: String! idempotencyKey: String! approvalId: ID }
       input DoorTenderInput { kind: String! tenderedCents: Int reference: String }
@@ -58,8 +57,6 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         eventsOnSale: JSON
         eventAvailability(eventId: ID!): JSON
         lookupTicketOrder(email: String!, orderNumber: String!): JSON
-        ticketOrderView(orderId: ID!, proof: String): JSON
-        myTicketOrders: JSON
       }
       type Mutation {
         createGaHold(eventId: ID!, levelId: ID!, qty: Int!, presaleCode: String, idempotencyKey: String!): JSON
@@ -69,9 +66,6 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         transferTicket(input: TransferTicketInput!): JSON
         refundTicketOrder(input: RefundTicketOrderInput!): JSON
         retryTicketRefund(input: RetryTicketRefundInput!): JSON
-        resendOrderConfirmation(orderId: ID!): JSON
-        sendEmailConfirmation: JSON
-        confirmCustomerEmail(userId: ID!, proof: String!): JSON
         updateActiveUser(data: UserUpdateProfileInput!): User
         seedConcerts(section: String!, data: JSON!): JSON
         publishSeatingChart(input: OperatorCommandInput!): JSON
@@ -95,8 +89,6 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         eventsOnSale: async (_: any, __: any, context: any) => context.prisma.event.findMany({ where: { status: { in: ['announced', 'presale', 'on_sale', 'sold_out', 'postponed'] }, OR: [{ showAt: { gt: new Date() } }, { showAt: null }] }, orderBy: { showAt: 'asc' }, take: 100, select: { id: true, title: true, status: true, showAt: true, doorsAt: true, ageRestriction: true, venue: { select: { name: true, city: true, timezone: true } } } }),
         eventAvailability: surfaceRefusals(availability),
         lookupTicketOrder: surfaceRefusals(lookupTicketOrder),
-        ticketOrderView: surfaceRefusals(ticketOrderView),
-        myTicketOrders: surfaceRefusals(myTicketOrders),
       },
       Mutation: surfaced({
         createGaHold: createHold,
@@ -104,7 +96,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         seedConcerts,
         publishSeatingChart, requestRefundApproval, decideRefundApproval, issueDoorSale, issueComp, previewDoorSale, refundDoorSale, openCashDrawer, closeCashDrawer, forceCloseCashDrawer,
         updateActiveUser,
-        startTicketCheckout, completeTicketCheckout, transferTicket, refundTicketOrder, retryTicketRefund, resendOrderConfirmation, sendEmailConfirmation, confirmCustomerEmail,
+        startTicketCheckout, completeTicketCheckout, transferTicket, refundTicketOrder, retryTicketRefund,
         ...editorMutations,
         ...Object.fromEntries(operatorCommands.map(name => [name, operator(name)])),
       }),

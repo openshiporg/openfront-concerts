@@ -7,8 +7,6 @@ type User {
   email: String
   password: PasswordState
   role: Role
-  emailVerifiedAt: DateTime
-  emailConfirmationSentAt: DateTime
   onboardingStatus: String
   event_promoter(where: EventWhereInput! = {}, orderBy: [EventOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: EventWhereUniqueInput): [Event!]
   event_promoterCount(where: EventWhereInput! = {}): Int
@@ -48,8 +46,6 @@ input UserWhereInput {
   id: IDFilter
   name: StringFilter
   role: RoleWhereInput
-  emailVerifiedAt: DateTimeNullableFilter
-  emailConfirmationSentAt: DateTimeNullableFilter
   onboardingStatus: StringNullableFilter
   event_promoter: EventManyRelationFilter
   inventoryHold_customer: InventoryHoldManyRelationFilter
@@ -108,17 +104,6 @@ input NestedStringFilter {
   startsWith: String
   endsWith: String
   not: NestedStringFilter
-}
-
-input DateTimeNullableFilter {
-  equals: DateTime
-  in: [DateTime!]
-  notIn: [DateTime!]
-  lt: DateTime
-  lte: DateTime
-  gt: DateTime
-  gte: DateTime
-  not: DateTimeNullableFilter
 }
 
 input StringNullableFilter {
@@ -193,11 +178,20 @@ input PasswordFilter {
   isSet: Boolean!
 }
 
+input DateTimeNullableFilter {
+  equals: DateTime
+  in: [DateTime!]
+  notIn: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+  not: DateTimeNullableFilter
+}
+
 input UserOrderByInput {
   id: OrderDirection
   name: OrderDirection
-  emailVerifiedAt: OrderDirection
-  emailConfirmationSentAt: OrderDirection
   onboardingStatus: OrderDirection
   createdAt: OrderDirection
   updatedAt: OrderDirection
@@ -215,8 +209,6 @@ input UserUpdateInput {
   email: String
   password: String
   role: RoleRelateToOneForUpdateInput
-  emailVerifiedAt: DateTime
-  emailConfirmationSentAt: DateTime
   onboardingStatus: String
   event_promoter: EventRelateToManyForUpdateInput
   inventoryHold_customer: InventoryHoldRelateToManyForUpdateInput
@@ -297,8 +289,6 @@ input UserCreateInput {
   email: String
   password: String
   role: RoleRelateToOneForCreateInput
-  emailVerifiedAt: DateTime
-  emailConfirmationSentAt: DateTime
   onboardingStatus: String
   event_promoter: EventRelateToManyForCreateInput
   inventoryHold_customer: InventoryHoldRelateToManyForCreateInput
@@ -3189,8 +3179,6 @@ type TicketOrder {
   promoRedemptions(where: PromoRedemptionWhereInput! = {}, orderBy: [PromoRedemptionOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PromoRedemptionWhereUniqueInput): [PromoRedemption!]
   promoRedemptionsCount(where: PromoRedemptionWhereInput! = {}): Int
   discountSnapshot: JSON
-  confirmationSentAt: DateTime
-  confirmationMessageId: String
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -3228,8 +3216,6 @@ input TicketOrderWhereInput {
   currencyCode: StringFilter
   payments: PaymentManyRelationFilter
   promoRedemptions: PromoRedemptionManyRelationFilter
-  confirmationSentAt: DateTimeNullableFilter
-  confirmationMessageId: StringFilter
   createdAt: DateTimeFilter
   updatedAt: DateTimeFilter
 }
@@ -3257,8 +3243,6 @@ input TicketOrderOrderByInput {
   status: OrderDirection
   source: OrderDirection
   currencyCode: OrderDirection
-  confirmationSentAt: OrderDirection
-  confirmationMessageId: OrderDirection
   createdAt: OrderDirection
   updatedAt: OrderDirection
 }
@@ -3288,8 +3272,6 @@ input TicketOrderUpdateInput {
   payments: PaymentRelateToManyForUpdateInput
   promoRedemptions: PromoRedemptionRelateToManyForUpdateInput
   discountSnapshot: JSON
-  confirmationSentAt: DateTime
-  confirmationMessageId: String
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -3337,8 +3319,6 @@ input TicketOrderCreateInput {
   payments: PaymentRelateToManyForCreateInput
   promoRedemptions: PromoRedemptionRelateToManyForCreateInput
   discountSnapshot: JSON
-  confirmationSentAt: DateTime
-  confirmationMessageId: String
   createdAt: DateTime
   updatedAt: DateTime
 }
@@ -4250,9 +4230,6 @@ type StoreSettings {
   name: String
   refundApprovalThresholdCents: Int
   manager: User
-  supportEmail: String
-  supportPhone: String
-  refundPolicy: String
   currencyCode: String
   logoIcon: String
   logoColor: String
@@ -4272,9 +4249,6 @@ input StoreSettingsWhereInput {
   name: StringFilter
   refundApprovalThresholdCents: IntNullableFilter
   manager: UserWhereInput
-  supportEmail: StringFilter
-  supportPhone: StringFilter
-  refundPolicy: StringFilter
   currencyCode: StringFilter
   logoIcon: StringFilter
   logoColor: StringFilter
@@ -4286,9 +4260,6 @@ input StoreSettingsOrderByInput {
   id: OrderDirection
   name: OrderDirection
   refundApprovalThresholdCents: OrderDirection
-  supportEmail: OrderDirection
-  supportPhone: OrderDirection
-  refundPolicy: OrderDirection
   currencyCode: OrderDirection
   logoIcon: OrderDirection
   logoColor: OrderDirection
@@ -4300,9 +4271,6 @@ input StoreSettingsUpdateInput {
   name: String
   refundApprovalThresholdCents: Int
   manager: UserRelateToOneForUpdateInput
-  supportEmail: String
-  supportPhone: String
-  refundPolicy: String
   currencyCode: String
   logoIcon: String
   logoColor: String
@@ -4319,9 +4287,6 @@ input StoreSettingsCreateInput {
   name: String
   refundApprovalThresholdCents: Int
   manager: UserRelateToOneForCreateInput
-  supportEmail: String
-  supportPhone: String
-  refundPolicy: String
   currencyCode: String
   logoIcon: String
   logoColor: String
@@ -5558,9 +5523,6 @@ type Mutation {
   transferTicket(input: TransferTicketInput!): JSON
   refundTicketOrder(input: RefundTicketOrderInput!): JSON
   retryTicketRefund(input: RetryTicketRefundInput!): JSON
-  resendOrderConfirmation(orderId: ID!): JSON
-  sendEmailConfirmation: JSON
-  confirmCustomerEmail(userId: ID!, proof: String!): JSON
   updateActiveUser(data: UserUpdateProfileInput!): User
   seedConcerts(section: String!, data: JSON!): JSON
   publishSeatingChart(input: OperatorCommandInput!): JSON
@@ -5768,8 +5730,6 @@ type Query {
   eventsOnSale: JSON
   eventAvailability(eventId: ID!): JSON
   lookupTicketOrder(email: String!, orderNumber: String!): JSON
-  ticketOrderView(orderId: ID!, proof: String): JSON
-  myTicketOrders: JSON
   storeLogo: StoreLogo!
 }
 
@@ -5984,7 +5944,7 @@ input CompleteTicketCheckoutInput {
 input TransferTicketInput {
   ticketCode: String!
   orderId: ID!
-  proof: String
+  proof: String!
   toEmail: String!
   toName: String
   idempotencyKey: String!
@@ -6065,7 +6025,4 @@ type StoreLogo {
   logoIcon: String!
   logoColor: String!
   name: String!
-  supportEmail: String!
-  supportPhone: String!
-  refundPolicy: String!
 }

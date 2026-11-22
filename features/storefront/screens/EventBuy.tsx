@@ -13,7 +13,7 @@ const loadStripeJs = () => new Promise<void>((resolve, reject) => {
 const key = () => crypto.randomUUID();
 const CLOSED: Record<string, string> = { announced: 'Tickets are not on sale yet.', sold_out: 'This show is sold out.', postponed: 'This show is postponed, so tickets are not on sale.', ended: 'This show has already happened, so tickets are no longer sold.' };
 
-export function EventBuy({ eventId, status, buyer }: { eventId: string; status: string; buyer?: { name: string; email: string } | null }) {
+export function EventBuy({ eventId, status }: { eventId: string; status: string }) {
   const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState('');
@@ -22,7 +22,7 @@ export function EventBuy({ eventId, status, buyer }: { eventId: string; status: 
   const [code, setCode] = useState('');
   const [hold, setHold] = useState<any>(null);
   const [left, setLeft] = useState(0);
-  const [form, setForm] = useState({ name: buyer?.name || '', email: buyer?.email || '', age: false });
+  const [form, setForm] = useState({ name: '', email: '', age: false });
   const [pay, setPay] = useState<any>(null);
   const [cardReady, setCardReady] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -59,7 +59,8 @@ export function EventBuy({ eventId, status, buyer }: { eventId: string; status: 
     if (result.error) throw new Error(result.error.message);
     const d = await api('mutation($i: CompleteTicketCheckoutInput!) { completeTicketCheckout(input: $i) }', { i: { orderId: pay.orderId, proof: pay.proof } });
     const done = d.completeTicketCheckout;
-    router.push(`/orders/${done.orderId}?t=${encodeURIComponent(done.proof || pay.proof)}`);
+    sessionStorage.setItem(`order:${done.orderId}`, JSON.stringify({ ...done, proof: pay.proof }));
+    router.push(`/orders/${done.orderId}`);
   });
 
   const wrap = 'mt-10 border-t border-black/10 pt-8';
@@ -136,7 +137,7 @@ export function EventBuy({ eventId, status, buyer }: { eventId: string; status: 
         <div className="max-w-xl">
           {!pay ? <>
             <h2 className="text-2xl font-semibold tracking-tight">Your details</h2>
-            <p className="mt-1 text-sm text-black/70">We email your tickets to this address.{buyer ? ' They also show under My tickets.' : <> <a className="underline underline-offset-4" href={`/account/sign-in?next=/events/${eventId}`}>Sign in</a> to keep them in an account, or carry on as a guest.</>}</p>
+            <p className="mt-1 text-sm text-black/70">Tickets are emailed to this address. You need it to find the order later.</p>
             <div className="mt-5 space-y-4">
               <div><label htmlFor="b-name" className={label}>Full name</label><input id="b-name" autoComplete="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={input} /></div>
               <div><label htmlFor="b-email" className={label}>Email</label><input id="b-email" type="email" autoComplete="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={input} /></div>
@@ -159,7 +160,7 @@ export function EventBuy({ eventId, status, buyer }: { eventId: string; status: 
             {hold.quote.discountCents ? <div className={row}><dt>Discount</dt><dd>-{usd(hold.quote.discountCents, hold.quote.currencyCode)}</dd></div> : null}
             <div className={row}><dt>Service fees</dt><dd>{usd(hold.quote.serviceFeesCents, hold.quote.currencyCode)}</dd></div>
             <div className={row}><dt>Facility fees</dt><dd>{usd(hold.quote.facilityFeesCents, hold.quote.currencyCode)}</dd></div>
-            {hold.quote.taxCents ? <div className={row}><dt>Tax</dt><dd>{usd(hold.quote.taxCents, hold.quote.currencyCode)}</dd></div> : null}
+            <div className={row}><dt>Tax</dt><dd>{usd(hold.quote.taxCents, hold.quote.currencyCode)}</dd></div>
             <div className={`${row} text-base font-semibold`}><dt>Total</dt><dd>{usd(hold.quote.totalCents, hold.quote.currencyCode)}</dd></div>
           </dl>
           <div className="mt-3">{timer}</div>

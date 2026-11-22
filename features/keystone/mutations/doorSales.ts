@@ -1,8 +1,7 @@
 import { permissions, permissionRefusal } from '../access';
 import { command } from '../lib/transaction';
 import { appendAuditEvent } from '../lib/audit';
-import { digest, humanCode, opaqueToken, ticketToken } from '../lib/guest-proof';
-import { deliverOrderConfirmation } from '../lib/order-mail';
+import { digest, humanCode, opaqueToken } from '../lib/guest-proof';
 import { DOOR_STATUSES, MAX_COMP_QTY, assertDoorQuantity, assertRoom, settleTender, pickPhase, priceDoorSale } from '../lib/door-sale';
 import { expireHolds } from './inventory';
 import { bookDrawer } from './cashDrawers';
@@ -67,7 +66,7 @@ async function issue(kind: Kind, input: any, context: any) {
     const line = await tx.ticketOrderLine.create({ data: { orderId: order.id, title: event.title, levelName: level.name, phaseName: phase?.name || '', seatLabel: seats.map((s: any) => s.seat.label).join(', '), unitPriceCents: unit, serviceFeeCents: 0, facilityFeeCents: level.facilityFeeCents, taxCents: quote.taxCents, quantity: qty, discountCents: 0, totalCents: quote.totalCents, currencyCode: level.currencyCode, priceLevelId: level.id, phaseId: phase?.id } });
     const tickets: { ticketCode: string; token: string; seat: string }[] = [];
     for (let i = 0; i < qty; i++) {
-      const ticketCode = humanCode('TK'); const token = ticketToken(ticketCode);
+      const token = opaqueToken(); const ticketCode = humanCode('TK');
       const seat = seats[i];
       if (seat) {
         const taken = await tx.seatInventory.updateMany({ where: { id: seat.id, status: 'open' }, data: { status: 'sold', holdKey: '', occupancyKey: `${event.id}:${seat.seatId}` } });
@@ -85,11 +84,5 @@ async function issue(kind: Kind, input: any, context: any) {
     return { orderId: order.id, orderNumber: order.orderNumber, status: order.status, totalCents: quote.totalCents, changeCents: tender?.changeCents ?? 0, tickets };
   });
 }
-// A door sale or comp with an email address gets the same ticket email an online order gets.
-async function issueAndEmail(kind: 'door' | 'comp', input: any, context: any) {
-  const result = await issue(kind, input, context);
-  if (result?.orderId) await deliverOrderConfirmation(context, result.orderId);
-  return result;
-}
-export const issueDoorSale = (_: any, { input }: any, context: any) => issueAndEmail('door', input, context);
-export const issueComp = (_: any, { input }: any, context: any) => issueAndEmail('comp', input, context);
+export const issueDoorSale = (_: any, { input }: any, context: any) => issue('door', input, context);
+export const issueComp = (_: any, { input }: any, context: any) => issue('comp', input, context);
