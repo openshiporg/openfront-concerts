@@ -3,7 +3,6 @@
 // clients that invert colours in dark mode keep text readable, and the prefers-color-scheme block gives
 // Apple Mail / iOS a proper dark palette.
 
-export const SUPPORT_EMAIL = "hello@concerts.openship.org";
 
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
 const C = {
@@ -96,7 +95,8 @@ export function emailLayout(input: {
   supportEmail?: string;
 }) {
   const store = escapeHtml(input.storeName || storeNameFromEnv());
-  const support = escapeHtml(input.supportEmail || SUPPORT_EMAIL);
+  // Only a contact address the venue has entered in Settings is printed; never a placeholder.
+  const support = escapeHtml(input.supportEmail || "");
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -143,7 +143,7 @@ ${input.body}
 </table>
 </td></tr>
 <tr><td class="em-pad" style="padding:20px 32px 8px;font-family:${FONT};font-size:13px;line-height:20px;color:${C.subtle};">
-<span class="em-muted" style="color:${C.subtle};">${input.footerNote ? `${input.footerNote}<br>` : ""}Questions? Email <a class="em-link" href="mailto:${support}" style="color:${C.muted};text-decoration:underline;">${support}</a>.<br>${store}</span>
+<span class="em-muted" style="color:${C.subtle};">${input.footerNote ? `${input.footerNote}<br>` : ""}${support ? `Questions? Email <a class="em-link" href="mailto:${support}" style="color:${C.muted};text-decoration:underline;">${support}</a>.<br>` : ""}${store}</span>
 </td></tr>
 </table>
 </td></tr>

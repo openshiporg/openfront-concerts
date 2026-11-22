@@ -20,11 +20,13 @@ export async function DoorPage({ searchParams }: { searchParams: Promise<{ event
   const detail = current ? await gql(`query($id: ID!) { admitted: ticketsCount(where: { event: { id: { equals: $id } }, status: { equals: "checked_in" } }) total: ticketsCount(where: { event: { id: { equals: $id } } }) scans: scanEvents(where: { event: { id: { equals: $id } } }, orderBy: [{ at: desc }], take: 15) { id gate result at ticket { ticketCode } } event(where: { id: $id }) { venue { capacity } } }`, { id: current.id }) : null;
   return (
     <Page title="Door scan">
-      <Rows empty="No events.">{list.events.map((e: any) => <Row key={e.id} href={`/dashboard/platform/door?event=${e.id}`} title={e.title} status={e.status} meta={when(e.showAt)} />)}</Rows>
-      {current && detail ? <section className="space-y-3"><h2 className="text-sm font-medium">{current.title}</h2>
+      {current && detail ? <section className="space-y-3"><h2 className="text-base font-semibold">{current.title} <span className="font-normal text-muted-foreground">· {when(current.showAt)}</span></h2>
         <div className="grid grid-cols-3 gap-3"><Stat name="Admitted" value={detail.admitted} /><Stat name="Tickets" value={detail.total} /><Stat name="Capacity" value={detail.event?.venue?.capacity ?? ''} /></div>
         {['doors', 'in_progress'].includes(current.status) ? <ScanConsole eventId={current.id} /> : <p className="text-sm text-muted-foreground">Scanning opens when the event is at doors.</p>}
-        <Rows empty="No scans.">{detail.scans.map((s: any) => <Row key={s.id} title={s.ticket?.ticketCode} status={s.result === 'admitted' ? 'confirmed' : 'void'} meta={`${s.gate} · ${s.result}`} right={when(s.at)} />)}</Rows></section> : null}
+        <h3 className="pt-2 text-sm font-medium">Latest scans</h3>
+        <Rows empty="No scans yet.">{detail.scans.map((s: any) => <Row key={s.id} title={s.ticket?.ticketCode} status={['admitted', 'reentry'].includes(s.result) ? 'confirmed' : 'void'} meta={`${s.gate} · ${s.result.replace(/_/g, ' ')}`} right={when(s.at)} />)}</Rows></section> : null}
+      <section className="space-y-2"><h2 className="text-sm font-medium">{current ? 'Other events' : 'Events'}</h2>
+        <Rows empty="No events are open for scanning.">{list.events.filter((e: any) => e.id !== current?.id).map((e: any) => <Row key={e.id} href={`/dashboard/platform/door?event=${e.id}`} title={e.title} status={e.status} meta={when(e.showAt)} />)}</Rows></section>
     </Page>
   );
 }

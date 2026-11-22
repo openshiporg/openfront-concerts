@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '../lib/api';
@@ -13,14 +14,13 @@ export function LookupPage() {
     try {
       const d = await api('query($e: String!, $n: String!) { lookupTicketOrder(email: $e, orderNumber: $n) }', { e: email, n: number });
       const order = d.lookupTicketOrder;
-      sessionStorage.setItem(`order:${order.orderId}`, JSON.stringify(order));
-      router.push(`/orders/${order.orderId}`);
+      router.push(`/orders/${order.orderId}?t=${encodeURIComponent(order.proof)}`);
     } catch (err: any) { setError(err.message === 'Order not found' ? 'No order matches that number and email. Check both and try again.' : err.message); setBusy(false); }
   }
   return (
     <main>
       <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">Find my order</h1>
-      <p className="mb-6 mt-2 max-w-md text-black/70">Enter the order number from your confirmation and the email you bought with. You can see your tickets and send one to someone else.</p>
+      <p className="mb-6 mt-2 max-w-md text-black/70">Enter the order number from your confirmation email and the email you bought with. You can see your tickets and send one to someone else. <Link className="underline underline-offset-4" href="/account/sign-in">Signed-up buyers can sign in</Link> instead.</p>
       <form onSubmit={find} className="max-w-sm space-y-4">
         <div><label htmlFor="l-number" className={label}>Order number</label><input id="l-number" required autoCapitalize="characters" value={number} onChange={(e) => setNumber(e.target.value)} className={input} /></div>
         <div><label htmlFor="l-email" className={label}>Email</label><input id="l-email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={input} /></div>

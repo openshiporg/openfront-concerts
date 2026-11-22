@@ -27,14 +27,14 @@ export async function DrawerReportPage({ searchParams }: { searchParams: Promise
     where: { openedAt: { gte: start, lt: end } }, orderBy: [{ openedAt: 'desc' }], take: 201,
     query: 'id label status openingFloatCents cashSalesCents cashRefundsCents expectedCents countedCents varianceCents varianceReason openedAt closedAt openedBy { id name } closedBy { id name }',
   }).then((cashDrawers: any) => ({ cashDrawers })).catch(() => null);
-  if (!data) return <Page title="Cash drawers"><p className="rounded-lg border p-6 text-sm text-muted-foreground">Drawer report could not load.</p></Page>;
+  if (!data) return <Page crumbs={[{ label: 'Box office', href: '/platform/box-office' }]} title="Cash drawers"><p className="rounded-lg border p-6 text-sm text-muted-foreground">Drawer report could not load.</p></Page>;
   const truncated = data.cashDrawers.length > 200;
   const rows = data.cashDrawers.slice(0, 200);
   const t = drawerTotals(rows);
   const canForce = Boolean(me.role.canApproveAdjustments);
   const label = range.from === range.to ? range.from : `${range.from} to ${range.to}`;
   return (
-    <Page title="Cash drawers" action={<Link className="inline-flex min-h-11 items-center text-sm underline" href="/dashboard/platform/box-office">Back to box office</Link>}>
+    <Page crumbs={[{ label: 'Box office', href: '/platform/box-office' }]} title="Cash drawers" action={<Link className="inline-flex min-h-11 items-center text-sm underline" href="/dashboard/platform/box-office">Back to box office</Link>}>
       <DrawerRangeForm from={range.from} to={range.to} />
       {rangeError ? <p className="text-sm text-destructive">{rangeError}. Showing today.</p> : null}
       <p className="text-sm text-muted-foreground">Shifts opened {label}, store time. {t.drawers} {t.drawers === 1 ? 'drawer' : 'drawers'}{t.open ? `, ${t.open} still open` : ''}.</p>

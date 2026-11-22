@@ -4,7 +4,7 @@ import { day, clock, ages } from '../lib/format';
 import { Photo } from '../components/Photo';
 import { EventBuy } from './EventBuy';
 
-export function EventPage({ show: s }: { show: Show }) {
+export function EventPage({ show: s, buyer }: { show: Show; buyer?: { name: string; email: string } | null }) {
   const tz = s.venue?.timezone;
   return (
     <main>
@@ -22,7 +22,7 @@ export function EventPage({ show: s }: { show: Show }) {
           {s.description ? <p className="mt-4 max-w-prose">{s.description}</p> : null}
         </header>
       </div>
-      <EventBuy eventId={s.id} status={s.status} />
+      <EventBuy eventId={s.id} status={s.status} buyer={buyer} />
     </main>
   );
 }

@@ -114,6 +114,11 @@ export async function handleDashboardRoutes(
     return NextResponse.redirect(new URL(basePath, request.url));
   }
 
+  // Public sign-up is for ticket buyers; staff are invited by a venue admin.
+  if (isDashboardRoute(pathname, 'signup')) {
+    return NextResponse.redirect(new URL('/account/sign-up', request.url));
+  }
+
   // Handle unauthenticated users
   if (!user && !isSigninRoute && !isSignupRoute && !isResetRoute) {
     const signinUrl = new URL(`${basePath}/signin`, request.url);
@@ -129,6 +134,11 @@ export async function handleDashboardRoutes(
       return NextResponse.redirect(new URL(fromPath, request.url));
     }
     return NextResponse.redirect(new URL(basePath, request.url));
+  }
+
+  // Ticket buyers have accounts but no staff role: their home is My tickets on the storefront.
+  if (user && !user.role) {
+    return NextResponse.redirect(new URL('/account', request.url));
   }
 
   // Check role permissions
