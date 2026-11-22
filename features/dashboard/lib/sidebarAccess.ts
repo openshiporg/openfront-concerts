@@ -5,7 +5,12 @@
  */
 
 type SidebarList = { path: string; isHidden?: boolean | null }
-type SidebarUser = { role?: { canAccessDashboard?: boolean | null } | null } | null | undefined
+type SidebarUser = { role?: { name?: string | null; canAccessDashboard?: boolean | null } | null } | null | undefined
+
+/** Raw model tooling is for the technical Admin role; owners and staff use platform screens. */
+export function canUseModels(user: SidebarUser) {
+  return user?.role?.canAccessDashboard === true && user.role.name === 'Admin'
+}
 
 /** Only an explicit false hides navigation; an unknown user is left to the middleware. */
 export function canUseDashboardNav(user: SidebarUser) {
@@ -13,7 +18,7 @@ export function canUseDashboardNav(user: SidebarUser) {
 }
 
 export function visibleSidebarLists<T extends SidebarList>(lists: T[], user: SidebarUser): T[] {
-  if (!canUseDashboardNav(user)) return []
+  if (!canUseModels(user)) return []
   return lists.filter((list) => !list.isHidden)
 }
 

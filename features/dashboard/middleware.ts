@@ -51,6 +51,7 @@ export async function getAuthenticatedUser(request: NextRequest) {
         ... on User {
           id
           role {
+            name
             canAccessDashboard
           }
         }
@@ -139,6 +140,14 @@ export async function handleDashboardRoutes(
   // Ticket buyers have accounts but no staff role: their home is My tickets on the storefront.
   if (user && !user.role) {
     return NextResponse.redirect(new URL('/account', request.url));
+  }
+
+  // Generic model pages are Admin-only, including direct URLs. Platform actions
+  // retain their own capability checks, so this does not grant or remove API access.
+  const section = pathname.slice(basePath.length + 1).split('/')[0];
+  const publicSections = ['', 'platform', 'signin', 'signup', 'reset', 'init', 'no-access'];
+  if (user && !publicSections.includes(section) && user.role?.name !== 'Admin') {
+    return NextResponse.redirect(new URL(basePath, request.url));
   }
 
   // Check role permissions

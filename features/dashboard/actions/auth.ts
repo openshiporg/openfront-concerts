@@ -155,7 +155,7 @@ export async function getAuthenticatedUser() {
       authenticatedItem {
         ... on User {
           id email name onboardingStatus
-          role { ${permissionNames.join(' ')} }
+          role { name ${permissionNames.join(' ')} }
         }
       }
       eventsCount: eventsCount

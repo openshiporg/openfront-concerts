@@ -336,8 +336,16 @@ export async function handleProviderWebhook(context: any, providerCode: string, 
       const intentId = parsed.resource?.id;
       const session = await prisma.paymentSession.findFirst({ where: { paymentProviderId: provider.id, data: { path: ['paymentIntentId'], equals: intentId } } });
       const order = session && await prisma.ticketOrder.findFirst({ where: { paymentCollectionId: session.paymentCollectionId } });
-      if (!order) throw new Error('Payment correlation pending');
-      await finalizePaidOrder(context, order.id, provider);
+      if (!order) {
+        // Fleet Stripe endpoints share an account. A valid event for another site must be
+        // acknowledged, not retried forever. Our intents always carry this order's id.
+        const claimedId = parsed.resource?.metadata?.orderId;
+        const claimedOrder = typeof claimedId === 'string' && claimedId
+          ? await prisma.ticketOrder.findUnique({ where: { id: claimedId }, select: { id: true } }) : null;
+        if (claimedOrder) throw new Error('Payment correlation pending');
+      } else {
+        await finalizePaidOrder(context, order.id, provider);
+      }
     }
     await prisma.paymentWebhookEvent.update({ where: { id: inbox.id }, data: { status: 'processed', processedAt: new Date(), attempts: { increment: 1 } } });
   } catch (error: any) {

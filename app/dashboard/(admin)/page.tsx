@@ -1,3 +1,2 @@
-import { HomePage } from "@/features/dashboard/screens/HomePage";
-
-export default HomePage;
+import { OperationsHome } from '@/features/platform/operations/screens/OperationsHome';
+export default OperationsHome;

@@ -40,7 +40,7 @@ import { Home, ChevronRight, Package } from 'lucide-react'
 import { Logo, LogoIcon } from '@/features/dashboard/components/Logo'
 import { UserProfileClient } from './UserProfileClient'
 import { useDashboard } from '../context/DashboardProvider'
-import { visibleByPermission, visiblePlatformItems, visibleSidebarLists } from '../lib/sidebarAccess'
+import { canUseModels, visibleByPermission, visiblePlatformItems, visibleSidebarLists } from '../lib/sidebarAccess'
 import { OnboardingCards } from '@/features/platform/onboarding/components/OnboardingCards'
 import { dismissOnboarding } from '@/features/platform/onboarding/actions/onboarding'
 import {
@@ -57,6 +57,7 @@ interface User {
   eventsCount?: number | null;
   brandName?: string | null;
   role?: {
+    name?: string;
     canAccessDashboard?: boolean;
     canManageOnboarding?: boolean;
   };
@@ -283,8 +284,8 @@ export function Sidebar({ adminMeta, user, onOpenDialog }: SidebarProps) {
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Models */}
-        <SidebarGroup>
+        {/* Raw model tooling is not part of staff workflows. */}
+        {canUseModels(user) ? <SidebarGroup>
           <SidebarGroupLabel>Models</SidebarGroupLabel>
           <SidebarMenu className="group-has-[[data-collapsible=icon]]/sidebar-wrapper:hidden">
             <Collapsible
@@ -357,7 +358,7 @@ export function Sidebar({ adminMeta, user, onOpenDialog }: SidebarProps) {
               </SidebarMenuItem>
             </DropdownMenu>
           </SidebarMenu>
-        </SidebarGroup>
+        </SidebarGroup> : null}
       </SidebarContent>
       
       <SidebarFooter>
