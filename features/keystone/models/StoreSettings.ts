@@ -12,6 +12,10 @@ export const StoreSettings = list({
   name: text({}),
   refundApprovalThresholdCents: integer({ defaultValue: 0 }),
   manager: relationship({ ref: 'User.storeSettings_manager', many: false }),
+  // Shown to customers in the storefront footer and in every email.
+  supportEmail: text({ validation: { match: { regex: /^$|^[^@\s]+@[^@\s]+\.[^@\s]+$/, explanation: 'Enter an email address' } } }),
+  supportPhone: text({}),
+  refundPolicy: text({ ui: { displayMode: 'textarea' } }),
   currencyCode: text({ defaultValue: 'USD', validation: { match: { regex: /^[A-Z]{3}$/, explanation: 'ISO 4217 currency code' } } }),
   ...storeLogoFields,
   ...trackingFields,

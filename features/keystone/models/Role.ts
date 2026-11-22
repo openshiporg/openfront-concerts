@@ -9,7 +9,8 @@ export const Role = list({
   access: {
     operation: {
       ...allOperations(permissions.canManageRoles),
-      query: isSignedIn,
+      // Staff read roles; customers (no role) have no use for them.
+      query: permissions.canAccessDashboard,
     },
   },
   ui: {

@@ -10,7 +10,7 @@ export async function siteDisplayName(_context: any): Promise<string | null> {
 
 /** Whether people without an account may create one on the consent screen (must match User create access). */
 export function allowAccountCreation(): boolean {
-  return process.env.PUBLIC_SIGNUPS_ALLOWED === 'true'
+  return process.env.PUBLIC_SIGNUPS_ALLOWED !== 'false'
 }
 
 /** Staff are people whose role opens the dashboard. */
