@@ -13,7 +13,7 @@ export async function OrderListPage({ searchParams }: { searchParams: Promise<{ 
   const status = statuses.some(([s]) => s === params.status) ? params.status || '' : '';
   const q = (params.q || '').trim().slice(0, 200);
   const page = Math.min(10000, Math.max(1, Math.floor(Number(params.page)) || 1));
-  const where = { ...(status ? { status: { equals: status } } : {}), ...(q ? { OR: [{ orderNumber: { contains: q, mode: 'insensitive' } }, { guestEmail: { contains: q, mode: 'insensitive' } }, { guestName: { contains: q, mode: 'insensitive' } }] } : {}) };
+  const where = { hiddenAt: { equals: null }, ...(status ? { status: { equals: status } } : {}), ...(q ? { OR: [{ orderNumber: { contains: q, mode: 'insensitive' } }, { guestEmail: { contains: q, mode: 'insensitive' } }, { guestName: { contains: q, mode: 'insensitive' } }] } : {}) };
   const data = await gql(`query($where: TicketOrderWhereInput!, $skip: Int!) { ticketOrders(where: $where, orderBy: [{ createdAt: desc }, { id: desc }], take: 21, skip: $skip) { id orderNumber status totalCents currencyCode guestName createdAt event { title } } }`, { where, skip: (page - 1) * 20 });
   const href = (s: string, p = 1) => { const v = new URLSearchParams(); if (s) v.set('status', s); if (q) v.set('q', q); if (p > 1) v.set('page', String(p)); return `/dashboard/platform/orders?${v}`; };
   const orders = data.ticketOrders.slice(0, 20);

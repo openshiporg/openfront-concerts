@@ -17,7 +17,7 @@ export async function OperationsHome() {
   const data = await gql(`query($now: DateTime!, $from: DateTime!, $until: DateTime!) {
     live: events(where: { showAt: { gte: $from, lte: $until }, status: { in: ["doors", "in_progress"] } }, take: 100, orderBy: [{ showAt: asc }]) { id title status showAt venue { name timezone } }
     upcoming: events(where: { showAt: { gte: $now }, status: { in: ["announced", "presale", "on_sale", "sold_out"] } }, take: 8, orderBy: [{ showAt: asc }]) { id title status showAt venue { name timezone } }
-    ${sales ? 'ticketOrders(take: 5, where: { status: { in: ["paid", "partially_refunded", "comp"] } }, orderBy: [{ createdAt: desc }]) { id orderNumber status totalCents currencyCode guestName event { title } } cashDrawers(where: { status: { equals: "open" } }, take: 10, orderBy: [{ openedAt: desc }]) { id label openedAt openedBy { name } }' : ''}
+    ${sales ? 'ticketOrders(take: 5, where: { hiddenAt: { equals: null }, status: { in: ["paid", "partially_refunded", "comp"] } }, orderBy: [{ createdAt: desc }]) { id orderNumber status totalCents currencyCode guestName event { title } } cashDrawers(where: { status: { equals: "open" } }, take: 10, orderBy: [{ openedAt: desc }]) { id label openedAt openedBy { name } }' : ''}
     ${can.canManageSettlements ? 'settlements(where: { status: { in: ["draft", "reviewed", "signed_promoter", "signed_artist"] } }, take: 5, orderBy: [{ createdAt: desc }]) { id status event { title } }' : ''}
   }`, { now, from, until });
   const live = data.live.filter((e: { showAt?: string; venue?: { timezone?: string } }) => isVenueToday(e.showAt, e.venue?.timezone, clock));

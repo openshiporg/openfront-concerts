@@ -13,7 +13,7 @@ export async function BoxOfficePage({ searchParams }: { searchParams: Promise<{ 
   await requireAnyPermission('canManageOrders', 'canIssueRefunds');
   const { q, take: takeParam } = await searchParams;
   const take = Math.min(200, Math.max(20, Math.floor(Number(takeParam)) || 20));
-  const where = q ? { OR: [{ orderNumber: { contains: q.toUpperCase() } }, { guestEmail: { contains: q.toLowerCase() } }, { guestName: { contains: q, mode: 'insensitive' } }] } : {};
+  const where = q ? { hiddenAt: { equals: null }, OR: [{ orderNumber: { contains: q.toUpperCase() } }, { guestEmail: { contains: q.toLowerCase() } }, { guestName: { contains: q, mode: 'insensitive' } }] } : { hiddenAt: { equals: null } };
   const data = await gql(`query($where: TicketOrderWhereInput!, $take: Int!) {
     ticketOrders(where: $where, orderBy: [{ createdAt: desc }], take: $take) { id orderNumber status totalCents refundedCents guestName guestEmail createdAt event { title } ticket_order { id ticketCode status } payments(where: { status: { in: ["succeeded", "partially_refunded"] } }) { id providerPaymentId } }
     events(where: { status: { in: ["presale", "on_sale", "doors", "in_progress"] } }, orderBy: [{ showAt: asc }], take: 20) { id title priceLevel_event(where: { status: { equals: "active" } }) { id name priceCents capacity sold held productionHeld sections { kind } } }

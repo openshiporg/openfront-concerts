@@ -18,6 +18,7 @@ model User {
   password                         String
   role                             Role?             @relation("User_role", fields: [roleId], references: [id])
   roleId                           String?           @map("role")
+  hiddenAt                         DateTime?
   emailVerifiedAt                  DateTime?
   emailConfirmationSentAt          DateTime?
   onboardingStatus                 String?           @default("not_started")
@@ -564,6 +565,7 @@ model TicketOrder {
   orderNumber           String?            @unique
   guestEmail            String             @default("")
   guestName             String             @default("")
+  hiddenAt              DateTime?
   secretKey             String             @default("")
   subtotalCents         Int?               @default(0)
   serviceFeesCents      Int?               @default(0)

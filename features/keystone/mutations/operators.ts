@@ -248,7 +248,7 @@ export async function buildSettlement(tx: any, eventId: string, actor: string) {
   if (old && ['signed_promoter','signed_artist','final'].includes(old.status)) throw new Error('Signed settlement is frozen; create an approved adjustment');
   const offers = await tx.offer.findMany({ where: { eventId, status: { in: ['accepted','contracted','settled'] } }, orderBy: { id: 'asc' } });
   if (!offers.length) throw new Error('Accepted artist deal required');
-  const orders = await tx.ticketOrder.findMany({ where: { eventId, status: { in: ['paid','partially_refunded','comp'] } }, include: { ticketOrderLine_order: true } });
+  const orders = await tx.ticketOrder.findMany({ where: { eventId, hiddenAt: null, status: { in: ['paid','partially_refunded','comp'] } }, include: { ticketOrderLine_order: true } });
   const expenses = await tx.eventExpense.findMany({ where: { eventId } });
   const merch = await tx.merchSales.findFirst({ where: { eventId } });
   const payments = await tx.artistPayment.findMany({ where: { status: 'paid', settlement: { eventId } } });

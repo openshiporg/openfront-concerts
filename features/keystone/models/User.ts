@@ -88,6 +88,8 @@ export const User = list({
       },
     }),
     // Set when the person opens the confirmation link we emailed; orders bought with that address then show in their account.
+    // Hidden accounts (e.g. a demo admin) stay in the DB but leave every staff and customer list.
+    hiddenAt: timestamp({ access: { create: denyAll, update: denyAll }, ui: { createView: { fieldMode: 'hidden' }, itemView: { fieldMode: 'read' } } }),
     emailVerifiedAt: timestamp({ access: { create: denyAll, update: denyAll }, ui: { createView: { fieldMode: 'hidden' }, itemView: { fieldMode: 'read' } } }),
     emailConfirmationSentAt: timestamp({ access: { read: denyAll, create: denyAll, update: denyAll }, ui: { createView: { fieldMode: 'hidden' }, itemView: { fieldMode: 'hidden' }, listView: { fieldMode: 'hidden' } } }),
     onboardingStatus: select({ options: ['not_started', 'in_progress', 'completed', 'dismissed'], defaultValue: 'not_started' }),

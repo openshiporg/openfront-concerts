@@ -10,6 +10,8 @@ export const TicketOrder = list({
   orderNumber: text({ isIndexed: 'unique', db: { isNullable: true } }),
   guestEmail: text({}),
   guestName: text({}),
+  // Test and QA orders are hidden from every staff list and report, never deleted (fleet rule).
+  hiddenAt: timestamp({ access: { create: () => false, update: () => false }, ui: { createView: { fieldMode: 'hidden' }, itemView: { fieldMode: 'read' } } }),
   secretKey: text({ access: { read: () => false, create: () => false, update: () => false } }),
   subtotalCents: integer({ defaultValue: 0 }),
   serviceFeesCents: integer({ defaultValue: 0 }),

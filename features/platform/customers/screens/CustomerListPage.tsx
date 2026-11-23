@@ -5,7 +5,7 @@ import { Page, Row, Rows } from '../../components/ui-bits';
 
 export async function CustomerListPage() {
   await requireAnyPermission('canSeeOtherPeople', 'canManagePeople', 'canManageRoles');
-  const data = await gql(`{ users(orderBy: [{ name: asc }], take: 200) { id name email role { name } } ticketOrders(where: { status: { in: ["paid", "partially_refunded", "refunded", "comp"] } }, orderBy: [{ createdAt: desc }], take: 200) { id guestName guestEmail orderNumber } }`);
+  const data = await gql(`{ users(where: { hiddenAt: { equals: null } }, orderBy: [{ name: asc }], take: 200) { id name email role { name } } ticketOrders(where: { hiddenAt: { equals: null }, status: { in: ["paid", "partially_refunded", "refunded", "comp"] } }, orderBy: [{ createdAt: desc }], take: 200) { id guestName guestEmail orderNumber } }`);
   const customers = new Map<string, { name: string; email: string; account: boolean; order?: string }>();
   for (const u of data.users) if (!u.role) customers.set(u.email.toLowerCase(), { name: u.name, email: u.email, account: true });
   for (const o of data.ticketOrders) if (o.guestEmail) {

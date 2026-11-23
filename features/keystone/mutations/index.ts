@@ -13,6 +13,7 @@ import { openCashDrawer, closeCashDrawer, forceCloseCashDrawer } from './cashDra
 import updateActiveUser from './updateActiveUser';
 import seedConcerts from './seedConcerts';
 import { constraintRefusal, constraintGraphQLError } from '../lib/constraint-errors';
+import { setRecordHidden } from './hidden';
 import { startTicketCheckout, completeTicketCheckout, lookupTicketOrder, transferTicket, refundTicketOrder, retryTicketRefund, ticketOrderView, myTicketOrders, resendOrderConfirmation } from './checkout';
 import { sendEmailConfirmation, confirmCustomerEmail } from './customers';
 
@@ -70,6 +71,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         refundTicketOrder(input: RefundTicketOrderInput!): JSON
         retryTicketRefund(input: RetryTicketRefundInput!): JSON
         resendOrderConfirmation(orderId: ID!): JSON
+        setRecordHidden(list: String!, id: ID!, hidden: Boolean!, reason: String): JSON
         sendEmailConfirmation: JSON
         confirmCustomerEmail(userId: ID!, proof: String!): JSON
         updateActiveUser(data: UserUpdateProfileInput!): User
@@ -104,7 +106,7 @@ export function extendGraphqlSchema(baseSchema: GraphQLSchema) {
         seedConcerts,
         publishSeatingChart, requestRefundApproval, decideRefundApproval, issueDoorSale, issueComp, previewDoorSale, refundDoorSale, openCashDrawer, closeCashDrawer, forceCloseCashDrawer,
         updateActiveUser,
-        startTicketCheckout, completeTicketCheckout, transferTicket, refundTicketOrder, retryTicketRefund, resendOrderConfirmation, sendEmailConfirmation, confirmCustomerEmail,
+        startTicketCheckout, completeTicketCheckout, transferTicket, refundTicketOrder, retryTicketRefund, resendOrderConfirmation, sendEmailConfirmation, confirmCustomerEmail, setRecordHidden,
         ...editorMutations,
         ...Object.fromEntries(operatorCommands.map(name => [name, operator(name)])),
       }),

@@ -7,6 +7,7 @@ type User {
   email: String
   password: PasswordState
   role: Role
+  hiddenAt: DateTime
   emailVerifiedAt: DateTime
   emailConfirmationSentAt: DateTime
   onboardingStatus: String
@@ -48,6 +49,7 @@ input UserWhereInput {
   id: IDFilter
   name: StringFilter
   role: RoleWhereInput
+  hiddenAt: DateTimeNullableFilter
   emailVerifiedAt: DateTimeNullableFilter
   emailConfirmationSentAt: DateTimeNullableFilter
   onboardingStatus: StringNullableFilter
@@ -196,6 +198,7 @@ input PasswordFilter {
 input UserOrderByInput {
   id: OrderDirection
   name: OrderDirection
+  hiddenAt: OrderDirection
   emailVerifiedAt: OrderDirection
   emailConfirmationSentAt: OrderDirection
   onboardingStatus: OrderDirection
@@ -215,6 +218,7 @@ input UserUpdateInput {
   email: String
   password: String
   role: RoleRelateToOneForUpdateInput
+  hiddenAt: DateTime
   emailVerifiedAt: DateTime
   emailConfirmationSentAt: DateTime
   onboardingStatus: String
@@ -297,6 +301,7 @@ input UserCreateInput {
   email: String
   password: String
   role: RoleRelateToOneForCreateInput
+  hiddenAt: DateTime
   emailVerifiedAt: DateTime
   emailConfirmationSentAt: DateTime
   onboardingStatus: String
@@ -3163,6 +3168,7 @@ type TicketOrder {
   orderNumber: String
   guestEmail: String
   guestName: String
+  hiddenAt: DateTime
   secretKey: String
   subtotalCents: Int
   serviceFeesCents: Int
@@ -3208,6 +3214,7 @@ input TicketOrderWhereInput {
   orderNumber: StringNullableFilter
   guestEmail: StringFilter
   guestName: StringFilter
+  hiddenAt: DateTimeNullableFilter
   secretKey: StringFilter
   subtotalCents: IntNullableFilter
   serviceFeesCents: IntNullableFilter
@@ -3245,6 +3252,7 @@ input TicketOrderOrderByInput {
   orderNumber: OrderDirection
   guestEmail: OrderDirection
   guestName: OrderDirection
+  hiddenAt: OrderDirection
   secretKey: OrderDirection
   subtotalCents: OrderDirection
   serviceFeesCents: OrderDirection
@@ -3267,6 +3275,7 @@ input TicketOrderUpdateInput {
   orderNumber: String
   guestEmail: String
   guestName: String
+  hiddenAt: DateTime
   secretKey: String
   subtotalCents: Int
   serviceFeesCents: Int
@@ -3316,6 +3325,7 @@ input TicketOrderCreateInput {
   orderNumber: String
   guestEmail: String
   guestName: String
+  hiddenAt: DateTime
   secretKey: String
   subtotalCents: Int
   serviceFeesCents: Int
@@ -5559,6 +5569,7 @@ type Mutation {
   refundTicketOrder(input: RefundTicketOrderInput!): JSON
   retryTicketRefund(input: RetryTicketRefundInput!): JSON
   resendOrderConfirmation(orderId: ID!): JSON
+  setRecordHidden(list: String!, id: ID!, hidden: Boolean!, reason: String): JSON
   sendEmailConfirmation: JSON
   confirmCustomerEmail(userId: ID!, proof: String!): JSON
   updateActiveUser(data: UserUpdateProfileInput!): User

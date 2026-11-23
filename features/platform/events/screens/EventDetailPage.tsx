@@ -45,7 +45,7 @@ export async function EventDetailPage({ params, searchParams }: { params: Promis
   const depositAgreed = liveDeal.reduce((n: number, o: any) => n + (o.acceptedTerms?.depositCents || 0), 0);
   const merch = e.merchSales_event[0];
   const totals = e.eventExpense_event.reduce((t: any, x: any) => ({ budget: t.budget + x.budgetCents, actual: t.actual + x.actualCents, capped: t.capped + (x.isCapped ? x.actualCents : 0) }), { budget: 0, actual: 0, capped: 0 });
-  const orders = tab === 'orders' ? (await gql(`query($id: ID!) { ticketOrders(where: { event: { id: { equals: $id } } }, orderBy: [{ createdAt: desc }], take: 100) { id orderNumber status totalCents guestName } }`, { id })).ticketOrders : [];
+  const orders = tab === 'orders' ? (await gql(`query($id: ID!) { ticketOrders(where: { hiddenAt: { equals: null }, event: { id: { equals: $id } } }, orderBy: [{ createdAt: desc }], take: 100) { id orderNumber status totalCents guestName } }`, { id })).ticketOrders : [];
   const seats = tab === 'seating' ? (await gql(`query($id: ID!) { seatInventories(where: { event: { id: { equals: $id } } }, take: 2000, orderBy: [{ id: asc }]) { id status seat { label row chartSection { name } } } }`, { id })).seatInventories : [];
   const bySection: Record<string, any[]> = {};
   for (const s of seats) (bySection[s.seat?.chartSection?.name || 'Seats'] ||= []).push(s);
