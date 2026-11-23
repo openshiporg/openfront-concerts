@@ -79,7 +79,7 @@ export function LevelStatusActions({ levelId, status }: { levelId: string; statu
     <div className="flex flex-wrap gap-2">
       {status === 'active' ? <ActionButton command="setPriceLevelStatus" input={{ levelId, data: { status: 'paused' } }}>Pause</ActionButton> : null}
       {status === 'paused' ? <ActionButton command="setPriceLevelStatus" input={{ levelId, data: { status: 'active' } }}>Resume</ActionButton> : null}
-      {status !== 'closed' ? <ActionButton command="setPriceLevelStatus" variant="destructive" input={{ levelId, data: { status: 'closed' } }}>Close</ActionButton> : null}
+      {status !== 'closed' ? <ActionButton command="setPriceLevelStatus" confirm="Close this price level permanently? It cannot be reopened." input={{ levelId, data: { status: 'closed' } }}>Close level</ActionButton> : null}
     </div>
   );
 }

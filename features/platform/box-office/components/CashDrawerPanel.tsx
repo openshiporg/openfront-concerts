@@ -34,8 +34,8 @@ export function CashDrawerPanel({ drawer }: { drawer: Drawer | null }) {
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-medium">Cash drawer</h2><span className="font-mono text-xs uppercase tracking-wide text-muted-foreground">Closed</span></div>
         {result ? <p className="text-sm tabular-nums">Last close: counted {money(result.countedCents)}, expected {money(result.expectedCents)}, {result.varianceCents === 0 ? 'balanced' : `${result.varianceCents > 0 ? 'over' : 'short'} ${money(Math.abs(result.varianceCents))}`}.</p> : <p className="text-sm text-muted-foreground">Door cash sales and cash refunds need your open drawer.</p>}
         <div className="grid grid-cols-2 gap-2">
-          <Input value={label} onChange={(e) => setLabel(e.target.value)} aria-label="Drawer name" className="h-9 min-w-0" />
-          <Input value={float} onChange={(e) => setFloat(e.target.value)} inputMode="decimal" aria-label="Opening float" className="h-9 min-w-0" />
+          <Input value={label} onChange={(e) => setLabel(e.target.value)} aria-label="Drawer name" className="h-11 min-w-0 text-base" />
+          <Input value={float} onChange={(e) => setFloat(e.target.value)} inputMode="decimal" aria-label="Opening float" className="h-11 min-w-0 text-base" />
         </div>
         <Button size="sm" disabled={pending || !label.trim() || Number.isNaN(cents)} onClick={() => run(() => runTyped('openCashDrawer', 'OpenCashDrawerInput', { label: label.trim(), openingFloatCents: cents, idempotencyKey: key }))}>{pending ? 'Working…' : 'Open drawer'}</Button>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
@@ -52,10 +52,10 @@ export function CashDrawerPanel({ drawer }: { drawer: Drawer | null }) {
           <div className="grid grid-cols-2 gap-2">
             {DENOMS.map(([k, name]) => (
               <label key={k} className="flex min-w-0 flex-col gap-1 text-sm"><span className="text-muted-foreground">{name}</span>
-                <Input value={counts[k] || ''} onChange={(e) => setCounts((c) => ({ ...c, [k]: e.target.value }))} inputMode="numeric" aria-label={`Count ${name}`} className="h-9 min-w-0" /></label>
+                <Input value={counts[k] || ''} onChange={(e) => setCounts((c) => ({ ...c, [k]: e.target.value }))} inputMode="numeric" aria-label={`Count ${name}`} className="h-11 min-w-0 text-base" /></label>
             ))}
           </div>
-          <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Variance reason (if over or short)" aria-label="Variance reason" />
+          <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Variance reason (if over or short)" aria-label="Variance reason" className="h-11 text-base" />
           <div className="flex flex-wrap gap-2">
             <Button size="sm" disabled={pending || !filled} onClick={() => run(async () => {
               const r = await runTyped('closeCashDrawer', 'CloseCashDrawerInput', { drawerId: drawer.id, count: Object.fromEntries(DENOMS.map(([k]) => [k, Number(counts[k])])), reason: reason.trim(), idempotencyKey: key });
