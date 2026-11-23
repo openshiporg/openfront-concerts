@@ -10,6 +10,14 @@ test('skips and terminal transitions refused; postponed resumption needs reason'
   assert.throws(() => assertEventTransition('postponed','announced'));
   assert.doesNotThrow(() => assertEventTransition('postponed','announced','New date confirmed'));
 });
+test('doors only near show time; completion only after start', () => {
+  const now = new Date('2026-11-23T20:00:00Z');
+  assert.doesNotThrow(() => assertEventTransition('on_sale', 'doors', '', '2026-11-24T03:00:00Z', now));
+  assert.throws(() => assertEventTransition('on_sale', 'doors', '', '2026-11-20T04:00:00Z', now), /passed/);
+  assert.throws(() => assertEventTransition('on_sale', 'doors', '', '2026-12-02T04:00:00Z', now), /12 hours/);
+  assert.throws(() => assertEventTransition('in_progress', 'completed', '', '2026-12-02T04:00:00Z', now), /after it starts/);
+  assert.doesNotThrow(() => assertEventTransition('in_progress', 'completed', '', '2026-11-20T04:00:00Z', now));
+});
 
 import { readFileSync } from 'node:fs';
 test('cancelling an event releases every active hold; expiry releases unpaid checkouts and cancels their orders', () => {

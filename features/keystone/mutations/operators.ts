@@ -106,7 +106,7 @@ export function operator(operation: string) {
       if (operation === 'advanceEvent') {
         const event = await tx.event.findUnique({ where: { id: eventId } });
         if (!event) throw new Error('Event not found');
-        assertEventTransition(event.status, input.status, input.reason);
+        assertEventTransition(event.status, input.status, input.reason, event.showAt);
         if (['presale', 'on_sale'].includes(input.status)) {
           const levels = await tx.priceLevel.findMany({ where: { eventId, status: 'active' } });
           if (!levels.length) throw new Error('Active pricing required before opening sales');

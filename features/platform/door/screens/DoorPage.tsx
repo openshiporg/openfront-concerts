@@ -4,11 +4,16 @@ import { gql } from '../../lib/gql';
 import { when } from '../../lib/format';
 import { Page, Row, Rows, Stat } from '../../components/ui-bits';
 import { ScanConsole } from '../components/ScanConsole';
+import { isVenueToday } from '../../operations/lib/today';
 
 export async function DoorPage({ searchParams }: { searchParams: Promise<{ event?: string }> }) {
   await requireAnyPermission('canScanTickets');
   const { event: selected } = await searchParams;
-  const list = await gql(`{ events(where: { status: { in: ["on_sale", "sold_out", "doors", "in_progress", "completed"] } }, orderBy: [{ showAt: asc }], take: 30) { id title status showAt } }`);
+  const list = await gql(`{ events(where: { status: { in: ["on_sale", "sold_out", "doors", "in_progress", "completed"] } }, orderBy: [{ showAt: asc }], take: 30) { id title status showAt venue { timezone } } }`);
+  // Today's shows first, then upcoming soonest, then past shows newest first.
+  const clock = new Date(); const nowIso = clock.toISOString();
+  const rank = (e: any) => isVenueToday(e.showAt, e.venue?.timezone, clock) ? 0 : e.showAt >= nowIso ? 1 : 2;
+  list.events.sort((a: any, b: any) => rank(a) - rank(b) || (rank(a) === 2 ? String(b.showAt).localeCompare(String(a.showAt)) : String(a.showAt).localeCompare(String(b.showAt))));
   // A named event that is not open for scanning is a 404, never another event's door.
   let named = selected === undefined ? null : list.events.find((e: any) => e.id === selected);
   if (selected !== undefined && !named) {
@@ -16,7 +21,7 @@ export async function DoorPage({ searchParams }: { searchParams: Promise<{ event
     named = found.events[0];
     if (!named) notFound();
   }
-  const current = named || list.events.find((e: any) => ['doors', 'in_progress'].includes(e.status)) || list.events[0];
+  const current = named || list.events.find((e: any) => ['doors', 'in_progress'].includes(e.status)) || list.events.find((e: any) => rank(e) < 2) || list.events[0];
   const detail = current ? await gql(`query($id: ID!) { admitted: ticketsCount(where: { event: { id: { equals: $id } }, status: { equals: "checked_in" } }) total: ticketsCount(where: { event: { id: { equals: $id } } }) scans: scanEvents(where: { event: { id: { equals: $id } } }, orderBy: [{ at: desc }], take: 15) { id gate result at ticket { ticketCode } } event(where: { id: $id }) { venue { capacity } } }`, { id: current.id }) : null;
   return (
     <Page title="Door scan">

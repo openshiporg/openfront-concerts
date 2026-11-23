@@ -59,7 +59,7 @@ export async function BoxOfficePage({ searchParams }: { searchParams: Promise<{ 
           const refundable = ['paid', 'partially_refunded'].includes(o.status) && o.payments?.length ? o.totalCents - o.refundedCents : 0;
           return <Row key={o.id} title={<Link className="inline-flex min-h-11 items-center underline underline-offset-4" href={`/dashboard/platform/orders/${o.id}`}>{o.orderNumber}</Link>} status={o.status}
             meta={<>{`${o.event?.title} · ${o.guestName} · ${o.guestEmail} · ${when(o.createdAt)}`}<RefundPanel orderId={o.id} cash={Boolean(o.payments?.[0]) && !o.payments[0].providerPaymentId} refundableCents={refundable} thresholdCents={threshold} approvals={approvals.filter((a: any) => a.targetId === o.id).map(({ id, actionType, targetId, amount, reason, status }: any) => ({ id, actionType, targetId, amount, reason, status }))} /></>}
-            right={<>{o.ticket_order.length} tickets · {money(o.totalCents)}{o.refundedCents ? ` · refunded ${money(o.refundedCents)}` : ''}</>} />;
+            right={<>{o.ticket_order.length} {o.ticket_order.length === 1 ? 'ticket' : 'tickets'} · {money(o.totalCents)}{o.refundedCents ? ` · refunded ${money(o.refundedCents)}` : ''}</>} />;
         })}
       </Rows>
       <p className="text-sm text-muted-foreground">{q ? 'Matching orders' : 'Most recent orders'}: showing {orders.length}.{hasMore ? <> <Link className="underline" href={`/dashboard/platform/box-office?${q ? `q=${encodeURIComponent(q)}&` : ''}take=${take + 20}`}>Load 20 more</Link></> : null}</p>

@@ -119,4 +119,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Phone tap targets: staff use the dashboard one-handed at the door and box office. */
+  @media (max-width: 767px) {
+    [data-slot="button"] { min-height: 2.75rem; min-width: 2.75rem; }
+    input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px; }
+  }
 }
