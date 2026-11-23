@@ -30,7 +30,7 @@ export function Page({ title, action, children, crumbs }: { title: string; actio
   return (
     <>
     <PageBreadcrumbs items={trail} />
-    <div className="mx-auto w-full max-w-6xl space-y-4 px-4 pb-10 pt-4">
+    <div className="mx-auto w-full max-w-6xl space-y-4 px-4 pb-24 pt-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-xl font-semibold">{title}</h1>
         {action}
@@ -47,7 +47,7 @@ export function FilterTabs({ base, param = 'status', current, options }: { base:
     <div className="-mx-4 max-w-[100vw] overflow-x-auto px-4 [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] sm:mx-0 sm:px-0 sm:[mask-image:none]">
       <div className="inline-flex gap-1 rounded-lg bg-muted p-1 pr-6 sm:pr-1">
         {options.map((o) => (
-          <Link key={o.value} href={o.value ? `${base}?${param}=${o.value}` : base} className={cn('inline-flex min-h-9 items-center whitespace-nowrap rounded-md px-3 text-sm', (current || '') === o.value ? 'bg-background font-medium shadow-sm' : 'text-muted-foreground')}>
+          <Link key={o.value} href={o.value ? `${base}?${param}=${o.value}` : base} className={cn('inline-flex min-h-11 sm:min-h-9 items-center whitespace-nowrap rounded-md px-3 text-sm', (current || '') === o.value ? 'bg-background font-medium shadow-sm' : 'text-muted-foreground')}>
             {o.label}{typeof o.count === 'number' ? ` ${o.count}` : ''}
           </Link>
         ))}
