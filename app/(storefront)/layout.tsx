@@ -35,7 +35,7 @@ export default async function StorefrontLayout({ children }: { children: React.R
         <footer className="border-t border-black/10 py-8 text-sm text-black/70">
           <div className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-start">
             <div className="space-y-2">
-              <p className="flex items-center gap-2 font-semibold text-[#141414]"><StoreLogoMark withName /></p>
+              <div className="flex items-center gap-2 font-semibold text-[#141414]"><StoreLogoMark withName /></div>
               {store.supportEmail || store.supportPhone ? <p>Questions about an order? {store.supportEmail ? <a className="underline underline-offset-4" href={`mailto:${store.supportEmail}`}>{store.supportEmail}</a> : null}{store.supportEmail && store.supportPhone ? ' · ' : ''}{store.supportPhone ? <a className="underline underline-offset-4" href={`tel:${store.supportPhone.replace(/[^+\d]/g, '')}`}>{store.supportPhone}</a> : null}</p> : null}
               {store.refundPolicy ? <p className="max-w-prose">{store.refundPolicy}</p> : null}
             </div>
