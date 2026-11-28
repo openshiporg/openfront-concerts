@@ -18,13 +18,14 @@ export async function CalendarPage() {
   const venues = data.venues.map((v: any) => ({ value: v.id, label: `${v.name}, ${v.city}` }));
   const artists = data.artists.map((a: any) => ({ value: a.id, label: a.name }));
   const chartsFor = (venueId?: string) => data.seatingCharts.filter((c: any) => c.venue?.id === venueId).map((c: any) => ({ value: c.id, label: `${c.name} v${c.version}` }));
+  const now = new Date();
   const groups = new Map<string, any[]>();
   for (const h of data.dateHolds) { const key = `${h.venue?.name} · ${day(h.date)}`; groups.set(key, [...(groups.get(key) || []), h]); }
   return (
     <Page title="Calendar and holds" action={can.canManageEvents ? <PlaceHoldForm venues={venues} artists={artists} /> : null}>
       {[...groups.entries()].map(([key, holds]) => (
         <section key={key} className="space-y-2"><h2 className="text-sm font-medium">{key}</h2>
-          <Rows>{holds.map((h) => <Row key={h.id} title={`${ordinal(h.rank)} hold: ${h.artist?.name || 'Open'}`} status={h.status} meta={h.event ? h.event.title : `Expires ${day(h.expiresAt)}`} right={h.event || !can.canManageEvents ? null : <HoldActions holdId={h.id} status={h.status} charts={chartsFor(h.venue?.id)} artist={h.artist?.name} />} />)}</Rows>
+          <Rows>{holds.map((h) => { const lapsed = ['held', 'challenged'].includes(h.status) && h.expiresAt && new Date(h.expiresAt) <= now; return <Row key={h.id} title={`${ordinal(h.rank)} hold: ${h.artist?.name || 'Open'}`} status={lapsed ? 'expired' : h.status} meta={h.event ? h.event.title : `${lapsed ? 'Expired' : 'Expires'} ${day(h.expiresAt)}`} right={h.event || !can.canManageEvents ? null : <HoldActions holdId={h.id} status={h.status} lapsed={Boolean(lapsed)} charts={chartsFor(h.venue?.id)} artist={h.artist?.name} />} />; })}</Rows>
         </section>
       ))}
       {!groups.size ? <Rows empty="No holds.">{[]}</Rows> : null}

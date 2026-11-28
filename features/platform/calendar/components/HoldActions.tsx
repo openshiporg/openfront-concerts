@@ -11,7 +11,7 @@ type Option = { value: string; label: string };
 const AGES: Option[] = [{ value: 'all_ages', label: 'All ages' }, { value: '16', label: '16+' }, { value: '18', label: '18+' }, { value: '21', label: '21+' }];
 
 /** Challenge, release, or confirm a hold into a draft event on a published chart. */
-export function HoldActions({ holdId, status, charts, artist }: { holdId: string; status: string; charts: Option[]; artist?: string }) {
+export function HoldActions({ holdId, status, charts, artist, lapsed }: { holdId: string; status: string; charts: Option[]; artist?: string; lapsed?: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(artist || '');
@@ -23,6 +23,8 @@ export function HoldActions({ holdId, status, charts, artist }: { holdId: string
   const [error, setError] = useState('');
   const [key] = useState(() => crypto.randomUUID());
   if (!['held', 'challenged'].includes(status)) return null;
+  // A hold past its expiry can only be released; challenge and confirm are refused by the server.
+  if (lapsed) return <ActionButton command="releaseDateHold" input={{ holdId, reason: 'Hold expired' }}>Release hold</ActionButton>;
   const confirm = async () => {
     setPending(true); setError('');
     try {
@@ -35,7 +37,7 @@ export function HoldActions({ holdId, status, charts, artist }: { holdId: string
       <div className="flex flex-wrap gap-2">
         {status === 'held' ? <ActionButton command="challengeHold" input={{ holdId }}>Challenge</ActionButton> : null}
         <ActionButton command="releaseDateHold" input={{ holdId, reason: 'Released by promoter' }}>Release hold</ActionButton>
-        {!open ? <Button size="sm" onClick={() => setOpen(true)}>Confirm</Button> : null}
+        {!open ? <Button size="sm" className="min-h-11 sm:min-h-8" onClick={() => setOpen(true)}>Confirm</Button> : null}
       </div>
       {open ? (
         <div className="w-full space-y-2 rounded-md border p-3 sm:w-80">
@@ -47,8 +49,8 @@ export function HoldActions({ holdId, status, charts, artist }: { holdId: string
           </div>
           <SingleSelect value={age} onChange={setAge} options={AGES} placeholder="Age" />
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" disabled={pending || !title.trim() || !chartId} onClick={confirm}>{pending ? 'Working…' : 'Confirm date'}</Button>
-            <Button size="sm" variant="outline" onClick={() => setOpen(false)}>Close</Button>
+            <Button size="sm" className="min-h-11 sm:min-h-8" disabled={pending || !title.trim() || !chartId} onClick={confirm}>{pending ? 'Working…' : 'Confirm date'}</Button>
+            <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" onClick={() => setOpen(false)}>Close</Button>
           </div>
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
         </div>

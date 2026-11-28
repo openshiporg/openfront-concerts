@@ -23,7 +23,7 @@ export function PlaceHoldForm({ venues, artists }: { venues: Option[]; artists: 
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [key, setKey] = useState(() => crypto.randomUUID());
-  if (!open) return <Button size="sm" onClick={() => setOpen(true)}>Place hold</Button>;
+  if (!open) return <Button size="sm" className="min-h-11 sm:min-h-8" onClick={() => setOpen(true)}>Place hold</Button>;
   const n = Number(rank);
   const ready = venueId && date && Number.isInteger(n) && n >= 1;
   const run = async () => {
@@ -49,8 +49,8 @@ export function PlaceHoldForm({ venues, artists }: { venues: Option[]; artists: 
         <Input value={rank} onChange={(e) => setRank(e.target.value)} inputMode="numeric" className="w-20" aria-label="Rank" />
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" disabled={pending || !ready} onClick={run}>{pending ? 'Working…' : 'Place hold'}</Button>
-        <Button size="sm" variant="outline" onClick={() => setOpen(false)}>Close</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" disabled={pending || !ready} onClick={run}>{pending ? 'Working…' : 'Place hold'}</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" onClick={() => setOpen(false)}>Close</Button>
       </div>
       {message ? <p className="text-sm">{message}</p> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
