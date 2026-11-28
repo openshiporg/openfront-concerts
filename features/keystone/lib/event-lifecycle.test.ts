@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { assertEventTransition } from './event-lifecycle';
+import { assertEventTransition, availableTransitions } from './event-lifecycle';
 
 test('event can reach admission and completion through explicit steps', () => {
   for (const [from, to] of [['announced','presale'],['presale','on_sale'],['on_sale','sold_out'],['sold_out','on_sale'],['on_sale','doors'],['doors','in_progress'],['in_progress','completed']]) assert.doesNotThrow(() => assertEventTransition(from, to));
@@ -17,6 +17,18 @@ test('doors only near show time; completion only after start', () => {
   assert.throws(() => assertEventTransition('on_sale', 'doors', '', '2026-12-02T04:00:00Z', now), /12 hours/);
   assert.throws(() => assertEventTransition('in_progress', 'completed', '', '2026-12-02T04:00:00Z', now), /after it starts/);
   assert.doesNotThrow(() => assertEventTransition('in_progress', 'completed', '', '2026-11-20T04:00:00Z', now));
+});
+test('a past show whose doors were never opened can be completed directly; an upcoming one cannot', () => {
+  const now = new Date('2026-11-28T20:00:00Z');
+  assert.doesNotThrow(() => assertEventTransition('on_sale', 'completed', '', '2026-11-24T04:00:00Z', now));
+  assert.doesNotThrow(() => assertEventTransition('sold_out', 'completed', '', '2026-11-24T04:00:00Z', now));
+  assert.throws(() => assertEventTransition('on_sale', 'completed', '', '2026-12-02T04:00:00Z', now));
+  assert.throws(() => assertEventTransition('on_sale', 'completed', '', null, now), /Open doors/);
+  assert.throws(() => assertEventTransition('announced', 'completed', '', '2026-11-24T04:00:00Z', now));
+  assert.deepEqual(availableTransitions('on_sale', '2026-11-24T04:00:00Z', now), ['sold_out', 'completed']);
+  assert.deepEqual(availableTransitions('on_sale', '2026-12-17T04:00:00Z', now), ['sold_out']);
+  assert.deepEqual(availableTransitions('on_sale', '2026-11-29T04:00:00Z', now), ['sold_out', 'doors']);
+  assert.deepEqual(availableTransitions('in_progress', '2026-11-28T04:00:00Z', now), ['completed']);
 });
 
 import { readFileSync } from 'node:fs';
