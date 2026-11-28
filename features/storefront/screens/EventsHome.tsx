@@ -10,7 +10,9 @@ const action = (s: Show) => (['on_sale', 'presale'].includes(s.status) ? 'Ticket
 const price = (s: Show) => (s.fromCents != null && s.status !== 'postponed' ? `From ${usd(s.fromCents, s.currencyCode)}` : '');
 
 export function EventsHome({ shows, venues }: { shows: Show[]; venues: PublicVenue[] }) {
-  const [next, ...rest] = shows;
+  // The featured show is the soonest one a buyer can act on; a postponed or not-yet-on-sale date stays in the list.
+  const next = shows.find((s) => action(s) === 'Tickets') || shows[0];
+  const rest = shows.filter((s) => s !== next);
   return (
     <main>
       <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">Upcoming shows</h1>
