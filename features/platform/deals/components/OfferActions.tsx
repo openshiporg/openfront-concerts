@@ -27,14 +27,14 @@ export function OfferActions({ offerId, status }: { offerId: string; status: str
       <div className="flex flex-wrap gap-2">
         {status === 'draft' ? <ActionButton command="sendOffer" input={{ offerId }}>Send offer</ActionButton> : null}
         {status === 'sent' ? <ActionButton command="acceptOffer" variant="default" input={{ offerId }}>Mark accepted</ActionButton> : null}
-        {status === 'sent' && !mode ? <Button size="sm" variant="outline" onClick={() => setMode('decline')}>Decline</Button> : null}
-        {status === 'accepted' && !mode ? <Button size="sm" variant="outline" onClick={() => setMode('contract')}>Record contract</Button> : null}
+        {status === 'sent' && !mode ? <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" onClick={() => setMode('decline')}>Decline</Button> : null}
+        {status === 'accepted' && !mode ? <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" onClick={() => setMode('contract')}>Record contract</Button> : null}
       </div>
       {mode ? (
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-80">
           <Input value={text} onChange={(e) => setText(e.target.value)} placeholder={mode === 'decline' ? 'Decline reason' : 'Contract reference'} aria-label={mode === 'decline' ? 'Decline reason' : 'Contract reference'} className="min-w-0 flex-1" />
-          <Button size="sm" disabled={pending || !text.trim()} onClick={submit}>{pending ? 'Working…' : mode === 'decline' ? 'Decline' : 'Save'}</Button>
-          <Button size="sm" variant="outline" onClick={() => { setMode(''); setError(''); }}>Close</Button>
+          <Button size="sm" className="min-h-11 sm:min-h-8" disabled={pending || !text.trim()} onClick={submit}>{pending ? 'Working…' : mode === 'decline' ? 'Decline' : 'Save'}</Button>
+          <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" onClick={() => { setMode(''); setError(''); }}>Close</Button>
         </div>
       ) : null}
       {error ? <span className="text-sm text-destructive">{error}</span> : null}

@@ -18,7 +18,7 @@ export function RefundPanel({ orderId, cash, refundableCents, thresholdCents, ap
   const [error, setError] = useState('');
   const [key, setKey] = useState(() => crypto.randomUUID());
   if (refundableCents < 1) return null;
-  if (!open) return <Button size="sm" variant="outline" onClick={() => setOpen(true)}>Refund</Button>;
+  if (!open) return <Button size="sm" variant="outline" className="min-h-11 sm:min-h-8 mt-2" onClick={() => setOpen(true)}>Refund</Button>;
   const cents = Math.round(Number(dollars) * 100);
   const valid = Number.isSafeInteger(cents) && cents >= 1 && cents <= refundableCents && reason.trim().length > 0;
   const needsApproval = cash || cents > thresholdCents;
@@ -44,8 +44,8 @@ export function RefundPanel({ orderId, cash, refundableCents, thresholdCents, ap
       <Input value={dollars} onChange={(e) => setDollars(e.target.value)} inputMode="decimal" aria-label="Refund amount in dollars" />
       <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason" aria-label="Refund reason" />
       <div className="flex flex-wrap items-center gap-2">
-        <Button size="sm" disabled={pending || !valid || Boolean(waiting)} onClick={run}>{pending ? 'Working…' : needsApproval && !match ? 'Request approval' : cash ? 'Record cash refund' : 'Issue refund'}</Button>
-        <Button size="sm" variant="outline" onClick={() => setOpen(false)}>Close</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" disabled={pending || !valid || Boolean(waiting)} onClick={run}>{pending ? 'Working…' : needsApproval && !match ? 'Request approval' : cash ? 'Record cash refund' : 'Issue refund'}</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" onClick={() => setOpen(false)}>Close</Button>
       </div>
       {waiting ? <span className="text-sm text-muted-foreground">Awaiting manager approval.</span> : null}
       {match ? <span className="text-sm text-muted-foreground">Approved. Ready to issue.</span> : null}
@@ -63,7 +63,7 @@ export function RetryRefund({ refundId, label }: { refundId: string; label: stri
   return (
     <span className="ml-2 inline-flex flex-wrap items-center gap-2">
       {label ? <span className="text-sm text-muted-foreground">{label}</span> : null}
-      <Button size="sm" variant="outline" disabled={pending} onClick={() => start(async () => { setError(''); try { await runTyped('retryTicketRefund', 'RetryTicketRefundInput', { refundId }); router.refresh(); } catch (e: any) { setError(e.message); } })}>{pending ? 'Working…' : 'Retry refund'}</Button>
+      <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" disabled={pending} onClick={() => start(async () => { setError(''); try { await runTyped('retryTicketRefund', 'RetryTicketRefundInput', { refundId }); router.refresh(); } catch (e: any) { setError(e.message); } })}>{pending ? 'Working…' : 'Retry refund'}</Button>
       {error ? <span className="text-sm text-destructive">{error}</span> : null}
     </span>
   );

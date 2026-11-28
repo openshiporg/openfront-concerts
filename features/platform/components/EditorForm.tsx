@@ -38,7 +38,7 @@ export function EditorPanel({ trigger, title, command, build, children, onDone, 
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
   const [key, setKey] = useState(() => crypto.randomUUID());
-  if (!open) return <Button size="sm" variant={variant} onClick={() => { setOpen(true); setError(''); }}>{trigger}</Button>;
+  if (!open) return <Button size="sm" className="min-h-11 sm:min-h-8" variant={variant} onClick={() => { setOpen(true); setError(''); }}>{trigger}</Button>;
   const built = build();
   const submit = async () => {
     if (typeof built === 'string') return;
@@ -55,8 +55,8 @@ export function EditorPanel({ trigger, title, command, build, children, onDone, 
       <div className="grid grid-cols-2 gap-3">{children}</div>
       {typeof built === 'string' ? <p className="text-sm text-muted-foreground">{built}</p> : null}
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" disabled={pending || typeof built === 'string'} onClick={submit}>{pending ? 'Working…' : 'Save'}</Button>
-        <Button size="sm" variant="outline" onClick={() => setOpen(false)}>Close</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" disabled={pending || typeof built === 'string'} onClick={submit}>{pending ? 'Working…' : 'Save'}</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" onClick={() => setOpen(false)}>Close</Button>
       </div>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </section>

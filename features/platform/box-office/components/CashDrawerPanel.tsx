@@ -37,7 +37,7 @@ export function CashDrawerPanel({ drawer }: { drawer: Drawer | null }) {
           <Input value={label} onChange={(e) => setLabel(e.target.value)} aria-label="Drawer name" className="h-11 min-w-0 text-base" />
           <Input value={float} onChange={(e) => setFloat(e.target.value)} inputMode="decimal" aria-label="Opening float" className="h-11 min-w-0 text-base" />
         </div>
-        <Button size="sm" disabled={pending || !label.trim() || Number.isNaN(cents)} onClick={() => run(() => runTyped('openCashDrawer', 'OpenCashDrawerInput', { label: label.trim(), openingFloatCents: cents, idempotencyKey: key }))}>{pending ? 'Working…' : 'Open drawer'}</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" disabled={pending || !label.trim() || Number.isNaN(cents)} onClick={() => run(() => runTyped('openCashDrawer', 'OpenCashDrawerInput', { label: label.trim(), openingFloatCents: cents, idempotencyKey: key }))}>{pending ? 'Working…' : 'Open drawer'}</Button>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
       </section>
     );
@@ -47,7 +47,7 @@ export function CashDrawerPanel({ drawer }: { drawer: Drawer | null }) {
     <section className="space-y-2 rounded-lg border p-4 sm:max-w-md">
       <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-medium">{drawer.label}</h2><span className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wide text-muted-foreground"><span className="size-2 rounded-full bg-emerald-500" aria-hidden />Open</span></div>
       <p className="text-sm text-muted-foreground">Float {money(drawer.openingFloatCents)} · opened {new Date(drawer.openedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</p>
-      {!closing ? <Button size="sm" variant="outline" onClick={() => setClosing(true)}>Count and close</Button> : (
+      {!closing ? <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" onClick={() => setClosing(true)}>Count and close</Button> : (
         <>
           <div className="grid grid-cols-2 gap-2">
             {DENOMS.map(([k, name]) => (
@@ -57,11 +57,11 @@ export function CashDrawerPanel({ drawer }: { drawer: Drawer | null }) {
           </div>
           <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Variance reason (if over or short)" aria-label="Variance reason" className="h-11 text-base" />
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" disabled={pending || !filled} onClick={() => run(async () => {
+            <Button size="sm" className="min-h-11 sm:min-h-8" disabled={pending || !filled} onClick={() => run(async () => {
               const r = await runTyped('closeCashDrawer', 'CloseCashDrawerInput', { drawerId: drawer.id, count: Object.fromEntries(DENOMS.map(([k]) => [k, Number(counts[k])])), reason: reason.trim(), idempotencyKey: key });
               setResult(r); setClosing(false); setCounts({}); setReason('');
             })}>{pending ? 'Working…' : 'Close drawer'}</Button>
-            <Button size="sm" variant="outline" onClick={() => setClosing(false)}>Back</Button>
+            <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" onClick={() => setClosing(false)}>Back</Button>
           </div>
         </>
       )}

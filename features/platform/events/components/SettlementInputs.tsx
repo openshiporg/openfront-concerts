@@ -66,7 +66,7 @@ export function MerchEditor({ eventId, current }: { eventId: string; current?: {
             <Input value={l.countOut} onChange={(e) => set(i, 'countOut', e.target.value)} aria-label={`Item ${i + 1} count out`} inputMode="numeric" className="h-9 min-w-0" />
           </div>
         ))}
-        <Button size="sm" variant="outline" onClick={() => setLines((ls) => [...ls, { item: '', countIn: '', countOut: '' }])}>Add item</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" onClick={() => setLines((ls) => [...ls, { item: '', countIn: '', countOut: '' }])}>Add item</Button>
       </div>
       <TextField label="Soft gross ($)" value={soft} onChange={setSoft} inputMode="decimal" />
       <TextField label="Hard gross ($)" value={hard} onChange={setHard} inputMode="decimal" />

@@ -16,8 +16,8 @@ export function ApprovalActions({ approvalId }: { approvalId: string }) {
   return (
     <span className="inline-flex flex-col items-start gap-1">
       <span className="inline-flex gap-2">
-        <Button size="sm" disabled={pending} onClick={() => decide('approve')}>Approve</Button>
-        <Button size="sm" variant="outline" disabled={pending} onClick={() => decide('reject')}>Reject</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" disabled={pending} onClick={() => decide('approve')}>Approve</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" disabled={pending} onClick={() => decide('reject')}>Reject</Button>
       </span>
       {error ? <span className="text-sm text-destructive">{error}</span> : null}
     </span>

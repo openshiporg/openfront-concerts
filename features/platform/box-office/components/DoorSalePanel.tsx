@@ -76,9 +76,9 @@ export function DoorSalePanel({ levels }: { levels: Level[] }) {
   return (
     <section className="space-y-2 rounded-lg border p-4 sm:max-w-md">
       <div className="flex gap-2">
-        <Button size="sm" variant={mode === 'door' ? 'default' : 'outline'} onClick={() => setMode('door')}>Door sale</Button>
-        <Button size="sm" variant={mode === 'comp' ? 'default' : 'outline'} onClick={() => setMode('comp')}>Comp</Button>
-        <Button size="sm" variant="outline" onClick={() => setOpen(false)}>Close</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" variant={mode === 'door' ? 'default' : 'outline'} onClick={() => setMode('door')}>Door sale</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" variant={mode === 'comp' ? 'default' : 'outline'} onClick={() => setMode('comp')}>Comp</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" onClick={() => setOpen(false)}>Close</Button>
       </div>
       <select className={sel} value={level.id} onChange={(e) => setLevelId(e.target.value)} aria-label="Event and level">
         {levels.map((l) => <option key={l.id} value={l.id}>{l.eventTitle} · {l.name} · {l.room} left</option>)}
@@ -113,7 +113,7 @@ export function DoorSalePanel({ levels }: { levels: Level[] }) {
           {' = '}<span className="font-medium">{money(quote.totalCents)}</span>
         </p>
       ) : quoteError ? <p className="text-sm text-destructive">{quoteError}</p> : null}
-      <Button size="sm" disabled={pending || !quote || !name.trim() || !Number.isInteger(n) || n < 1} onClick={run}>{pending ? 'Working…' : mode === 'comp' ? 'Issue comp' : 'Take payment'}</Button>
+      <Button size="sm" className="min-h-11 sm:min-h-8" disabled={pending || !quote || !name.trim() || !Number.isInteger(n) || n < 1} onClick={run}>{pending ? 'Working…' : mode === 'comp' ? 'Issue comp' : 'Take payment'}</Button>
       {message ? <p className="text-sm">{message}</p> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </section>

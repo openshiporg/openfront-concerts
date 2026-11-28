@@ -55,7 +55,7 @@ export async function EventDetailPage({ params, searchParams }: { params: Promis
     <Page title={e.title} crumbs={[{ label: 'Events', href: '/platform/events' }]} action={can.canManageEvents ? <EventActions eventId={e.id} status={e.status} steps={availableTransitions(e.status, e.showAt)} /> : null}>
       <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"><StatusLabel status={e.status} /><span>{e.venue?.name}, {e.venue?.city}</span><span>{when(e.showAt, e.venue?.timezone)}</span></div>
       <div className="w-full max-w-full overflow-x-auto"><div className="inline-flex gap-1 rounded-lg bg-muted p-1">
-        {TABS.map((t) => <Link key={t} href={`${base}?tab=${t}`} className={cn('whitespace-nowrap rounded-md px-3 py-1.5 text-sm capitalize', tab === t ? 'bg-background font-medium shadow-sm' : 'text-muted-foreground')}>{t}</Link>)}
+        {TABS.map((t) => <Link key={t} href={`${base}?tab=${t}`} className={cn('inline-flex min-h-11 items-center whitespace-nowrap rounded-md px-3 text-sm capitalize sm:min-h-9', tab === t ? 'bg-background font-medium shadow-sm' : 'text-muted-foreground')}>{t}</Link>)}
       </div></div>
       {tab === 'overview' && <div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><Stat name="Sold" value={e.sold} /><Stat name="Held" value={e.held} /><Stat name="Open" value={e.open} />{seesGross ? <Stat name="Gross" value={money(e.gross)} /> : null}
         <Stat name="Doors" value={when(e.doorsAt, e.venue?.timezone)} /><Stat name="Curfew" value={when(e.curfewAt, e.venue?.timezone)} /><Stat name="Age" value={label(e.ageRestriction)} /><Stat name="Chart" value={e.seatingChart ? `${e.seatingChart.name} v${e.seatingChart.version}` : ''} /></div>}

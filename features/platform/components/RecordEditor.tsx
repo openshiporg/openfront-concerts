@@ -42,7 +42,7 @@ export function RecordEditor({ list, id, values, fields, trigger, title }: { lis
   const [state, setState] = useState<Record<string, string>>(() => Object.fromEntries(fields.map((f) => [f.name, toInput(f, values?.[f.name], values)])));
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
-  if (!open) return <Button size="sm" variant={id ? 'outline' : 'default'} onClick={() => { setOpen(true); setError(''); }}>{trigger}</Button>;
+  if (!open) return <Button size="sm" className="min-h-11 sm:min-h-8" variant={id ? 'outline' : 'default'} onClick={() => { setOpen(true); setError(''); }}>{trigger}</Button>;
   const save = async () => {
     setError('');
     try {
@@ -75,8 +75,8 @@ export function RecordEditor({ list, id, values, fields, trigger, title }: { lis
         ))}
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" disabled={pending} onClick={save}>{pending ? 'Saving…' : 'Save'}</Button>
-        <Button size="sm" variant="outline" onClick={() => setOpen(false)}>Close</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" disabled={pending} onClick={save}>{pending ? 'Saving…' : 'Save'}</Button>
+        <Button size="sm" className="min-h-11 sm:min-h-8" variant="outline" onClick={() => setOpen(false)}>Close</Button>
       </div>
       {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}
     </section>
